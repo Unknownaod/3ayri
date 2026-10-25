@@ -1,15 +1,8 @@
 import "./globals.css";
 
-/*
-=========================================================
-EDIT THESE
-=========================================================
-*/
-
 const BRAND = "3ayri";
 
-// Put your real Discord invite here
-const DISCORD_INVITE = "https://discord.gg/your-invite";
+const DISCORD_INVITE = "https://discord.gg/8ytUjqaY2f";
 
 const TAGLINE = "Welcome to the kingdom.";
 const SUBTAGLINE =
@@ -34,10 +27,6 @@ const FEATURES = [
   },
 ];
 
-/*
-Embers drifting up behind the page. Values come from a formula
-(not Math.random) so server and client render identically.
-*/
 const EMBERS = Array.from({ length: 22 }, (_, i) => ({
   left: `${(i * 37 + 11) % 100}%`,
   size: 2 + ((i * 5) % 4),
