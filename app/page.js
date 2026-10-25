@@ -1,12 +1,26 @@
+import Link from "next/link";
 import "./globals.css";
 
-const BRAND = "3ayri";
+import { Background, Nav, Footer } from "./SiteChrome";
+import Avatar from "./Avatar";
+import { BRAND, DISCORD_INVITE } from "./site";
+import { AFFILIATES } from "./affiliates/data";
 
-const DISCORD_INVITE = "https://discord.gg/8ytUjqaY2f";
+/*
+=========================================================
+EDIT THIS COPY
+=========================================================
+*/
 
 const TAGLINE = "Welcome to the kingdom.";
+
 const SUBTAGLINE =
   "A Discord community for people who want good company, good chaos, and a place that feels like theirs.";
+
+const ABOUT = [
+  `${BRAND} is a Discord community built around good people and good times. Hop in, say hello, find your corner of the server, and make yourself at home.`,
+  "Whether you're here to chat, queue up with friends, or just see what's going on, there's a place for you.",
+];
 
 const FEATURES = [
   {
@@ -18,7 +32,7 @@ const FEATURES = [
     text: "Jump into a voice channel with the crew, whether you're gaming or just vibing.",
   },
   {
-    title: "Events & giveaways",
+    title: "Events and giveaways",
     text: "Community nights, game sessions, and giveaways run throughout the month.",
   },
   {
@@ -27,78 +41,23 @@ const FEATURES = [
   },
 ];
 
-const EMBERS = Array.from({ length: 22 }, (_, i) => ({
-  left: `${(i * 37 + 11) % 100}%`,
-  size: 2 + ((i * 5) % 4),
-  duration: 12 + ((i * 7) % 14),
-  delay: -((i * 3) % 16),
-  drift: ((i * 13) % 60) - 30,
-}));
-
 export const metadata = {
   title: `${BRAND} | Discord Community`,
   description: SUBTAGLINE,
 };
 
 export default function Home() {
+  const featured = AFFILIATES.filter((item) => item.featured).slice(0, 4);
+
   return (
     <main className="site">
-      {/* =====================================================
-          BACKGROUND EFFECTS
-      ===================================================== */}
+      <Background />
 
-      <div className="ambient" aria-hidden="true" />
-      <div className="moon" aria-hidden="true" />
+      <Nav current="home" />
 
-      <div className="embers" aria-hidden="true">
-        {EMBERS.map((ember, index) => (
-          <span
-            key={index}
-            style={{
-              left: ember.left,
-              width: ember.size,
-              height: ember.size,
-              animationDuration: `${ember.duration}s`,
-              animationDelay: `${ember.delay}s`,
-              "--drift": `${ember.drift}px`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="noise" aria-hidden="true" />
-
-      {/* =====================================================
-          NAV
-      ===================================================== */}
-
-      <header className="nav">
-        <a className="brand" href="#top" aria-label={`${BRAND} home`}>
-          <span className="brand-mark">
-            <img src="/logo.png" alt="" />
-          </span>
-          <span className="brand-name">{BRAND}</span>
-        </a>
-
-        <nav className="nav-links" aria-label="Sections">
-          <a href="#about">About</a>
-          <a href="#features">What's inside</a>
-          <a href="#join">Join</a>
-        </nav>
-
-        <a className="btn btn-small" href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
-          Join Discord
-        </a>
-      </header>
-
-      {/* =====================================================
-          HERO
-      ===================================================== */}
-
-      <section className="hero" id="top">
-        <div className="banner">
-          <img src="/banner.png" alt={`${BRAND} — crowned logo over a moonlit purple city`} />
-          <div className="banner-shine" aria-hidden="true" />
+      <section className="hero">
+        <div className="hero-art">
+          <img src="/banner.png" alt={`${BRAND}, a crown over a moonlit purple city`} />
         </div>
 
         <div className="hero-copy">
@@ -111,9 +70,9 @@ export default function Home() {
               Join the Discord
             </a>
 
-            <a className="btn btn-ghost" href="#about">
-              Learn more
-            </a>
+            <Link className="btn btn-ghost" href="/affiliates">
+              Our affiliates
+            </Link>
           </div>
         </div>
       </section>
@@ -122,23 +81,13 @@ export default function Home() {
           ABOUT
       ===================================================== */}
 
-      <section className="section about" id="about">
-        <div className="about-inner">
-          <img className="about-logo" src="/logo.png" alt={`${BRAND} logo`} />
+      <section className="wrap block" id="about">
+        <h2>What is {BRAND}?</h2>
 
-          <div>
-            <h2>What is {BRAND}?</h2>
-
-            <p>
-              {BRAND} is a Discord community built around good people and good times. Hop in,
-              say hello, find your corner of the server, and make yourself at home.
-            </p>
-
-            <p>
-              Whether you're here to chat, queue up with friends, or just see what's going on,
-              there's a place for you.
-            </p>
-          </div>
+        <div className="block-body prose">
+          {ABOUT.map((paragraph, index) => (
+            <p key={index}>{paragraph}</p>
+          ))}
         </div>
       </section>
 
@@ -146,49 +95,75 @@ export default function Home() {
           FEATURES
       ===================================================== */}
 
-      <section className="section" id="features">
-        <h2 className="section-title">What's inside</h2>
+      <section className="wrap block" id="features">
+        <h2>What's inside</h2>
 
-        <div className="features">
+        <ul className="block-body rows">
           {FEATURES.map((item) => (
-            <article className="feature" key={item.title}>
+            <li className="row" key={item.title}>
               <h3>{item.title}</h3>
               <p>{item.text}</p>
-            </article>
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
+
+      {/* =====================================================
+          AFFILIATES
+      ===================================================== */}
+
+      {featured.length > 0 && (
+        <section className="wrap block" id="affiliates">
+          <div>
+            <h2>Our affiliates</h2>
+
+            <Link className="text-link" href="/affiliates">
+              View all <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+
+          <ul className="block-body rows">
+            {featured.map((item) => (
+              <li key={item.slug}>
+                <Link
+                  className="row row-link"
+                  href={`/affiliates#${item.slug}`}
+                  style={{ "--accent": item.accent }}
+                >
+                  <Avatar name={item.name} logo={item.logo} accent={item.accent} size={46} />
+
+                  <span className="row-text">
+                    <strong>{item.name}</strong>
+                    <small>{item.tagline}</small>
+                  </span>
+
+                  <span className="row-arrow" aria-hidden="true">
+                    →
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* =====================================================
           JOIN
       ===================================================== */}
 
-      <section className="section" id="join">
-        <div className="join">
-          <img className="join-logo" src="/logo.png" alt="" />
+      <section className="join" id="join">
+        <img className="join-logo" src="/logo.png" alt="" />
 
-          <h2>Take your seat.</h2>
+        <h2>Take your seat.</h2>
 
-          <p>The door's open. Jump in and say hi.</p>
+        <p>The door's open. Jump in and say hi.</p>
 
-          <a className="btn" href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
-            Join the Discord
-          </a>
-        </div>
+        <a className="btn" href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
+          Join the Discord
+        </a>
       </section>
 
-      {/* =====================================================
-          FOOTER
-      ===================================================== */}
-
-      <footer className="footer">
-        <span className="footer-brand">
-          <img src="/logo.png" alt="" />
-          {BRAND}
-        </span>
-
-        <span>© {new Date().getFullYear()} {BRAND}. Not affiliated with Discord Inc.</span>
-      </footer>
+      <Footer />
     </main>
   );
 }
