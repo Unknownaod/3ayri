@@ -238,7 +238,7 @@ export default function Home() {
                   className="partner-row"
                   href={`/affiliates#${item.slug}`}
                   key={item.slug}
-                  style={{ "--partner-accent": item.accent } as React.CSSProperties}
+                 style={{ "--partner-accent": item.accent }}
                 >
                   <span className="partner-index">
                     0{index + 1}
