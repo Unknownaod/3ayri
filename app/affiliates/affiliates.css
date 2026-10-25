@@ -1,32 +1,50 @@
 /* =========================================================
 AFFILIATES PAGE
-Grid of affiliate cards + the open profile view.
+Shared tokens, .glass, .spot, .btn, .avatar and .mini-card
+come from globals.css. This file only holds what is unique
+to the affiliates grid and the open profile.
 Each card/profile sets --accent from its data.
+
+CONTENTS
+  1. Header + toolbar
+  2. Grid + cards
+  3. Empty state + partner block
+  4. Open profile
+  5. Responsive
 ========================================================= */
 
 /* =========================================================
-HEADER
+1. HEADER + TOOLBAR
 ========================================================= */
 
 .aff-head {
   position: relative;
 
-  margin-top: -68px;
+  margin-top: calc(-1 * var(--nav-space));
 
-  padding: calc(68px + clamp(56px, 9vw, 110px)) 0 clamp(36px, 5vw, 56px);
+  padding: calc(var(--nav-space) + clamp(48px, 8vw, 96px)) 0 clamp(28px, 4vw, 44px);
 }
 
+/* the banner, ghosted behind the title and melted into the page */
 .page-glow {
   position: absolute;
-  inset: 0 0 auto 0;
-  height: 100%;
+  inset: 0;
 
   background: url("/banner.png") center top / cover no-repeat;
 
-  opacity: 0.32;
+  opacity: 0.3;
 
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
+  -webkit-mask-image:
+    linear-gradient(to bottom, #000 0%, transparent 100%),
+    linear-gradient(to right, transparent, #000 15%, #000 85%, transparent);
+  -webkit-mask-composite: source-in;
+
+  mask-image:
+    linear-gradient(to bottom, #000 0%, transparent 100%),
+    linear-gradient(to right, transparent, #000 15%, #000 85%, transparent);
+  mask-composite: intersect;
+
+  translate: calc(var(--px, 0) * -10px) calc(var(--py, 0) * -6px);
 }
 
 .aff-head .wrap {
@@ -37,127 +55,300 @@ HEADER
   margin: 0 0 14px;
 
   font-family: var(--display);
-  font-size: clamp(38px, 6vw, 64px);
-  line-height: 1.02;
+  font-size: clamp(42px, 7vw, 76px);
+  line-height: 1;
   font-weight: 800;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.045em;
 
-  background: linear-gradient(180deg, #ffffff 20%, var(--purple-300) 130%);
+  background: linear-gradient(180deg, #ffffff 25%, var(--purple-300) 130%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .aff-head p {
-  max-width: 46ch;
+  max-width: 48ch;
 
   margin: 0;
 
   color: var(--text-secondary);
 
-  font-size: clamp(15px, 2vw, 17px);
+  font-size: clamp(15px, 2vw, 18px);
   line-height: 1.7;
 }
 
+.aff-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+
+  margin-top: 36px;
+}
+
+.aff-search {
+  position: relative;
+
+  flex: 1 1 260px;
+
+  max-width: 360px;
+}
+
+.aff-search svg {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+
+  transform: translateY(-50%);
+
+  color: var(--text-muted);
+
+  pointer-events: none;
+}
+
+.aff-search input {
+  width: 100%;
+  height: 46px;
+
+  padding: 0 16px 0 44px;
+
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+
+  background: rgba(13, 9, 24, 0.7);
+
+  backdrop-filter: blur(12px);
+
+  color: var(--text);
+
+  font-family: inherit;
+  font-size: 14.5px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.aff-search input::placeholder {
+  color: var(--text-muted);
+}
+
+.aff-search input:focus {
+  outline: none;
+
+  border-color: var(--purple-400);
+
+  box-shadow: 0 0 0 4px rgba(139, 60, 255, 0.18);
+}
+
+.aff-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  height: 36px;
+
+  padding: 0 16px;
+
+  border: 1px solid var(--border);
+  border-radius: 999px;
+
+  background: rgba(13, 9, 24, 0.6);
+
+  color: var(--text-muted);
+
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.chip:hover {
+  border-color: var(--border-strong);
+
+  color: #fff;
+}
+
+.chip[aria-pressed="true"] {
+  border-color: var(--purple-400);
+
+  background: rgba(139, 60, 255, 0.24);
+
+  color: #fff;
+
+  box-shadow: 0 0 20px var(--glow-soft);
+}
+
 /* =========================================================
-GRID
+2. GRID + CARDS
 ========================================================= */
 
 .aff-section {
   padding-bottom: clamp(56px, 8vw, 100px);
 }
 
-.aff-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
-  gap: 16px;
-}
-
-/* =========================================================
-CARD
-========================================================= */
-
-.aff-card {
-  position: relative;
-  overflow: hidden;
-
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-
-  padding: 24px;
-
-  border: 1px solid var(--border);
-  border-radius: 18px;
-
-  background: rgba(13, 9, 24, 0.62);
-
-  backdrop-filter: blur(10px);
-
-  transition:
-    transform 0.25s ease,
-    border-color 0.25s ease,
-    box-shadow 0.25s ease;
-}
-
-/* accent light along the top edge */
-.aff-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 12%;
-  right: 12%;
-  height: 1px;
-
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-
-  opacity: 0.8;
-}
-
-.aff-card:hover {
-  transform: translateY(-3px);
-
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-
-  box-shadow: 0 18px 50px color-mix(in srgb, var(--accent) 22%, transparent);
-}
-
-.aff-card-top {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.aff-card-top h2 {
-  margin: 0 0 3px;
-
-  color: #fff;
-
-  font-family: var(--display);
-  font-size: 19px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.aff-card-top p {
-  margin: 0;
+.aff-count {
+  margin: 0 0 18px;
 
   color: var(--text-muted);
 
   font-size: 13.5px;
+}
+
+.aff-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 18px;
+}
+
+.aff-card {
+  --card-bg: #0d0918;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  background: color-mix(in srgb, var(--card-bg) 88%, transparent);
+
+  backdrop-filter: blur(10px);
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.aff-card:hover {
+  transform: translateY(-4px);
+
+  box-shadow: 0 24px 64px color-mix(in srgb, var(--accent) 26%, transparent);
+}
+
+/* banner strip. Uses the affiliate's banner, or an accent-color glow. */
+.aff-card-cover {
+  position: relative;
+
+  height: 104px;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      90% 140% at 15% 0%,
+      color-mix(in srgb, var(--accent) 60%, transparent),
+      transparent 65%
+    ),
+    radial-gradient(
+      70% 120% at 100% 100%,
+      color-mix(in srgb, var(--accent) 28%, transparent),
+      transparent 70%
+    ),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.04) 0 1px,
+      transparent 1px 14px
+    );
+}
+
+.aff-card-cover img {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
+}
+
+.aff-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  padding: 0 24px 22px;
+}
+
+.aff-card-id {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-top: -36px;
+  margin-bottom: 6px;
+}
+
+.aff-card-id .avatar {
+  border-width: 2px;
+
+  box-shadow:
+    0 0 0 5px var(--card-bg),
+    0 0 30px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.aff-stat {
+  padding: 5px 12px;
+
+  border: 1px solid var(--border);
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.04);
+
+  color: var(--text-muted);
+
+  font-size: 12.5px;
+}
+
+.aff-stat strong {
+  color: #fff;
+
+  font-weight: 600;
+}
+
+.aff-card h2 {
+  margin: 0;
+
+  color: #fff;
+
+  font-family: var(--display);
+  font-size: 22px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.aff-tagline {
+  margin: 0;
+
+  color: color-mix(in srgb, var(--accent) 45%, var(--purple-100));
+
+  font-size: 14px;
+  font-weight: 500;
   line-height: 1.45;
 }
 
 .aff-card-desc {
-  margin: 0;
+  margin: 4px 0 6px;
 
-  color: var(--text-secondary);
+  color: var(--text-muted);
 
   font-size: 14.5px;
   line-height: 1.65;
 }
-
-/* tags */
 
 .aff-tags {
   display: flex;
@@ -171,9 +362,9 @@ CARD
 }
 
 .aff-tags li {
-  padding: 4px 11px;
+  padding: 4px 12px;
 
-  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
   border-radius: 999px;
 
   background: color-mix(in srgb, var(--accent) 12%, transparent);
@@ -184,8 +375,6 @@ CARD
   font-weight: 500;
 }
 
-/* footer: link pills + view more */
-
 .aff-card-foot {
   display: flex;
   align-items: center;
@@ -193,46 +382,65 @@ CARD
   gap: 12px;
 
   margin-top: auto;
-  padding-top: 16px;
+  padding: 16px 24px;
 
   border-top: 1px solid var(--border);
+
+  background: rgba(255, 255, 255, 0.02);
 }
 
-.aff-pills {
+.aff-icons {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
+  gap: 8px;
 }
 
-.aff-pills a {
+.icon-btn {
+  display: grid;
+  place-items: center;
+
+  width: 36px;
+  height: 36px;
+
+  border: 1px solid var(--border);
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.03);
+
   color: var(--text-muted);
 
-  font-size: 13px;
-  font-weight: 500;
-
-  transition: color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease,
+    transform 0.15s ease;
 }
 
-.aff-pills a:hover {
+.icon-btn:hover {
+  transform: translateY(-2px);
+
+  border-color: color-mix(in srgb, var(--accent) 65%, transparent);
+
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+
   color: #fff;
 }
 
 .aff-more {
   flex-shrink: 0;
 
-  height: 36px;
+  height: 38px;
 
-  padding: 0 16px;
+  padding: 0 18px;
 
   border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
-  border-radius: 10px;
+  border-radius: 999px;
 
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
 
   color: #fff;
 
   font-family: inherit;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
 
   cursor: pointer;
@@ -242,34 +450,88 @@ CARD
     box-shadow 0.15s ease;
 }
 
+.aff-more span {
+  display: inline-block;
+
+  transition: transform 0.2s ease;
+}
+
 .aff-more:hover {
-  background: color-mix(in srgb, var(--accent) 32%, transparent);
+  background: color-mix(in srgb, var(--accent) 34%, transparent);
 
-  box-shadow: 0 0 22px color-mix(in srgb, var(--accent) 40%, transparent);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
-/* apply block */
-
-.aff-apply {
-  margin-top: clamp(48px, 7vw, 80px);
-  padding-top: 32px;
-
-  border-top: 1px solid var(--border);
+.aff-more:hover span {
+  transform: translateX(3px);
 }
 
-.aff-apply h2 {
+/* =========================================================
+3. EMPTY STATE + PARTNER BLOCK
+========================================================= */
+
+.aff-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: clamp(40px, 7vw, 72px) 24px;
+
+  border-radius: var(--radius-lg);
+
+  text-align: center;
+}
+
+.aff-empty h2 {
   margin: 0 0 8px;
 
   color: #fff;
 
   font-family: var(--display);
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.03em;
+}
+
+.aff-empty p {
+  margin: 0 0 22px;
+
+  color: var(--text-muted);
+
+  font-size: 15px;
+}
+
+.aff-apply {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px 32px;
+
+  margin-top: clamp(48px, 7vw, 80px);
+  padding: clamp(24px, 4vw, 36px);
+
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+
+  background:
+    radial-gradient(60% 140% at 0% 0%, rgba(139, 60, 255, 0.2), transparent 70%),
+    rgba(13, 9, 24, 0.7);
+}
+
+.aff-apply h2 {
+  margin: 0 0 6px;
+
+  color: #fff;
+
+  font-family: var(--display);
+  font-size: clamp(21px, 3vw, 26px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .aff-apply p {
-  margin: 0 0 20px;
+  margin: 0;
 
   color: var(--text-secondary);
 
@@ -277,7 +539,7 @@ CARD
 }
 
 /* =========================================================
-OPEN PROFILE
+4. OPEN PROFILE
 ========================================================= */
 
 .profile {
@@ -285,13 +547,13 @@ OPEN PROFILE
 
   padding-bottom: clamp(56px, 8vw, 100px);
 
-  animation: profileIn 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: profileIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 @keyframes profileIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -303,19 +565,26 @@ OPEN PROFILE
 .profile-cover {
   position: relative;
 
-  height: clamp(260px, 34vw, 400px);
+  height: clamp(300px, 38vw, 460px);
 
-  margin-top: -68px;
+  margin-top: calc(-1 * var(--nav-space));
+
+  overflow: hidden;
 
   background:
     radial-gradient(
       70% 120% at 50% 0%,
-      color-mix(in srgb, var(--accent) 45%, transparent),
+      color-mix(in srgb, var(--accent) 50%, transparent),
       transparent 70%
+    ),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.035) 0 1px,
+      transparent 1px 16px
     );
 
-  -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 45%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 45%, transparent 100%);
 }
 
 .profile-cover img {
@@ -326,17 +595,18 @@ OPEN PROFILE
   height: 100%;
 
   object-fit: cover;
-  object-position: center;
 
-  opacity: 0.85;
+  opacity: 0.9;
 
   -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
   mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+
+  animation: breathe 18s ease-in-out infinite alternate;
 }
 
 .profile-back {
   position: absolute;
-  top: 88px;
+  top: calc(var(--nav-space) + 14px);
   left: clamp(16px, 4vw, 40px);
   z-index: 3;
 
@@ -344,16 +614,11 @@ OPEN PROFILE
   align-items: center;
   gap: 8px;
 
-  height: 38px;
+  height: 40px;
 
-  padding: 0 15px;
+  padding: 0 18px;
 
-  border: 1px solid var(--border-strong);
-  border-radius: 10px;
-
-  background: rgba(5, 3, 11, 0.6);
-
-  backdrop-filter: blur(10px);
+  border-radius: 999px;
 
   color: var(--text-secondary);
 
@@ -369,37 +634,76 @@ OPEN PROFILE
 }
 
 .profile-back:hover {
-  color: #fff;
   border-color: var(--accent);
+
+  color: #fff;
 }
 
-/* avatar + name + main action */
-
-.profile-head {
+/* avatar + name + actions, overlapping the cover */
+.profile-card {
   position: relative;
   z-index: 2;
 
-  display: flex;
-  align-items: flex-end;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 28px;
 
-  margin-top: -64px;
-  padding-bottom: 36px;
+  margin-top: calc(-1 * clamp(96px, 13vw, 150px));
+  padding: clamp(20px, 3vw, 30px);
+
+  border-radius: var(--radius-lg);
 }
 
-.profile-head .avatar {
-  flex-shrink: 0;
+.profile-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
 
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.profile-card .avatar {
   border-width: 2px;
 
   box-shadow:
-    0 0 0 6px var(--background),
-    0 0 50px color-mix(in srgb, var(--accent) 55%, transparent);
+    0 0 0 6px rgba(13, 9, 24, 0.9),
+    0 0 60px color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
-.profile-title {
-  flex: 1;
-  min-width: 0;
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 12px;
+  padding: 5px 13px 5px 11px;
+
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 999px;
+
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+
+  color: var(--text-secondary);
+
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.badge::before {
+  content: "";
+
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: var(--accent);
+
+  box-shadow: 0 0 10px var(--accent);
 }
 
 .profile-title h1 {
@@ -408,83 +712,108 @@ OPEN PROFILE
   color: #fff;
 
   font-family: var(--display);
-  font-size: clamp(30px, 5vw, 46px);
-  line-height: 1.05;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.02;
   font-weight: 800;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.04em;
 
   outline: none;
 }
 
 .profile-title p {
-  margin: 0 0 14px;
+  margin: 0 0 16px;
 
   color: var(--text-secondary);
 
-  font-size: 16px;
-  line-height: 1.55;
+  font-size: 17px;
+  line-height: 1.5;
 }
 
-/* body: about + side */
+.profile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 
+  min-width: 190px;
+}
+
+/* body */
 .profile-body {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-  gap: clamp(32px, 5vw, 64px);
+  grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr);
+  gap: clamp(28px, 5vw, 56px);
 
-  padding-top: 36px;
-
-  border-top: 1px solid var(--border);
+  padding-top: clamp(32px, 5vw, 52px);
 }
 
 .profile-main h2,
-.profile-side h2 {
-  margin: 0 0 14px;
+.side-card h2,
+.profile-more h2 {
+  margin: 0 0 16px;
 
   color: #fff;
 
   font-family: var(--display);
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 
 .profile-main p {
-  margin: 0 0 16px;
-
   max-width: 62ch;
+
+  margin: 0 0 18px;
 
   color: var(--text-secondary);
 
-  font-size: 16px;
+  font-size: 16.5px;
   line-height: 1.8;
 }
 
-/* stats */
+.profile-main p.lead {
+  color: #fff;
 
+  font-size: clamp(19px, 2.4vw, 23px);
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+}
+
+.profile-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  align-self: start;
+
+  position: sticky;
+  top: calc(var(--nav-space) + 16px);
+}
+
+.side-card {
+  padding: 22px;
+
+  border-radius: var(--radius);
+}
+
+.side-card h2 {
+  margin-bottom: 14px;
+
+  font-size: 17px;
+}
+
+/* stats */
 .profile-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 12px;
+  gap: 18px;
 
-  margin: 0 0 32px;
+  margin: 0;
 }
 
 .profile-stats div {
-  padding: 14px 16px;
-
-  border: 1px solid var(--border);
-  border-radius: 14px;
-
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
-}
-
-.profile-stats dt {
-  margin-bottom: 4px;
-
-  color: var(--text-muted);
-
-  font-size: 12.5px;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 2px;
 }
 
 .profile-stats dd {
@@ -493,43 +822,45 @@ OPEN PROFILE
   color: #fff;
 
   font-family: var(--display);
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: 30px;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.profile-stats dt {
+  color: var(--text-muted);
+
+  font-size: 13px;
 }
 
 /* links */
-
 .link-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
   margin: 0;
   padding: 0;
 
   list-style: none;
 }
 
-.link-list li + li {
-  margin-top: 8px;
-}
-
 .link-list a {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
 
-  padding: 13px 16px;
+  padding: 10px 14px 10px 10px;
 
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
 
-  background: rgba(13, 9, 24, 0.6);
-
-  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.02);
 
   transition:
     border-color 0.2s ease,
     background 0.2s ease,
-    color 0.2s ease,
     transform 0.2s ease;
 }
 
@@ -539,11 +870,29 @@ OPEN PROFILE
   border-color: color-mix(in srgb, var(--accent) 60%, transparent);
 
   background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.link-icon {
+  display: grid;
+  place-items: center;
+
+  flex-shrink: 0;
+
+  width: 40px;
+  height: 40px;
+
+  border-radius: 11px;
+
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
 
   color: #fff;
 }
 
-.link-list strong {
+.link-text {
+  min-width: 0;
+}
+
+.link-text strong {
   display: block;
 
   color: #fff;
@@ -552,35 +901,83 @@ OPEN PROFILE
   font-weight: 600;
 }
 
-.link-list small {
+.link-text small {
   display: block;
 
-  margin-top: 2px;
+  margin-top: 1px;
+
+  overflow: hidden;
 
   color: var(--text-muted);
 
   font-size: 12.5px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link-arrow {
+  margin-left: auto;
+
+  color: var(--text-muted);
+
+  transition: color 0.15s ease;
+}
+
+.link-list a:hover .link-arrow {
+  color: #fff;
+}
+
+/* more affiliates */
+.profile-more {
+  margin-top: clamp(48px, 7vw, 80px);
+  padding-top: clamp(28px, 4vw, 40px);
+
+  border-top: 1px solid var(--border);
 }
 
 /* =========================================================
-RESPONSIVE
+5. RESPONSIVE
 ========================================================= */
 
-@media (max-width: 820px) {
+@media (max-width: 900px) {
+  .profile-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .profile-actions {
+    grid-column: 1 / -1;
+
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .profile-actions .btn {
+    flex: 1 1 180px;
+  }
+
   .profile-body {
     grid-template-columns: 1fr;
   }
+
+  .profile-side {
+    position: static;
+  }
 }
 
-@media (max-width: 640px) {
-  .profile-head {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 18px;
+@media (max-width: 600px) {
+  .profile-card {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 
-  .profile-head .btn {
-    width: 100%;
+  .profile-card .avatar {
+    width: 104px !important;
+    height: 104px !important;
+  }
+
+  .aff-search {
+    max-width: none;
   }
 
   .aff-card-foot {
@@ -588,7 +985,15 @@ RESPONSIVE
     align-items: stretch;
   }
 
+  .aff-icons {
+    justify-content: center;
+  }
+
   .aff-more {
+    width: 100%;
+  }
+
+  .aff-apply .btn {
     width: 100%;
   }
 }
@@ -596,5 +1001,9 @@ RESPONSIVE
 @media (prefers-reduced-motion: reduce) {
   .profile {
     animation: none;
+  }
+
+  .page-glow {
+    translate: none;
   }
 }
