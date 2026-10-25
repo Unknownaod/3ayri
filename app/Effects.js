@@ -1,57 +1,44 @@
 "use client";
-
 import { useEffect } from "react";
 
-/*
-Tiny pointer effects shared by every page. Renders nothing.
-
-1. Any element with the class "spot" gets --mx / --my set to the
-   cursor position inside it, which the CSS uses for the glowing
-   spotlight and border light.
-2. --px / --py (-1 to 1) are set on <html> and drive the slow
-   parallax on the hero banner.
-
-Skipped on touch screens and for people who prefer reduced motion.
-*/
-
+// Pointer glow, card spotlight, hero tilt and scroll reveals. Renders nothing.
 export default function Effects() {
   useEffect(() => {
-    const coarse = window.matchMedia("(pointer: coarse)").matches;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (coarse || reduced) {
-      return undefined;
-    }
-
     const root = document.documentElement;
+    root.classList.add("fx");
 
-    let frame = 0;
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("in");
+            io.unobserve(e.target);
+          }
+        }),
+      { threshold: 0.12 }
+    );
+    document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
 
-    function onMove(event) {
-      const { clientX, clientY, target } = event;
-
-      cancelAnimationFrame(frame);
-
-      frame = requestAnimationFrame(() => {
-        root.style.setProperty("--px", ((clientX / window.innerWidth) * 2 - 1).toFixed(3));
-        root.style.setProperty("--py", ((clientY / window.innerHeight) * 2 - 1).toFixed(3));
-
-        const spot = target instanceof Element ? target.closest(".spot") : null;
-
-        if (spot) {
-          const rect = spot.getBoundingClientRect();
-
-          spot.style.setProperty("--mx", `${clientX - rect.left}px`);
-          spot.style.setProperty("--my", `${clientY - rect.top}px`);
-        }
-      });
-    }
-
-    document.addEventListener("pointermove", onMove, { passive: true });
+    const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const move = (e) => {
+      if (calm) return;
+      const card = e.target.closest?.(".spot");
+      if (card) {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty("--mx", `${e.clientX - r.left}px`);
+        card.style.setProperty("--my", `${e.clientY - r.top}px`);
+      }
+      root.style.setProperty("--cx", `${e.clientX}px`);
+      root.style.setProperty("--cy", `${e.clientY}px`);
+      root.style.setProperty("--ry", (e.clientX / window.innerWidth - 0.5).toFixed(3));
+      root.style.setProperty("--rx", (e.clientY / window.innerHeight - 0.5).toFixed(3));
+    };
+    window.addEventListener("pointermove", move, { passive: true });
 
     return () => {
-      cancelAnimationFrame(frame);
-      document.removeEventListener("pointermove", onMove);
+      io.disconnect();
+      window.removeEventListener("pointermove", move);
+      root.classList.remove("fx");
     };
   }, []);
 
