@@ -43,6 +43,14 @@ const FAQ = [
   ["Do I need to play games to join?", "No. Games are a big part of the server, but plenty of people come just to talk, hang out in voice, or see what’s going on."],
   ["How do I join?", "Select Join the Discord and the invite opens in Discord. If you don’t have an account yet, Discord walks you through making one."],
   ["What are affiliates?", "Communities and creators we know and like. You can browse them all on the affiliates page."],
+  [
+    "Are there rules?",
+    <>
+      A few, and they keep the place good. Be decent to people and we’ll all get along. You can{" "}
+      <Link className="text-link" href="/terms">visit our Terms of Service page</Link>{" "}
+      for the full details.
+    </>,
+  ],
 ];
 
 function ArrowUpRight() {
@@ -343,6 +351,10 @@ export default function Home() {
           <a className="btn-glow" data-magnetic href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
             Join {BRAND} <ArrowUpRight />
           </a>
+          <p>
+            By joining, you agree to our{" "}
+            <Link className="text-link" href="/terms">Terms of Service</Link>.
+          </p>
         </div>
       </section>
 
