@@ -15,6 +15,13 @@ export const metadata = {
   description: SUBTAGLINE,
 };
 
+const STATS = [
+  ["24/7", "Voice lounge always open"],
+  ["Weekly", "Game & movie nights"],
+  ["Zero", "Tolerance for toxicity"],
+  ["Everyone", "Welcome, no gatekeeping"],
+];
+
 const ROW_A = [
   ["🎮", "Game nights", "Queue up with people who show up."],
   ["🌙", "Late-night talks", "The best conversations start after midnight."],
@@ -54,6 +61,18 @@ function SmallArrow() {
   );
 }
 
+function Crown() {
+  return (
+    <svg className="crown" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <path d="M8 46 4 20l15 13L32 10l13 23 15-13-4 26H8Z" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round" fill="rgba(139,60,255,.18)" />
+      <path d="M10 54h44" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+      <circle cx="32" cy="10" r="2.6" fill="currentColor" />
+      <circle cx="4" cy="20" r="2.2" fill="currentColor" />
+      <circle cx="60" cy="20" r="2.2" fill="currentColor" />
+    </svg>
+  );
+}
+
 function Marquee({ items, reverse }) {
   const list = [...items, ...items];
   return (
@@ -85,6 +104,7 @@ export default function Home() {
       {/* Hero */}
       <section className="hero">
         <div className="hero-bg" aria-hidden="true">
+          <div className="hero-banner" />
           <i className="blob b1" />
           <i className="blob b2" />
           <i className="blob b3" />
@@ -92,6 +112,9 @@ export default function Home() {
         </div>
 
         <div className="wrap hero-in">
+          <div className="medallion reveal" aria-hidden="true">
+            <img src="/logo.png" alt="" />
+          </div>
           <p className="pill reveal">
             <span className="live-dot" /> Your people are here
           </p>
@@ -101,12 +124,21 @@ export default function Home() {
           <p className="hero-sub reveal">{SUBTAGLINE}</p>
 
           <div className="hero-actions reveal">
-            <a className="btn-glow" href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
+            <a className="btn-glow" data-magnetic href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
               Join the Discord <ArrowUpRight />
             </a>
-            <Link className="btn-ghost" href="/affiliates">
+            <Link className="btn-ghost" data-magnetic href="/affiliates">
               Meet our affiliates <SmallArrow />
             </Link>
+          </div>
+
+          <div className="stats">
+            {STATS.map(([big, small], i) => (
+              <div className="stat reveal" key={big} style={{ "--delay": `${i * 0.08}s` }}>
+                <b>{big}</b>
+                <small>{small}</small>
+              </div>
+            ))}
           </div>
 
           <div className="stage reveal" aria-hidden="true">
@@ -146,6 +178,7 @@ export default function Home() {
 
       {/* Bento */}
       <section className="wrap section" id="features">
+        <p className="eyebrow reveal">Inside the server</p>
         <h2 className="section-title reveal">Come for one reason. Find a few more.</h2>
 
         <div className="bento">
@@ -167,7 +200,7 @@ export default function Home() {
               <p>Queue into games, jump in voice, or hang out while everyone does their own thing.</p>
             </div>
             <div className="voices" aria-hidden="true">
-              {["#8b7bff", "#ff6bd6", "#5ee6ff", "#ffb84d"].map((c, i) => (
+              {["#8b7bff", "#c084fc", "#e8e4ff", "#6d28d9"].map((c, i) => (
                 <span key={c} style={{ "--c": c, "--i": i }} />
               ))}
             </div>
@@ -191,18 +224,40 @@ export default function Home() {
               <p>Pick the channels and roles that fit you. Your corner of the server looks like you.</p>
             </div>
             <div className="roles" aria-hidden="true">
-              <span style={{ "--c": "#8b7bff" }}>Night owl</span>
-              <span style={{ "--c": "#ff6bd6" }}>Co-op only</span>
-              <span style={{ "--c": "#5ee6ff" }}>Ranked grinder</span>
-              <span style={{ "--c": "#ffb84d" }}>Here for the memes</span>
+              <span style={{ "--c": "#a78bfa" }}>Night owl</span>
+              <span style={{ "--c": "#e879f9" }}>Co-op only</span>
+              <span style={{ "--c": "#c4b5fd" }}>Ranked grinder</span>
+              <span style={{ "--c": "#8b3cff" }}>Here for the memes</span>
             </div>
           </article>
+        </div>
+      </section>
+
+      {/* Showcase */}
+      <section className="wrap section" id="realm">
+        <div className="showcase">
+          <div>
+            <p className="eyebrow reveal">The realm</p>
+            <h2 className="section-title reveal">A kingdom built after dark.</h2>
+            <p className="reveal">
+              Moonlit, a little dramatic, and always open. {BRAND} is where the night crowd gathers, and everyone gets a seat at the table.
+            </p>
+            <ul className="checks reveal">
+              <li>Active voice channels around the clock</li>
+              <li>Events, game nights and community picks</li>
+              <li>Friendly mods and a no-drama culture</li>
+            </ul>
+          </div>
+          <div className="frame reveal" aria-hidden="true">
+            <img src="/banner.png" alt="" />
+          </div>
         </div>
       </section>
 
       {/* Manifesto */}
       <section className="manifesto">
         <div className="wrap">
+          <div className="reveal"><Crown /></div>
           <h2 className="reveal">
             A server feels different when the <span className="shimmer">people do.</span>
           </h2>
@@ -214,6 +269,7 @@ export default function Home() {
 
       {/* Steps */}
       <section className="wrap section" id="how">
+        <p className="eyebrow reveal">Get started</p>
         <h2 className="section-title reveal">Getting in takes a minute.</h2>
         <ol className="steps">
           {[
@@ -235,7 +291,10 @@ export default function Home() {
         <section className="partners" id="affiliates">
           <div className="wrap">
             <div className="partners-heading">
-              <h2 className="section-title reveal">Good company knows good company.</h2>
+              <div>
+                <p className="eyebrow reveal">Affiliates</p>
+                <h2 className="section-title reveal">Good company knows good company.</h2>
+              </div>
               <Link className="text-link" href="/affiliates">
                 All affiliates <SmallArrow />
               </Link>
@@ -263,6 +322,7 @@ export default function Home() {
 
       {/* FAQ */}
       <section className="wrap section faq" id="faq">
+        <p className="eyebrow reveal">FAQ</p>
         <h2 className="section-title reveal">Before you jump in</h2>
         <div className="faq-list reveal">
           {FAQ.map(([q, a]) => (
@@ -280,7 +340,7 @@ export default function Home() {
           <img className="final-call-logo" src="/logo.png" alt="" aria-hidden="true" />
           <h2>Come as you are. Stay a while.</h2>
           <p>Good people, open conversations, and room to make the place yours.</p>
-          <a className="btn-glow" href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
+          <a className="btn-glow" data-magnetic href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
             Join {BRAND} <ArrowUpRight />
           </a>
         </div>
