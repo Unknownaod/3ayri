@@ -1,53 +1,67 @@
-
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Avatar from "../Avatar";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { BRAND, DISCORD_INVITE } from "../site";
 
-/*
-=========================================================
-HELPERS
-=========================================================
-*/
+const FALLBACK_ACCENT = "#8b7cff";
 
-function hostOf(url) {
+function getInitials(name = "") {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+}
+
+function cleanText(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function getSlug(affiliate) {
+  return cleanText(affiliate?.slug).toLowerCase();
+}
+
+function getTags(affiliate) {
+  return Array.isArray(affiliate?.tags)
+    ? affiliate.tags.filter((tag) => typeof tag === "string" && tag.trim())
+    : [];
+}
+
+function getStats(affiliate) {
+  return Array.isArray(affiliate?.stats)
+    ? affiliate.stats.filter((stat) => stat && typeof stat === "object")
+    : [];
+}
+
+function getLinks(affiliate) {
+  return Array.isArray(affiliate?.links)
+    ? affiliate.links.filter(
+        (link) =>
+          link &&
+          typeof link === "object" &&
+          typeof link.url === "string" &&
+          link.url.trim()
+      )
+    : [];
+}
+
+function validUrl(value) {
+  if (!value || typeof value !== "string") return "";
+
   try {
-    return new URL(url).hostname.replace(/^www\./, "");
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol) ? url.href : "";
   } catch {
-    return url || "";
+    return "";
   }
 }
 
-function readHash(affiliates) {
-  if (typeof window === "undefined") return null;
-
-  try {
-    const slug = decodeURIComponent(window.location.hash.slice(1));
-    return affiliates.some((item) => item.slug === slug) ? slug : null;
-  } catch {
-    return null;
-  }
-}
-
-function iconKind(link) {
-  const host = hostOf(link.url).toLowerCase();
-  const label = (link.label || "").toLowerCase();
-
-  if (host.includes("discord") || label.includes("discord")) return "discord";
-  if (host.includes("youtube") || host === "youtu.be") return "youtube";
-  if (host.includes("twitch")) return "twitch";
-  if (host.includes("tiktok")) return "tiktok";
-  if (host.includes("instagram")) return "instagram";
-  if (host === "x.com" || host.includes("twitter")) return "x";
-
-  return "web";
-}
-
-function LinkIcon({ kind }) {
-  const props = {
-    width: 17,
-    height: 17,
+function Icon({ name, size = 17 }) {
+  const common = {
+    width: size,
+    height: size,
     viewBox: "0 0 24 24",
     fill: "none",
     stroke: "currentColor",
@@ -57,501 +71,600 @@ function LinkIcon({ kind }) {
     "aria-hidden": true,
   };
 
-  switch (kind) {
-    case "discord":
-      return (
-        <svg {...props}>
-          <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.3A8 8 0 1 1 21 12z" />
-          <circle cx="9" cy="12" r=".6" />
-          <circle cx="15" cy="12" r=".6" />
-        </svg>
-      );
-    case "youtube":
-      return (
-        <svg {...props}>
-          <rect x="3" y="6" width="18" height="12" rx="4" />
-          <path d="M10.5 9.5v5l4-2.5z" />
-        </svg>
-      );
-    case "twitch":
-      return (
-        <svg {...props}>
-          <path d="M5 3h15v10l-4 4h-4l-3 3v-3H5z" />
-          <path d="M12 8v3M16 8v3" />
-        </svg>
-      );
-    case "tiktok":
-      return (
-        <svg {...props}>
-          <path d="M14 4v10.5a3.5 3.5 0 1 1-3.5-3.5" />
-          <path d="M14 4c.4 2.6 2.2 4.2 5 4.4" />
-        </svg>
-      );
-    case "instagram":
-      return (
-        <svg {...props}>
-          <rect x="4" y="4" width="16" height="16" rx="5" />
-          <circle cx="12" cy="12" r="3.6" />
-          <circle cx="17" cy="7" r=".6" />
-        </svg>
-      );
-    case "x":
-      return (
-        <svg {...props}>
-          <path d="M5 4l14 16M19 4L5 20" />
-        </svg>
-      );
-    default:
-      return (
-        <svg {...props}>
-          <circle cx="12" cy="12" r="8.5" />
-          <path d="M3.5 12h17M12 3.5c2.6 2.4 2.6 14.6 0 17M12 3.5c-2.6 2.4-2.6 14.6 0 17" />
-        </svg>
-      );
-  }
+  const paths = {
+    search: (
+      <>
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-4-4" />
+      </>
+    ),
+    arrow: (
+      <>
+        <path d="M5 12h14" />
+        <path d="m13 6 6 6-6 6" />
+      </>
+    ),
+    back: (
+      <>
+        <path d="m15 18-6-6 6-6" />
+      </>
+    ),
+    external: (
+      <>
+        <path d="M14 3h7v7" />
+        <path d="M10 14 21 3" />
+        <path d="M19 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" />
+      </>
+    ),
+    share: (
+      <>
+        <circle cx="18" cy="5" r="3" />
+        <circle cx="6" cy="12" r="3" />
+        <circle cx="18" cy="19" r="3" />
+        <path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4" />
+      </>
+    ),
+    users: (
+      <>
+        <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="10" cy="7" r="4" />
+        <path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+      </>
+    ),
+    discord: (
+      <>
+        <path d="M8 8.5c2.5-1 5.5-1 8 0" />
+        <path d="M7 17c3.3 1.7 6.7 1.7 10 0" />
+        <path d="M7 6c-2 2.8-3 6.5-2.5 10.5 1.5 1.5 3 2.5 5 3l1-2 3 0 1 2c2-.5 3.5-1.5 5-3C20 12.5 19 8.8 17 6c-1.5-.8-3-.9-4.5-1l-.5 1.5h-2L9.5 5C8 5.1 8.5 5.2 7 6Z" />
+        <circle cx="9" cy="12" r="1" fill="currentColor" stroke="none" />
+        <circle cx="15" cy="12" r="1" fill="currentColor" stroke="none" />
+      </>
+    ),
+    check: <path d="m5 12 4 4L19 6" />,
+    sparkle: (
+      <>
+        <path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3Z" />
+        <path d="m19 14 1.1 2.9L23 18l-2.9 1.1L19 22l-1.1-2.9L15 18l2.9-1.1L19 14Z" />
+      </>
+    ),
+    grid: (
+      <>
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      </>
+    ),
+  };
+
+  return <svg {...common}>{paths[name] || null}</svg>;
 }
 
-function SearchIcon() {
+function Avatar({ affiliate, large = false }) {
+  const logo = validUrl(affiliate?.logo);
+  const name = cleanText(affiliate?.name) || "Community";
+
   return (
-    <svg width="19" height="19" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-      <circle cx="11" cy="11" r="6.5" />
-      <path d="m16 16 4.5 4.5" />
-    </svg>
+    <div
+      className={`directory-avatar${large ? " directory-avatar-large" : ""}`}
+      style={{ "--community-accent": affiliate?.accent || FALLBACK_ACCENT }}
+    >
+      {logo ? (
+        <img src={logo} alt={`${name} icon`} />
+      ) : (
+        <span>{getInitials(name)}</span>
+      )}
+    </div>
   );
 }
 
-function ArrowIcon() {
+function Banner({ affiliate, className = "" }) {
+  const banner = validUrl(affiliate?.banner);
+
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
-      strokeLinejoin="round">
-      <path d="M7 17 17 7M7 7h10v10" />
-    </svg>
+    <div
+      className={`directory-banner ${className}`}
+      style={{
+        "--community-accent": affiliate?.accent || FALLBACK_ACCENT,
+        backgroundImage: banner ? `url("${banner}")` : undefined,
+      }}
+    >
+      <div className="directory-banner-shade" />
+      <div className="directory-banner-glow" />
+    </div>
   );
 }
 
-/*
-=========================================================
-VIEW
-=========================================================
-*/
+function CommunityCard({ affiliate, onOpen }) {
+  const name = cleanText(affiliate.name) || "Unnamed community";
+  const description =
+    cleanText(affiliate.description) ||
+    cleanText(affiliate.tagline) ||
+    "Discover this community.";
+  const tags = getTags(affiliate).slice(0, 3);
+  const stats = getStats(affiliate);
+  const memberStat = stats.find((stat) =>
+    /member|user|population/i.test(
+      `${stat.label || ""} ${stat.name || ""}`
+    )
+  );
+
+  return (
+    <article
+      className="directory-card"
+      style={{ "--community-accent": affiliate.accent || FALLBACK_ACCENT }}
+    >
+      <button
+        className="directory-card-main"
+        type="button"
+        onClick={() => onOpen(affiliate)}
+        aria-label={`View ${name}`}
+      >
+        <Banner affiliate={affiliate} />
+
+        <div className="directory-card-content">
+          <div className="directory-card-identity">
+            <Avatar affiliate={affiliate} />
+
+            {affiliate.featured && (
+              <span className="directory-featured">
+                <Icon name="sparkle" size={12} />
+                Featured
+              </span>
+            )}
+          </div>
+
+          <div className="directory-card-heading">
+            <div className="directory-card-title">
+              <h3>{name}</h3>
+              <span className="directory-card-arrow">
+                <Icon name="arrow" size={16} />
+              </span>
+            </div>
+
+            {affiliate.tagline && (
+              <p className="directory-tagline">{affiliate.tagline}</p>
+            )}
+          </div>
+
+          <p className="directory-description">{description}</p>
+
+          <div className="directory-card-meta">
+            {memberStat && (
+              <span className="directory-members">
+                <Icon name="users" size={14} />
+                {memberStat.value || memberStat.count || memberStat.label}
+              </span>
+            )}
+
+            {tags.length > 0 && (
+              <div className="directory-tags">
+                {tags.map((tag) => (
+                  <span key={tag}>{tag}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </button>
+
+      <div className="directory-card-footer">
+        <span className="directory-card-category">
+          <span className="directory-status-dot" />
+          Community partner
+        </span>
+
+        <button
+          type="button"
+          className="directory-card-view"
+          onClick={() => onOpen(affiliate)}
+        >
+          View community
+          <Icon name="arrow" size={14} />
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function ProfileStat({ stat, index }) {
+  const label = stat.label || stat.name || `Stat ${index + 1}`;
+  const value = stat.value ?? stat.count ?? stat.amount ?? "—";
+
+  return (
+    <div className="directory-profile-stat" key={`${label}-${index}`}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function ProfileLink({ link }) {
+  const href = validUrl(link.url);
+  if (!href) return null;
+
+  return (
+    <a
+      className={`directory-profile-link${link.primary ? " is-primary" : ""}`}
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <span>{link.label || "Visit link"}</span>
+      <Icon name="external" size={15} />
+    </a>
+  );
+}
+
+function CommunityProfile({ affiliate, affiliates, onBack, onOpen }) {
+  const name = cleanText(affiliate.name) || "Community";
+  const about = Array.isArray(affiliate.about)
+    ? affiliate.about.filter((item) => typeof item === "string" && item.trim())
+    : [];
+  const description = cleanText(affiliate.description);
+  const links = getLinks(affiliate);
+  const stats = getStats(affiliate);
+  const tags = getTags(affiliate);
+
+  const related = affiliates
+    .filter(
+      (item) =>
+        getSlug(item) !== getSlug(affiliate) &&
+        getTags(item).some((tag) => tags.includes(tag))
+    )
+    .slice(0, 3);
+
+  const primaryLink = links.find((link) => link.primary) || links[0];
+  const primaryHref = validUrl(primaryLink?.url);
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}${window.location.pathname}#${getSlug(
+      affiliate
+    )}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: name, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+      }
+    } catch {
+      // Sharing can be cancelled by the user.
+    }
+  };
+
+  return (
+    <div className="directory-profile">
+      <div className="directory-profile-topbar">
+        <button className="directory-back" type="button" onClick={onBack}>
+          <Icon name="back" size={16} />
+          Back to directory
+        </button>
+
+        <button
+          className="directory-share"
+          type="button"
+          onClick={handleShare}
+        >
+          <Icon name="share" size={15} />
+          Share
+        </button>
+      </div>
+
+      <section
+        className="directory-profile-hero"
+        style={{
+          "--community-accent": affiliate.accent || FALLBACK_ACCENT,
+        }}
+      >
+        <Banner affiliate={affiliate} className="directory-profile-banner" />
+
+        <div className="directory-profile-identity">
+          <Avatar affiliate={affiliate} large />
+
+          <div className="directory-profile-title">
+            <div className="directory-profile-name-row">
+              <h1>{name}</h1>
+              {affiliate.featured && (
+                <span className="directory-featured">
+                  <Icon name="sparkle" size={12} />
+                  Featured
+                </span>
+              )}
+            </div>
+
+            {affiliate.tagline && (
+              <p className="directory-tagline">{affiliate.tagline}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="directory-profile-actions">
+          {primaryHref && (
+            <a
+              className="directory-primary-action"
+              href={primaryHref}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {primaryLink.label || "Visit community"}
+              <Icon name="external" size={15} />
+            </a>
+          )}
+
+          <a
+            className="directory-secondary-action"
+            href={DISCORD_INVITE}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Icon name="discord" size={16} />
+            Join {BRAND}
+          </a>
+        </div>
+      </section>
+
+      <div className="directory-profile-layout">
+        <main className="directory-profile-main">
+          <section className="directory-panel">
+            <div className="directory-panel-heading">
+              <span className="directory-panel-icon">
+                <Icon name="grid" size={16} />
+              </span>
+              <h2>About this community</h2>
+            </div>
+
+            {description && <p className="directory-about">{description}</p>}
+
+            {about.length > 0 && (
+              <div className="directory-about-list">
+                {about.map((item, index) => (
+                  <p key={`${index}-${item}`}>{item}</p>
+                ))}
+              </div>
+            )}
+
+            {!description && about.length === 0 && (
+              <p className="directory-muted">
+                More information about this community has not been provided.
+              </p>
+            )}
+          </section>
+
+          {stats.length > 0 && (
+            <section className="directory-panel">
+              <div className="directory-panel-heading">
+                <span className="directory-panel-icon">
+                  <Icon name="users" size={16} />
+                </span>
+                <h2>Community statistics</h2>
+              </div>
+
+              <div className="directory-profile-stats">
+                {stats.map((stat, index) => (
+                  <ProfileStat
+                    key={`${stat.label || stat.name || "stat"}-${index}`}
+                    stat={stat}
+                    index={index}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {related.length > 0 && (
+            <section className="directory-panel">
+              <div className="directory-panel-heading">
+                <span className="directory-panel-icon">
+                  <Icon name="sparkle" size={16} />
+                </span>
+                <h2>Similar communities</h2>
+              </div>
+
+              <div className="directory-related">
+                {related.map((item) => (
+                  <button
+                    className="directory-related-card"
+                    key={getSlug(item)}
+                    type="button"
+                    onClick={() => onOpen(item)}
+                  >
+                    <Avatar affiliate={item} />
+                    <span>
+                      <strong>{item.name}</strong>
+                      <small>{item.tagline || "Community partner"}</small>
+                    </span>
+                    <Icon name="arrow" size={15} />
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+        </main>
+
+        <aside className="directory-profile-sidebar">
+          {tags.length > 0 && (
+            <section className="directory-panel">
+              <div className="directory-panel-heading">
+                <h2>Categories</h2>
+              </div>
+
+              <div className="directory-profile-tags">
+                {tags.map((tag) => (
+                  <span key={tag}>{tag}</span>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section className="directory-panel">
+            <div className="directory-panel-heading">
+              <h2>Find them online</h2>
+            </div>
+
+            {links.length > 0 ? (
+              <div className="directory-profile-links">
+                {links.map((link, index) => (
+                  <ProfileLink
+                    key={`${link.label || "link"}-${index}`}
+                    link={link}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="directory-muted">No links have been added yet.</p>
+            )}
+          </section>
+
+          <section className="directory-partner-card">
+            <span className="directory-partner-icon">
+              <Icon name="sparkle" size={19} />
+            </span>
+            <h3>Want to partner with us?</h3>
+            <p>
+              Think your community would be a great fit? Get in touch and
+              become part of the directory.
+            </p>
+            <a
+              href={DISCORD_INVITE}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Get in touch
+              <Icon name="arrow" size={14} />
+            </a>
+          </section>
+        </aside>
+      </div>
+    </div>
+  );
+}
 
 export default function AffiliatesView({ affiliates = [] }) {
-  const [active, setActive] = useState(null);
-  const [query, setQuery] = useState("");
-  const [tag, setTag] = useState("All");
+  const [search, setSearch] = useState("");
+  const [activeTag, setActiveTag] = useState("All");
+  const [selectedSlug, setSelectedSlug] = useState("");
   const [sort, setSort] = useState("featured");
-  const [copied, setCopied] = useState(false);
 
-  const scrollRef = useRef(0);
-  const headingRef = useRef(null);
+  const safeAffiliates = useMemo(
+    () =>
+      Array.isArray(affiliates)
+        ? affiliates.filter(
+            (affiliate) =>
+              affiliate &&
+              typeof affiliate === "object" &&
+              getSlug(affiliate) &&
+              cleanText(affiliate.name)
+          )
+        : [],
+    [affiliates]
+  );
 
   const allTags = useMemo(() => {
-    const tags = new Set();
+    const tags = safeAffiliates.flatMap(getTags);
+    return ["All", ...Array.from(new Set(tags)).sort((a, b) => a.localeCompare(b))];
+  }, [safeAffiliates]);
 
-    affiliates.forEach((item) => {
-      item.tags?.forEach((value) => tags.add(value));
-    });
+  const selectedAffiliate = useMemo(
+    () =>
+      safeAffiliates.find(
+        (affiliate) => getSlug(affiliate) === selectedSlug
+      ) || null,
+    [safeAffiliates, selectedSlug]
+  );
 
-    return ["All", ...Array.from(tags).sort()];
-  }, [affiliates]);
-
-  const filtered = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-
-    let results = affiliates.filter((item) => {
-      if (tag !== "All" && !item.tags?.includes(tag)) return false;
-
-      if (!needle) return true;
-
-      const haystack = [
-        item.name,
-        item.tagline,
-        item.description,
-        ...(item.tags || []),
-      ].join(" ").toLowerCase();
-
-      return haystack.includes(needle);
-    });
-
-    if (sort === "featured") {
-      results = [...results].sort(
-        (a, b) => Number(b.featured) - Number(a.featured)
-      );
-    } else if (sort === "az") {
-      results = [...results].sort((a, b) =>
-        a.name.localeCompare(b.name)
-      );
-    }
-
-    return results;
-  }, [affiliates, query, tag, sort]);
-
-  const featured = filtered.filter((item) => item.featured);
-  const regular = filtered.filter((item) => !item.featured);
-
-  /*
-  =========================================================
-  NAVIGATION
-  =========================================================
-  */
-
-  const openProfile = useCallback((slug) => {
-    if (!window.location.hash) {
-      scrollRef.current = window.scrollY;
-    }
+  const openProfile = useCallback((affiliate) => {
+    const slug = getSlug(affiliate);
+    if (!slug) return;
 
     window.history.pushState(null, "", `#${encodeURIComponent(slug)}`);
-    setActive(slug);
-    setCopied(false);
-
-    window.scrollTo({ top: 0, behavior: "instant" });
+    setSelectedSlug(slug);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const closeProfile = useCallback(() => {
     window.history.pushState(
       null,
       "",
-      window.location.pathname + window.location.search
+      `${window.location.pathname}${window.location.search}`
     );
-
-    setActive(null);
-
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: scrollRef.current, behavior: "instant" });
-    });
+    setSelectedSlug("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   useEffect(() => {
-    const sync = () => setActive(readHash(affiliates));
+    const syncHash = () => {
+      const slug = decodeURIComponent(window.location.hash.slice(1)).toLowerCase();
+      setSelectedSlug(
+        safeAffiliates.some((affiliate) => getSlug(affiliate) === slug)
+          ? slug
+          : ""
+      );
+    };
 
-    sync();
-
-    window.addEventListener("hashchange", sync);
-    window.addEventListener("popstate", sync);
+    syncHash();
+    window.addEventListener("popstate", syncHash);
+    window.addEventListener("hashchange", syncHash);
 
     return () => {
-      window.removeEventListener("hashchange", sync);
-      window.removeEventListener("popstate", sync);
+      window.removeEventListener("popstate", syncHash);
+      window.removeEventListener("hashchange", syncHash);
     };
-  }, [affiliates]);
+  }, [safeAffiliates]);
 
-  useEffect(() => {
-    if (!active) return;
+  const filteredAffiliates = useMemo(() => {
+    const query = search.trim().toLowerCase();
 
-    function onKeyDown(event) {
-      if (event.key === "Escape") closeProfile();
-    }
+    return safeAffiliates
+      .filter((affiliate) => {
+        const matchesTag =
+          activeTag === "All" || getTags(affiliate).includes(activeTag);
 
-    window.addEventListener("keydown", onKeyDown);
-    headingRef.current?.focus({ preventScroll: true });
+        const searchable = [
+          affiliate.name,
+          affiliate.tagline,
+          affiliate.description,
+          ...getTags(affiliate),
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
 
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [active, closeProfile]);
+        return matchesTag && (!query || searchable.includes(query));
+      })
+      .sort((a, b) => {
+        if (sort === "az") {
+          return cleanText(a.name).localeCompare(cleanText(b.name));
+        }
 
-  async function shareProfile() {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    } catch {
-      // Clipboard unavailable.
-    }
-  }
+        return Number(Boolean(b.featured)) - Number(Boolean(a.featured)) ||
+          cleanText(a.name).localeCompare(cleanText(b.name));
+      });
+  }, [safeAffiliates, search, activeTag, sort]);
 
-  const affiliate = affiliates.find((item) => item.slug === active);
+  const featuredAffiliates = filteredAffiliates.filter(
+    (affiliate) => affiliate.featured
+  );
 
-  /*
-  =========================================================
-  DIRECTORY LISTING
-  =========================================================
-  */
-
-  function DirectoryCard({ item }) {
-    const stat = item.stats?.[0];
-
+  if (selectedAffiliate) {
     return (
-      <article
-        className="directory-card"
-        key={item.slug}
-        style={{ "--accent": item.accent }}
-      >
-        <button
-          className="directory-card-main"
-          type="button"
-          onClick={() => openProfile(item.slug)}
-        >
-          <div className="directory-avatar">
-            <Avatar
-              name={item.name}
-              logo={item.logo}
-              accent={item.accent}
-              size={68}
-            />
-          </div>
-
-          <div className="directory-info">
-            <div className="directory-name">
-              <h3>{item.name}</h3>
-              {item.featured && (
-                <span className="directory-featured">
-                  <span>✦</span> Featured
-                </span>
-              )}
-            </div>
-
-            <p className="directory-tagline">{item.tagline}</p>
-
-            <p className="directory-description">
-              {item.description}
-            </p>
-
-            <div className="directory-meta">
-              {item.tags?.slice(0, 4).map((value) => (
-                <span className="directory-tag" key={value}>
-                  {value}
-                </span>
-              ))}
-
-              {stat && (
-                <span className="directory-stat">
-                  <span className="directory-dot" />
-                  {stat.value} {stat.label}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="directory-arrow">
-            <ArrowIcon />
-          </div>
-        </button>
-
-        <div className="directory-card-footer">
-          <div className="directory-socials">
-            {(item.links || []).slice(0, 5).map((link) => (
-              <a
-                key={link.url}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={link.label}
-                aria-label={`${item.name} - ${link.label}`}
-                onClick={(event) => event.stopPropagation()}
-              >
-                <LinkIcon kind={iconKind(link)} />
-              </a>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            className="directory-view"
-            onClick={() => openProfile(item.slug)}
-          >
-            View server <span>→</span>
-          </button>
-        </div>
-      </article>
+      <CommunityProfile
+        affiliate={selectedAffiliate}
+        affiliates={safeAffiliates}
+        onBack={closeProfile}
+        onOpen={openProfile}
+      />
     );
   }
-
-  /*
-  =========================================================
-  PROFILE
-  =========================================================
-  */
-
-  if (affiliate) {
-    const primary =
-      affiliate.links?.find((link) => link.primary) ||
-      affiliate.links?.[0];
-
-    const others = affiliates
-      .filter((item) => item.slug !== affiliate.slug)
-      .slice(0, 3);
-
-    return (
-      <section
-        className="directory-profile"
-        style={{ "--accent": affiliate.accent }}
-      >
-        <div className="directory-profile-cover">
-          {affiliate.banner && <img src={affiliate.banner} alt="" />}
-          <div className="directory-profile-overlay" />
-        </div>
-
-        <div className="wrap directory-profile-wrap">
-          <button
-            className="directory-back"
-            type="button"
-            onClick={closeProfile}
-          >
-            <span>←</span> Back to directory
-          </button>
-
-          <div className="directory-profile-header">
-            <div className="directory-profile-identity">
-              <Avatar
-                name={affiliate.name}
-                logo={affiliate.logo}
-                accent={affiliate.accent}
-                size={112}
-              />
-
-              <div>
-                <div className="directory-profile-label">
-                  {affiliate.featured ? "✦ Featured community" : "Official affiliate"}
-                </div>
-
-                <h1 ref={headingRef} tabIndex={-1}>
-                  {affiliate.name}
-                </h1>
-
-                <p>{affiliate.tagline}</p>
-              </div>
-            </div>
-
-            <div className="directory-profile-actions">
-              {primary && (
-                <a
-                  className="directory-join"
-                  href={primary.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {primary.label} <ArrowIcon />
-                </a>
-              )}
-
-              <button
-                className="directory-share"
-                type="button"
-                onClick={shareProfile}
-              >
-                {copied ? "✓ Copied" : "Share"}
-              </button>
-            </div>
-          </div>
-
-          <div className="directory-profile-grid">
-            <main className="directory-about">
-              <div className="directory-section-heading">
-                <span>01</span>
-                <h2>About this community</h2>
-              </div>
-
-              {(affiliate.about || []).map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
-              ))}
-
-              {affiliate.tags?.length > 0 && (
-                <div className="directory-profile-tags">
-                  {affiliate.tags.map((value) => (
-                    <span key={value}>{value}</span>
-                  ))}
-                </div>
-              )}
-            </main>
-
-            <aside className="directory-sidebar">
-              {affiliate.stats?.length > 0 && (
-                <div className="directory-panel">
-                  <h3>Community statistics</h3>
-
-                  <div className="directory-stat-grid">
-                    {affiliate.stats.map((stat) => (
-                      <div key={stat.label}>
-                        <strong>{stat.value}</strong>
-                        <span>{stat.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="directory-panel">
-                <h3>Find them online</h3>
-
-                <div className="directory-link-list">
-                  {(affiliate.links || []).map((link) => (
-                    <a
-                      key={link.url}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <span className="directory-link-icon">
-                        <LinkIcon kind={iconKind(link)} />
-                      </span>
-
-                      <span>
-                        <strong>{link.label}</strong>
-                        <small>{hostOf(link.url)}</small>
-                      </span>
-
-                      <ArrowIcon />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </aside>
-          </div>
-
-          {others.length > 0 && (
-            <section className="directory-more">
-              <div className="directory-section-heading">
-                <span>02</span>
-                <h2>Explore more communities</h2>
-              </div>
-
-              <div className="directory-mini-grid">
-                {others.map((item) => (
-                  <button
-                    key={item.slug}
-                    type="button"
-                    onClick={() => openProfile(item.slug)}
-                  >
-                    <Avatar
-                      name={item.name}
-                      logo={item.logo}
-                      accent={item.accent}
-                      size={42}
-                    />
-
-                    <span>
-                      <strong>{item.name}</strong>
-                      <small>{item.tagline}</small>
-                    </span>
-
-                    <ArrowIcon />
-                  </button>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
-      </section>
-    );
-  }
-
-  /*
-  =========================================================
-  DIRECTORY
-  =========================================================
-  */
 
   return (
-    <div className="server-directory">
-      <section className="directory-hero">
-        <div className="directory-hero-glow" />
-
-        <div className="wrap">
-          <div className="directory-eyebrow">
-            <span className="directory-live-dot" />
+    <div className="directory">
+      <header className="directory-heading">
+        <div className="directory-heading-copy">
+          <span className="directory-eyebrow">
+            <span className="directory-eyebrow-dot" />
             THE {BRAND.toUpperCase()} NETWORK
-          </div>
+          </span>
 
           <h1>
             Find your next
@@ -559,157 +672,164 @@ export default function AffiliatesView({ affiliates = [] }) {
           </h1>
 
           <p>
-            Discover the communities, servers and creators connected
-            with {BRAND}.
+            Explore communities we're connected with. Find your people,
+            discover new interests, and join something great.
           </p>
+        </div>
 
-          <div className="directory-search">
-            <SearchIcon />
-
-            <input
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search communities, topics or tags..."
-              aria-label="Search communities"
-            />
-
-            {query && (
-              <button type="button" onClick={() => setQuery("")}>
-                Clear
-              </button>
-            )}
-          </div>
-
-          <div className="directory-hero-stats">
-            <div>
-              <strong>{affiliates.length}</strong>
-              <span>Communities</span>
-            </div>
-            <div>
-              <strong>{allTags.length - 1}</strong>
-              <span>Categories</span>
-            </div>
-            <div>
-              <strong>{featured.length}</strong>
-              <span>Featured</span>
-            </div>
+        <div className="directory-heading-stat">
+          <span className="directory-heading-stat-icon">
+            <Icon name="users" size={20} />
+          </span>
+          <div>
+            <strong>{safeAffiliates.length}</strong>
+            <span>communities</span>
           </div>
         </div>
+      </header>
+
+      <section className="directory-controls">
+        <label className="directory-search">
+          <Icon name="search" size={18} />
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search communities..."
+            aria-label="Search communities"
+          />
+          {search && (
+            <button
+              type="button"
+              className="directory-search-clear"
+              onClick={() => setSearch("")}
+              aria-label="Clear search"
+            >
+              ×
+            </button>
+          )}
+        </label>
+
+        <label className="directory-sort">
+          <span>Sort by</span>
+          <select value={sort} onChange={(event) => setSort(event.target.value)}>
+            <option value="featured">Featured</option>
+            <option value="az">Name A–Z</option>
+          </select>
+        </label>
       </section>
 
-      <section className="wrap directory-content">
-        <div className="directory-toolbar">
-          <div className="directory-categories">
-            {allTags.map((item) => (
-              <button
-                key={item}
-                type="button"
-                className={tag === item ? "active" : ""}
-                onClick={() => setTag(item)}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
+      <nav className="directory-categories" aria-label="Community categories">
+        {allTags.map((tag) => (
+          <button
+            key={tag}
+            type="button"
+            className={activeTag === tag ? "is-active" : ""}
+            onClick={() => setActiveTag(tag)}
+          >
+            {tag === "All" && <Icon name="grid" size={14} />}
+            {tag}
+          </button>
+        ))}
+      </nav>
 
-          <div className="directory-sort">
-            <span>Sort:</span>
-            <select
-              value={sort}
-              onChange={(event) => setSort(event.target.value)}
-              aria-label="Sort communities"
-            >
-              <option value="featured">Featured first</option>
-              <option value="az">Name A–Z</option>
-            </select>
-          </div>
-        </div>
+      {featuredAffiliates.length > 0 &&
+        activeTag === "All" &&
+        !search.trim() && (
+          <section className="directory-section">
+            <div className="directory-section-heading">
+              <div>
+                <span className="directory-section-kicker">HAND PICKED</span>
+                <h2>
+                  <Icon name="sparkle" size={19} />
+                  Featured communities
+                </h2>
+              </div>
+              <span className="directory-section-count">
+                {featuredAffiliates.length} featured
+              </span>
+            </div>
 
-        <div className="directory-results-heading">
+            <div className="directory-grid">
+              {featuredAffiliates.map((affiliate) => (
+                <CommunityCard
+                  key={getSlug(affiliate)}
+                  affiliate={affiliate}
+                  onOpen={openProfile}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+      <section className="directory-section">
+        <div className="directory-section-heading">
           <div>
-            <h2>Explore communities</h2>
-            <p>Browse the communities in our network.</p>
+            <span className="directory-section-kicker">EXPLORE</span>
+            <h2>
+              <Icon name="grid" size={18} />
+              {search || activeTag !== "All"
+                ? "Search results"
+                : "All communities"}
+            </h2>
           </div>
 
-          <span>
-            {filtered.length} {filtered.length === 1 ? "result" : "results"}
+          <span className="directory-section-count">
+            {filteredAffiliates.length}{" "}
+            {filteredAffiliates.length === 1 ? "community" : "communities"}
           </span>
         </div>
 
-        {filtered.length === 0 ? (
+        {filteredAffiliates.length > 0 ? (
+          <div className="directory-grid">
+            {filteredAffiliates.map((affiliate) => (
+              <CommunityCard
+                key={getSlug(affiliate)}
+                affiliate={affiliate}
+                onOpen={openProfile}
+              />
+            ))}
+          </div>
+        ) : (
           <div className="directory-empty">
-            <div className="directory-empty-icon">
-              <SearchIcon />
-            </div>
-
-            <h2>No communities found</h2>
-            <p>Try another search or choose a different category.</p>
-
+            <span className="directory-empty-icon">
+              <Icon name="search" size={25} />
+            </span>
+            <h3>No communities found</h3>
+            <p>
+              Try another search or choose a different category to find what
+              you're looking for.
+            </p>
             <button
               type="button"
               onClick={() => {
-                setQuery("");
-                setTag("All");
+                setSearch("");
+                setActiveTag("All");
               }}
             >
-              Reset filters
+              Clear filters
             </button>
           </div>
-        ) : (
-          <>
-            {featured.length > 0 && sort === "featured" && (
-              <section className="directory-group">
-                <div className="directory-group-heading">
-                  <h3><span>✦</span> Featured communities</h3>
-                  <span>{featured.length}</span>
-                </div>
-
-                <div className="directory-grid">
-                  {featured.map((item) => (
-                    <DirectoryCard key={item.slug} item={item} />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {regular.length > 0 && (
-              <section className="directory-group">
-                <div className="directory-group-heading">
-                  <h3>
-                    {sort === "az" ? "All communities" : "More communities"}
-                  </h3>
-                  <span>{regular.length}</span>
-                </div>
-
-                <div className="directory-grid">
-                  {regular.map((item) => (
-                    <DirectoryCard key={item.slug} item={item} />
-                  ))}
-                </div>
-              </section>
-            )}
-          </>
         )}
+      </section>
 
-        <section className="directory-apply">
-          <div>
-            <span>GROW WITH US</span>
-            <h2>Have a community of your own?</h2>
-            <p>
-              Become part of the {BRAND} network. Join our Discord
-              and open a partnership ticket.
-            </p>
-          </div>
-
-          <a
-            href={DISCORD_INVITE}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Apply for partnership <ArrowIcon />
-          </a>
-        </section>
+      <section className="directory-join">
+        <div className="directory-join-glow" />
+        <div className="directory-join-icon">
+          <Icon name="discord" size={25} />
+        </div>
+        <div className="directory-join-copy">
+          <span>YOUR COMMUNITY STARTS HERE</span>
+          <h2>Looking for a place to belong?</h2>
+          <p>
+            Join the {BRAND} community and meet people, make connections, and
+            find your place.
+          </p>
+        </div>
+        <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
+          Join {BRAND}
+          <Icon name="arrow" size={15} />
+        </a>
       </section>
     </div>
   );
