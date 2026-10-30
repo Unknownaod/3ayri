@@ -395,6 +395,26 @@
   background-size: cover;
 }
 
+/* Display the complete banner without cropping */
+.directory-banner-full {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Keep existing overlays above the image */
+.directory-banner-shade {
+  z-index: 2;
+}
+
+.directory-banner-glow {
+  z-index: 2;
+}
+
 .directory-banner::before {
   position: absolute;
   z-index: 0;
