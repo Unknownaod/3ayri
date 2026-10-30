@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -14,54 +15,39 @@ function hostOf(url) {
   try {
     return new URL(url).hostname.replace(/^www\./, "");
   } catch {
-    return url;
+    return url || "";
   }
 }
 
 function readHash(affiliates) {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  let slug;
+  if (typeof window === "undefined") return null;
 
   try {
-    slug = decodeURIComponent(window.location.hash.slice(1));
+    const slug = decodeURIComponent(window.location.hash.slice(1));
+    return affiliates.some((item) => item.slug === slug) ? slug : null;
   } catch {
     return null;
   }
-
-  return affiliates.some((item) => item.slug === slug) ? slug : null;
 }
 
 function iconKind(link) {
   const host = hostOf(link.url).toLowerCase();
-  const label = link.label.toLowerCase();
+  const label = (link.label || "").toLowerCase();
 
   if (host.includes("discord") || label.includes("discord")) return "discord";
-  if (
-    host.includes("youtube") ||
-    host === "youtu.be" ||
-    label.includes("youtube")
-  ) {
-    return "youtube";
-  }
-  if (host.includes("twitch") || label.includes("twitch")) return "twitch";
-  if (host.includes("tiktok") || label.includes("tiktok")) return "tiktok";
-  if (host.includes("instagram") || label.includes("instagram")) {
-    return "instagram";
-  }
-  if (host === "x.com" || host.includes("twitter") || label === "x") {
-    return "x";
-  }
+  if (host.includes("youtube") || host === "youtu.be") return "youtube";
+  if (host.includes("twitch")) return "twitch";
+  if (host.includes("tiktok")) return "tiktok";
+  if (host.includes("instagram")) return "instagram";
+  if (host === "x.com" || host.includes("twitter")) return "x";
 
   return "web";
 }
 
 function LinkIcon({ kind }) {
   const props = {
-    width: 18,
-    height: 18,
+    width: 17,
+    height: 17,
     viewBox: "0 0 24 24",
     fill: "none",
     stroke: "currentColor",
@@ -80,7 +66,6 @@ function LinkIcon({ kind }) {
           <circle cx="15" cy="12" r=".6" />
         </svg>
       );
-
     case "youtube":
       return (
         <svg {...props}>
@@ -88,7 +73,6 @@ function LinkIcon({ kind }) {
           <path d="M10.5 9.5v5l4-2.5z" />
         </svg>
       );
-
     case "twitch":
       return (
         <svg {...props}>
@@ -96,7 +80,6 @@ function LinkIcon({ kind }) {
           <path d="M12 8v3M16 8v3" />
         </svg>
       );
-
     case "tiktok":
       return (
         <svg {...props}>
@@ -104,7 +87,6 @@ function LinkIcon({ kind }) {
           <path d="M14 4c.4 2.6 2.2 4.2 5 4.4" />
         </svg>
       );
-
     case "instagram":
       return (
         <svg {...props}>
@@ -113,14 +95,12 @@ function LinkIcon({ kind }) {
           <circle cx="17" cy="7" r=".6" />
         </svg>
       );
-
     case "x":
       return (
         <svg {...props}>
           <path d="M5 4l14 16M19 4L5 20" />
         </svg>
       );
-
     default:
       return (
         <svg {...props}>
@@ -133,18 +113,20 @@ function LinkIcon({ kind }) {
 
 function SearchIcon() {
   return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      aria-hidden="true"
-    >
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
       <circle cx="11" cy="11" r="6.5" />
-      <path d="M16 16l4.5 4.5" />
+      <path d="m16 16 4.5 4.5" />
+    </svg>
+  );
+}
+
+function ArrowIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
+      strokeLinejoin="round">
+      <path d="M7 17 17 7M7 7h10v10" />
     </svg>
   );
 }
@@ -159,51 +141,59 @@ export default function AffiliatesView({ affiliates = [] }) {
   const [active, setActive] = useState(null);
   const [query, setQuery] = useState("");
   const [tag, setTag] = useState("All");
+  const [sort, setSort] = useState("featured");
   const [copied, setCopied] = useState(false);
 
   const scrollRef = useRef(0);
   const headingRef = useRef(null);
 
-  // Build available filters from the affiliate data received from the API.
   const allTags = useMemo(() => {
-    const tagSet = new Set();
+    const tags = new Set();
 
     affiliates.forEach((item) => {
-      item.tags?.forEach((value) => tagSet.add(value));
+      item.tags?.forEach((value) => tags.add(value));
     });
 
-    return ["All", ...Array.from(tagSet).sort()];
+    return ["All", ...Array.from(tags).sort()];
   }, [affiliates]);
 
-  // Filter the current API data.
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
 
-    return affiliates.filter((item) => {
-      if (tag !== "All" && !item.tags?.includes(tag)) {
-        return false;
-      }
+    let results = affiliates.filter((item) => {
+      if (tag !== "All" && !item.tags?.includes(tag)) return false;
 
-      if (!needle) {
-        return true;
-      }
+      if (!needle) return true;
 
       const haystack = [
         item.name,
         item.tagline,
         item.description,
         ...(item.tags || []),
-      ]
-        .join(" ")
-        .toLowerCase();
+      ].join(" ").toLowerCase();
 
       return haystack.includes(needle);
     });
-  }, [affiliates, query, tag]);
+
+    if (sort === "featured") {
+      results = [...results].sort(
+        (a, b) => Number(b.featured) - Number(a.featured)
+      );
+    } else if (sort === "az") {
+      results = [...results].sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
+    }
+
+    return results;
+  }, [affiliates, query, tag, sort]);
+
+  const featured = filtered.filter((item) => item.featured);
+  const regular = filtered.filter((item) => !item.featured);
 
   /*
   =========================================================
-  OPEN / CLOSE A PROFILE
+  NAVIGATION
   =========================================================
   */
 
@@ -248,14 +238,10 @@ export default function AffiliatesView({ affiliates = [] }) {
   }, [affiliates]);
 
   useEffect(() => {
-    if (!active) {
-      return undefined;
-    }
+    if (!active) return;
 
     function onKeyDown(event) {
-      if (event.key === "Escape") {
-        closeProfile();
-      }
+      if (event.key === "Escape") closeProfile();
     }
 
     window.addEventListener("keydown", onKeyDown);
@@ -267,11 +253,10 @@ export default function AffiliatesView({ affiliates = [] }) {
   async function shareProfile() {
     try {
       await navigator.clipboard.writeText(window.location.href);
-
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     } catch {
-      // Clipboard access may be unavailable in some browsers.
+      // Clipboard unavailable.
     }
   }
 
@@ -279,168 +264,268 @@ export default function AffiliatesView({ affiliates = [] }) {
 
   /*
   =========================================================
-  OPEN PROFILE
+  DIRECTORY LISTING
+  =========================================================
+  */
+
+  function DirectoryCard({ item }) {
+    const stat = item.stats?.[0];
+
+    return (
+      <article
+        className="directory-card"
+        key={item.slug}
+        style={{ "--accent": item.accent }}
+      >
+        <button
+          className="directory-card-main"
+          type="button"
+          onClick={() => openProfile(item.slug)}
+        >
+          <div className="directory-avatar">
+            <Avatar
+              name={item.name}
+              logo={item.logo}
+              accent={item.accent}
+              size={68}
+            />
+          </div>
+
+          <div className="directory-info">
+            <div className="directory-name">
+              <h3>{item.name}</h3>
+              {item.featured && (
+                <span className="directory-featured">
+                  <span>✦</span> Featured
+                </span>
+              )}
+            </div>
+
+            <p className="directory-tagline">{item.tagline}</p>
+
+            <p className="directory-description">
+              {item.description}
+            </p>
+
+            <div className="directory-meta">
+              {item.tags?.slice(0, 4).map((value) => (
+                <span className="directory-tag" key={value}>
+                  {value}
+                </span>
+              ))}
+
+              {stat && (
+                <span className="directory-stat">
+                  <span className="directory-dot" />
+                  {stat.value} {stat.label}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="directory-arrow">
+            <ArrowIcon />
+          </div>
+        </button>
+
+        <div className="directory-card-footer">
+          <div className="directory-socials">
+            {(item.links || []).slice(0, 5).map((link) => (
+              <a
+                key={link.url}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={link.label}
+                aria-label={`${item.name} - ${link.label}`}
+                onClick={(event) => event.stopPropagation()}
+              >
+                <LinkIcon kind={iconKind(link)} />
+              </a>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            className="directory-view"
+            onClick={() => openProfile(item.slug)}
+          >
+            View server <span>→</span>
+          </button>
+        </div>
+      </article>
+    );
+  }
+
+  /*
+  =========================================================
+  PROFILE
   =========================================================
   */
 
   if (affiliate) {
     const primary =
-      affiliate.links.find((link) => link.primary) || affiliate.links[0];
+      affiliate.links?.find((link) => link.primary) ||
+      affiliate.links?.[0];
 
     const others = affiliates
       .filter((item) => item.slug !== affiliate.slug)
       .slice(0, 3);
 
     return (
-      <section className="profile" style={{ "--accent": affiliate.accent }}>
-        <div className="profile-cover" aria-hidden="true">
+      <section
+        className="directory-profile"
+        style={{ "--accent": affiliate.accent }}
+      >
+        <div className="directory-profile-cover">
           {affiliate.banner && <img src={affiliate.banner} alt="" />}
+          <div className="directory-profile-overlay" />
         </div>
 
-        <button
-          className="profile-back glass"
-          type="button"
-          onClick={closeProfile}
-        >
-          <span aria-hidden="true">←</span> All affiliates
-        </button>
+        <div className="wrap directory-profile-wrap">
+          <button
+            className="directory-back"
+            type="button"
+            onClick={closeProfile}
+          >
+            <span>←</span> Back to directory
+          </button>
 
-        <div className="wrap">
-          <div className="profile-card glass">
-            <Avatar
-              name={affiliate.name}
-              logo={affiliate.logo}
-              accent={affiliate.accent}
-              size={136}
-            />
+          <div className="directory-profile-header">
+            <div className="directory-profile-identity">
+              <Avatar
+                name={affiliate.name}
+                logo={affiliate.logo}
+                accent={affiliate.accent}
+                size={112}
+              />
 
-            <div className="profile-title">
-              <span className="badge">Official affiliate</span>
+              <div>
+                <div className="directory-profile-label">
+                  {affiliate.featured ? "✦ Featured community" : "Official affiliate"}
+                </div>
 
-              <h1 ref={headingRef} tabIndex={-1}>
-                {affiliate.name}
-              </h1>
+                <h1 ref={headingRef} tabIndex={-1}>
+                  {affiliate.name}
+                </h1>
 
-              <p>{affiliate.tagline}</p>
-
-              {affiliate.tags?.length > 0 && (
-                <ul className="aff-tags">
-                  {affiliate.tags.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              )}
+                <p>{affiliate.tagline}</p>
+              </div>
             </div>
 
-            <div className="profile-actions">
+            <div className="directory-profile-actions">
               {primary && (
                 <a
-                  className="btn"
+                  className="directory-join"
                   href={primary.url}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {primary.label}
+                  {primary.label} <ArrowIcon />
                 </a>
               )}
 
               <button
-                className="btn btn-ghost"
+                className="directory-share"
                 type="button"
                 onClick={shareProfile}
               >
-                {copied ? "Link copied" : "Share profile"}
+                {copied ? "✓ Copied" : "Share"}
               </button>
             </div>
           </div>
 
-          <div className="profile-body">
-            <div className="profile-main">
-              <h2>About</h2>
+          <div className="directory-profile-grid">
+            <main className="directory-about">
+              <div className="directory-section-heading">
+                <span>01</span>
+                <h2>About this community</h2>
+              </div>
 
               {(affiliate.about || []).map((paragraph, index) => (
-                <p
-                  key={index}
-                  className={index === 0 ? "lead" : undefined}
-                >
-                  {paragraph}
-                </p>
+                <p key={index}>{paragraph}</p>
               ))}
-            </div>
 
-            <aside className="profile-side">
+              {affiliate.tags?.length > 0 && (
+                <div className="directory-profile-tags">
+                  {affiliate.tags.map((value) => (
+                    <span key={value}>{value}</span>
+                  ))}
+                </div>
+              )}
+            </main>
+
+            <aside className="directory-sidebar">
               {affiliate.stats?.length > 0 && (
-                <div className="side-card glass">
-                  <dl className="profile-stats">
+                <div className="directory-panel">
+                  <h3>Community statistics</h3>
+
+                  <div className="directory-stat-grid">
                     {affiliate.stats.map((stat) => (
                       <div key={stat.label}>
-                        <dd>{stat.value}</dd>
-                        <dt>{stat.label}</dt>
+                        <strong>{stat.value}</strong>
+                        <span>{stat.label}</span>
                       </div>
                     ))}
-                  </dl>
+                  </div>
                 </div>
               )}
 
-              <div className="side-card glass">
-                <h2>Find them online</h2>
+              <div className="directory-panel">
+                <h3>Find them online</h3>
 
-                <ul className="link-list">
+                <div className="directory-link-list">
                   {(affiliate.links || []).map((link) => (
-                    <li key={link.url}>
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <span className="link-icon">
-                          <LinkIcon kind={iconKind(link)} />
-                        </span>
+                    <a
+                      key={link.url}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <span className="directory-link-icon">
+                        <LinkIcon kind={iconKind(link)} />
+                      </span>
 
-                        <span className="link-text">
-                          <strong>{link.label}</strong>
-                          <small>{hostOf(link.url)}</small>
-                        </span>
+                      <span>
+                        <strong>{link.label}</strong>
+                        <small>{hostOf(link.url)}</small>
+                      </span>
 
-                        <span className="link-arrow" aria-hidden="true">
-                          ↗
-                        </span>
-                      </a>
-                    </li>
+                      <ArrowIcon />
+                    </a>
                   ))}
-                </ul>
+                </div>
               </div>
             </aside>
           </div>
 
           {others.length > 0 && (
-            <section className="profile-more">
-              <h2>More affiliates</h2>
+            <section className="directory-more">
+              <div className="directory-section-heading">
+                <span>02</span>
+                <h2>Explore more communities</h2>
+              </div>
 
-              <div className="mini-grid">
+              <div className="directory-mini-grid">
                 {others.map((item) => (
                   <button
-                    className="mini-card spot"
-                    type="button"
                     key={item.slug}
-                    style={{ "--accent": item.accent }}
+                    type="button"
                     onClick={() => openProfile(item.slug)}
                   >
                     <Avatar
                       name={item.name}
                       logo={item.logo}
                       accent={item.accent}
-                      size={48}
+                      size={42}
                     />
 
-                    <span className="mini-text">
+                    <span>
                       <strong>{item.name}</strong>
                       <small>{item.tagline}</small>
                     </span>
 
-                    <span className="mini-arrow" aria-hidden="true">
-                      →
-                    </span>
+                    <ArrowIcon />
                   </button>
                 ))}
               </div>
@@ -453,180 +538,179 @@ export default function AffiliatesView({ affiliates = [] }) {
 
   /*
   =========================================================
-  GRID
+  DIRECTORY
   =========================================================
   */
 
   return (
-    <>
-      <section className="aff-head">
-        <div className="page-glow" aria-hidden="true" />
+    <div className="server-directory">
+      <section className="directory-hero">
+        <div className="directory-hero-glow" />
 
         <div className="wrap">
-          <h1>Affiliates</h1>
+          <div className="directory-eyebrow">
+            <span className="directory-live-dot" />
+            THE {BRAND.toUpperCase()} NETWORK
+          </div>
+
+          <h1>
+            Find your next
+            <span> community.</span>
+          </h1>
 
           <p>
-            The servers and creators we stand with. Open a profile to see who
-            they are.
+            Discover the communities, servers and creators connected
+            with {BRAND}.
           </p>
 
-          <div className="aff-toolbar">
-            <label className="aff-search">
-              <SearchIcon />
+          <div className="directory-search">
+            <SearchIcon />
 
-              <input
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search affiliates"
-                aria-label="Search affiliates"
-              />
-            </label>
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search communities, topics or tags..."
+              aria-label="Search communities"
+            />
 
-            {allTags.length > 2 && (
-              <div
-                className="aff-filters"
-                role="group"
-                aria-label="Filter by tag"
-              >
-                {allTags.map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    className="chip"
-                    aria-pressed={tag === item}
-                    onClick={() => setTag(item)}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
+            {query && (
+              <button type="button" onClick={() => setQuery("")}>
+                Clear
+              </button>
             )}
+          </div>
+
+          <div className="directory-hero-stats">
+            <div>
+              <strong>{affiliates.length}</strong>
+              <span>Communities</span>
+            </div>
+            <div>
+              <strong>{allTags.length - 1}</strong>
+              <span>Categories</span>
+            </div>
+            <div>
+              <strong>{featured.length}</strong>
+              <span>Featured</span>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="wrap aff-section">
-        <p className="aff-count" aria-live="polite">
-          {filtered.length}{" "}
-          {filtered.length === 1 ? "affiliate" : "affiliates"}
-        </p>
+      <section className="wrap directory-content">
+        <div className="directory-toolbar">
+          <div className="directory-categories">
+            {allTags.map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={tag === item ? "active" : ""}
+                onClick={() => setTag(item)}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+
+          <div className="directory-sort">
+            <span>Sort:</span>
+            <select
+              value={sort}
+              onChange={(event) => setSort(event.target.value)}
+              aria-label="Sort communities"
+            >
+              <option value="featured">Featured first</option>
+              <option value="az">Name A–Z</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="directory-results-heading">
+          <div>
+            <h2>Explore communities</h2>
+            <p>Browse the communities in our network.</p>
+          </div>
+
+          <span>
+            {filtered.length} {filtered.length === 1 ? "result" : "results"}
+          </span>
+        </div>
 
         {filtered.length === 0 ? (
-          <div className="aff-empty glass">
-            <h2>No matches</h2>
+          <div className="directory-empty">
+            <div className="directory-empty-icon">
+              <SearchIcon />
+            </div>
 
-            <p>
-              Nothing fits that search. Try a different word or clear the
-              filter.
-            </p>
+            <h2>No communities found</h2>
+            <p>Try another search or choose a different category.</p>
 
             <button
-              className="btn btn-ghost"
               type="button"
               onClick={() => {
                 setQuery("");
                 setTag("All");
               }}
             >
-              Clear filters
+              Reset filters
             </button>
           </div>
         ) : (
-          <div className="aff-grid">
-            {filtered.map((item) => {
-              const stat = item.stats?.[0];
+          <>
+            {featured.length > 0 && sort === "featured" && (
+              <section className="directory-group">
+                <div className="directory-group-heading">
+                  <h3><span>✦</span> Featured communities</h3>
+                  <span>{featured.length}</span>
+                </div>
 
-              return (
-                <article
-                  className="aff-card spot"
-                  key={item.slug}
-                  style={{ "--accent": item.accent }}
-                >
-                  <div className="aff-card-cover" aria-hidden="true">
-                    {item.banner && <img src={item.banner} alt="" />}
-                  </div>
+                <div className="directory-grid">
+                  {featured.map((item) => (
+                    <DirectoryCard key={item.slug} item={item} />
+                  ))}
+                </div>
+              </section>
+            )}
 
-                  <div className="aff-card-body">
-                    <div className="aff-card-id">
-                      <Avatar
-                        name={item.name}
-                        logo={item.logo}
-                        accent={item.accent}
-                        size={68}
-                      />
+            {regular.length > 0 && (
+              <section className="directory-group">
+                <div className="directory-group-heading">
+                  <h3>
+                    {sort === "az" ? "All communities" : "More communities"}
+                  </h3>
+                  <span>{regular.length}</span>
+                </div>
 
-                      {stat && (
-                        <span className="aff-stat">
-                          <strong>{stat.value}</strong> {stat.label}
-                        </span>
-                      )}
-                    </div>
-
-                    <h2>{item.name}</h2>
-
-                    <p className="aff-tagline">{item.tagline}</p>
-
-                    <p className="aff-card-desc">{item.description}</p>
-
-                    {item.tags?.length > 0 && (
-                      <ul className="aff-tags">
-                        {item.tags.map((value) => (
-                          <li key={value}>{value}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-
-                  <div className="aff-card-foot">
-                    <div className="aff-icons">
-                      {(item.links || []).slice(0, 4).map((link) => (
-                        <a
-                          key={link.url}
-                          className="icon-btn"
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`${item.name} on ${link.label}`}
-                          title={link.label}
-                        >
-                          <LinkIcon kind={iconKind(link)} />
-                        </a>
-                      ))}
-                    </div>
-
-                    <button
-                      className="aff-more"
-                      type="button"
-                      onClick={() => openProfile(item.slug)}
-                      aria-label={`View ${item.name}'s full profile`}
-                    >
-                      View more <span aria-hidden="true">→</span>
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                <div className="directory-grid">
+                  {regular.map((item) => (
+                    <DirectoryCard key={item.slug} item={item} />
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
         )}
 
-        <div className="aff-apply">
+        <section className="directory-apply">
           <div>
-            <h2>Want to partner with {BRAND}?</h2>
-
-            <p>Join the Discord and open a ticket. We'll get back to you.</p>
+            <span>GROW WITH US</span>
+            <h2>Have a community of your own?</h2>
+            <p>
+              Become part of the {BRAND} network. Join our Discord
+              and open a partnership ticket.
+            </p>
           </div>
 
           <a
-            className="btn"
             href={DISCORD_INVITE}
             target="_blank"
             rel="noopener noreferrer"
           >
-            Join the Discord
+            Apply for partnership <ArrowIcon />
           </a>
-        </div>
+        </section>
       </section>
-    </>
+    </div>
   );
 }
