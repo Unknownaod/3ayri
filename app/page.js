@@ -282,7 +282,7 @@ export default function Home() {
         <ol className="steps">
           {[
             ["Join the server", "Select the invite and Discord opens. No account yet? Discord will help you make one."],
-            ["Say hi in #introductions", "Tell us what you play or what you’re into. Someone will answer."],
+            ["Say hi in #gen", "Interact with the community."],
             ["Find your corner", "Browse the channels that fit you, then drop into voice whenever you feel like it."],
           ].map(([t, d], i) => (
             <li className="spot reveal" key={t} style={{ "--delay": `${i * 0.12}s` }}>
