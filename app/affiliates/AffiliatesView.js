@@ -166,15 +166,25 @@ function Banner({ affiliate, className = "" }) {
       className={`directory-banner ${className}`}
       style={{
         "--community-accent": affiliate?.accent || FALLBACK_ACCENT,
-        backgroundImage: banner ? `url("${banner}")` : undefined,
       }}
     >
       {banner && (
-        <img
-          className="directory-banner-full"
-          src={banner}
-          alt={`${affiliate?.name || "Community"} banner`}
-        />
+        <>
+          {/* Blurred background fills the entire banner area */}
+          <img
+            className="directory-banner-backdrop"
+            src={banner}
+            alt=""
+            aria-hidden="true"
+          />
+
+          {/* Original image remains completely visible */}
+          <img
+            className="directory-banner-full"
+            src={banner}
+            alt={`${affiliate?.name || "Community"} banner`}
+          />
+        </>
       )}
 
       <div className="directory-banner-shade" />
