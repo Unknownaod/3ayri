@@ -371,6 +371,8 @@
 
 /* Banner image */
 
+/* Banner image */
+
 .directory-banner {
   --community-accent: #8b7cff;
 
@@ -395,7 +397,23 @@
   background-size: cover;
 }
 
-/* Display the complete banner without cropping */
+/* Blurred background fills any unused space */
+
+.directory-banner-backdrop {
+  position: absolute;
+  z-index: 0;
+  inset: -15px;
+  width: calc(100% + 30px);
+  height: calc(100% + 30px);
+  object-fit: cover;
+  object-position: center;
+  filter: blur(12px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* Full original banner, without cropping */
+
 .directory-banner-full {
   position: absolute;
   z-index: 1;
@@ -404,20 +422,14 @@
   height: 100%;
   object-fit: contain;
   object-position: center;
+  pointer-events: none;
 }
 
-/* Keep existing overlays above the image */
-.directory-banner-shade {
-  z-index: 2;
-}
-
-.directory-banner-glow {
-  z-index: 2;
-}
+/* Dark gradient overlay */
 
 .directory-banner::before {
   position: absolute;
-  z-index: 0;
+  z-index: 2;
   inset: 0;
   background:
     linear-gradient(
@@ -432,11 +444,14 @@
       transparent 70%
     );
   content: "";
+  pointer-events: none;
 }
+
+/* Decorative rings */
 
 .directory-banner::after {
   position: absolute;
-  z-index: 0;
+  z-index: 3;
   right: -45px;
   bottom: -135px;
   width: 310px;
@@ -451,20 +466,25 @@
   pointer-events: none;
 }
 
+/* Additional shade */
+
 .directory-banner-shade {
   position: absolute;
-  z-index: 1;
+  z-index: 4;
   inset: 0;
   background: linear-gradient(
     0deg,
     rgba(12, 10, 19, 0.2),
     transparent 70%
   );
+  pointer-events: none;
 }
+
+/* Purple accent glow */
 
 .directory-banner-glow {
   position: absolute;
-  z-index: 1;
+  z-index: 5;
   top: -80px;
   left: 38%;
   width: 220px;
