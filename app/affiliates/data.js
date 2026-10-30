@@ -1,6 +1,5 @@
 // Affiliates data for the 3ayri site.
-// Live data comes from the partnership bot's API; the static list below is only
-// a fallback if the API is unreachable.
+// All affiliate data comes directly from the partnership bot's API.
 
 const API_URL =
   process.env.NEXT_PUBLIC_AFFILIATES_API_URL ||
@@ -10,10 +9,10 @@ const API_URL =
 const REVALIDATE_SECONDS = 60;
 const TIMEOUT_MS = 5000;
 
-// Empty fallback — no default affiliates.
+// Empty fallback when the API is unavailable.
 export const AFFILIATES = [];
 
-// Make sure every affiliate has the full shape, even if the API omits a field.
+// Normalize API data.
 function normalize(item) {
   return {
     slug: String(item.slug),
@@ -31,7 +30,7 @@ function normalize(item) {
   };
 }
 
-// All approved affiliates (featured first). Use in server components / route handlers.
+// Get all affiliates directly from the API.
 export async function getAffiliates() {
   try {
     const res = await fetch(API_URL, {
@@ -39,23 +38,33 @@ export async function getAffiliates() {
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
 
-    if (!res.ok) throw new Error(`API responded with ${res.status}`);
+    if (!res.ok) {
+      throw new Error(`API responded with ${res.status}`);
+    }
 
     const data = await res.json();
-    if (!Array.isArray(data)) throw new Error("API did not return an array");
+
+    if (!Array.isArray(data)) {
+      throw new Error("API did not return an array");
+    }
 
     return data
-      .filter(item => item && item.slug)
-      .map(normalize)
-      .sort((a, b) => Number(b.featured) - Number(a.featured));
+      .filter((item) => item && item.slug)
+      .map(normalize);
   } catch (error) {
     console.error("Could not load affiliates from API:", error.message);
-    return AFFILIATES;
+
+    return [];
   }
 }
 
-// One affiliate by slug, or null. Use for the open-profile page.
+// Get one affiliate by slug.
 export async function getAffiliate(slug) {
   const affiliates = await getAffiliates();
-  return affiliates.find(a => a.slug === String(slug).toLowerCase()) ?? null;
+
+  return (
+    affiliates.find(
+      (item) => item.slug === String(slug).toLowerCase()
+    ) ?? null
+  );
 }
