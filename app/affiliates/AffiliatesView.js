@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Avatar from "../Avatar";
 import { BRAND, DISCORD_INVITE } from "../site";
-import { AFFILIATES } from "./data";
 
 /*
 =========================================================
@@ -19,14 +18,20 @@ function hostOf(url) {
   }
 }
 
-function readHash() {
+function readHash(affiliates) {
   if (typeof window === "undefined") {
     return null;
   }
 
-  const slug = decodeURIComponent(window.location.hash.slice(1));
+  let slug;
 
-  return AFFILIATES.some((item) => item.slug === slug) ? slug : null;
+  try {
+    slug = decodeURIComponent(window.location.hash.slice(1));
+  } catch {
+    return null;
+  }
+
+  return affiliates.some((item) => item.slug === slug) ? slug : null;
 }
 
 function iconKind(link) {
@@ -34,11 +39,21 @@ function iconKind(link) {
   const label = link.label.toLowerCase();
 
   if (host.includes("discord") || label.includes("discord")) return "discord";
-  if (host.includes("youtube") || host === "youtu.be" || label.includes("youtube")) return "youtube";
+  if (
+    host.includes("youtube") ||
+    host === "youtu.be" ||
+    label.includes("youtube")
+  ) {
+    return "youtube";
+  }
   if (host.includes("twitch") || label.includes("twitch")) return "twitch";
   if (host.includes("tiktok") || label.includes("tiktok")) return "tiktok";
-  if (host.includes("instagram") || label.includes("instagram")) return "instagram";
-  if (host === "x.com" || host.includes("twitter") || label === "x") return "x";
+  if (host.includes("instagram") || label.includes("instagram")) {
+    return "instagram";
+  }
+  if (host === "x.com" || host.includes("twitter") || label === "x") {
+    return "x";
+  }
 
   return "web";
 }
@@ -65,6 +80,7 @@ function LinkIcon({ kind }) {
           <circle cx="15" cy="12" r=".6" />
         </svg>
       );
+
     case "youtube":
       return (
         <svg {...props}>
@@ -72,6 +88,7 @@ function LinkIcon({ kind }) {
           <path d="M10.5 9.5v5l4-2.5z" />
         </svg>
       );
+
     case "twitch":
       return (
         <svg {...props}>
@@ -79,6 +96,7 @@ function LinkIcon({ kind }) {
           <path d="M12 8v3M16 8v3" />
         </svg>
       );
+
     case "tiktok":
       return (
         <svg {...props}>
@@ -86,6 +104,7 @@ function LinkIcon({ kind }) {
           <path d="M14 4c.4 2.6 2.2 4.2 5 4.4" />
         </svg>
       );
+
     case "instagram":
       return (
         <svg {...props}>
@@ -94,12 +113,14 @@ function LinkIcon({ kind }) {
           <circle cx="17" cy="7" r=".6" />
         </svg>
       );
+
     case "x":
       return (
         <svg {...props}>
           <path d="M5 4l14 16M19 4L5 20" />
         </svg>
       );
+
     default:
       return (
         <svg {...props}>
@@ -134,7 +155,7 @@ VIEW
 =========================================================
 */
 
-export default function AffiliatesView() {
+export default function AffiliatesView({ affiliates = [] }) {
   const [active, setActive] = useState(null);
   const [query, setQuery] = useState("");
   const [tag, setTag] = useState("All");
@@ -143,18 +164,22 @@ export default function AffiliatesView() {
   const scrollRef = useRef(0);
   const headingRef = useRef(null);
 
+  // Build available filters from the affiliate data received from the API.
   const allTags = useMemo(() => {
-    const set = new Set();
+    const tagSet = new Set();
 
-    AFFILIATES.forEach((item) => item.tags?.forEach((value) => set.add(value)));
+    affiliates.forEach((item) => {
+      item.tags?.forEach((value) => tagSet.add(value));
+    });
 
-    return ["All", ...Array.from(set).sort()];
-  }, []);
+    return ["All", ...Array.from(tagSet).sort()];
+  }, [affiliates]);
 
+  // Filter the current API data.
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
 
-    return AFFILIATES.filter((item) => {
+    return affiliates.filter((item) => {
       if (tag !== "All" && !item.tags?.includes(tag)) {
         return false;
       }
@@ -163,30 +188,31 @@ export default function AffiliatesView() {
         return true;
       }
 
-      const haystack = [item.name, item.tagline, item.description, ...(item.tags || [])]
+      const haystack = [
+        item.name,
+        item.tagline,
+        item.description,
+        ...(item.tags || []),
+      ]
         .join(" ")
         .toLowerCase();
 
       return haystack.includes(needle);
     });
-  }, [query, tag]);
+  }, [affiliates, query, tag]);
 
   /*
   =========================================================
   OPEN / CLOSE A PROFILE
-  The profile lives in the URL hash so it can be linked
-  to directly (/affiliates#example-one) and the browser's
-  back button closes it.
   =========================================================
   */
 
   const openProfile = useCallback((slug) => {
-    // only remember the grid's scroll position when coming from the grid
     if (!window.location.hash) {
       scrollRef.current = window.scrollY;
     }
 
-    window.history.pushState(null, "", `#${slug}`);
+    window.history.pushState(null, "", `#${encodeURIComponent(slug)}`);
     setActive(slug);
     setCopied(false);
 
@@ -194,7 +220,12 @@ export default function AffiliatesView() {
   }, []);
 
   const closeProfile = useCallback(() => {
-    window.history.pushState(null, "", window.location.pathname + window.location.search);
+    window.history.pushState(
+      null,
+      "",
+      window.location.pathname + window.location.search
+    );
+
     setActive(null);
 
     requestAnimationFrame(() => {
@@ -203,7 +234,7 @@ export default function AffiliatesView() {
   }, []);
 
   useEffect(() => {
-    const sync = () => setActive(readHash());
+    const sync = () => setActive(readHash(affiliates));
 
     sync();
 
@@ -214,7 +245,7 @@ export default function AffiliatesView() {
       window.removeEventListener("hashchange", sync);
       window.removeEventListener("popstate", sync);
     };
-  }, []);
+  }, [affiliates]);
 
   useEffect(() => {
     if (!active) {
@@ -228,7 +259,6 @@ export default function AffiliatesView() {
     }
 
     window.addEventListener("keydown", onKeyDown);
-
     headingRef.current?.focus({ preventScroll: true });
 
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -239,14 +269,13 @@ export default function AffiliatesView() {
       await navigator.clipboard.writeText(window.location.href);
 
       setCopied(true);
-
       setTimeout(() => setCopied(false), 1800);
     } catch {
-      // clipboard blocked, nothing to do
+      // Clipboard access may be unavailable in some browsers.
     }
   }
 
-  const affiliate = AFFILIATES.find((item) => item.slug === active);
+  const affiliate = affiliates.find((item) => item.slug === active);
 
   /*
   =========================================================
@@ -255,8 +284,12 @@ export default function AffiliatesView() {
   */
 
   if (affiliate) {
-    const primary = affiliate.links.find((link) => link.primary) || affiliate.links[0];
-    const others = AFFILIATES.filter((item) => item.slug !== affiliate.slug).slice(0, 3);
+    const primary =
+      affiliate.links.find((link) => link.primary) || affiliate.links[0];
+
+    const others = affiliates
+      .filter((item) => item.slug !== affiliate.slug)
+      .slice(0, 3);
 
     return (
       <section className="profile" style={{ "--accent": affiliate.accent }}>
@@ -264,7 +297,11 @@ export default function AffiliatesView() {
           {affiliate.banner && <img src={affiliate.banner} alt="" />}
         </div>
 
-        <button className="profile-back glass" type="button" onClick={closeProfile}>
+        <button
+          className="profile-back glass"
+          type="button"
+          onClick={closeProfile}
+        >
           <span aria-hidden="true">←</span> All affiliates
         </button>
 
@@ -297,12 +334,21 @@ export default function AffiliatesView() {
 
             <div className="profile-actions">
               {primary && (
-                <a className="btn" href={primary.url} target="_blank" rel="noopener noreferrer">
+                <a
+                  className="btn"
+                  href={primary.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {primary.label}
                 </a>
               )}
 
-              <button className="btn btn-ghost" type="button" onClick={shareProfile}>
+              <button
+                className="btn btn-ghost"
+                type="button"
+                onClick={shareProfile}
+              >
                 {copied ? "Link copied" : "Share profile"}
               </button>
             </div>
@@ -312,8 +358,11 @@ export default function AffiliatesView() {
             <div className="profile-main">
               <h2>About</h2>
 
-              {affiliate.about.map((paragraph, index) => (
-                <p key={index} className={index === 0 ? "lead" : undefined}>
+              {(affiliate.about || []).map((paragraph, index) => (
+                <p
+                  key={index}
+                  className={index === 0 ? "lead" : undefined}
+                >
                   {paragraph}
                 </p>
               ))}
@@ -337,9 +386,13 @@ export default function AffiliatesView() {
                 <h2>Find them online</h2>
 
                 <ul className="link-list">
-                  {affiliate.links.map((link) => (
+                  {(affiliate.links || []).map((link) => (
                     <li key={link.url}>
-                      <a href={link.url} target="_blank" rel="noopener noreferrer">
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         <span className="link-icon">
                           <LinkIcon kind={iconKind(link)} />
                         </span>
@@ -373,7 +426,12 @@ export default function AffiliatesView() {
                     style={{ "--accent": item.accent }}
                     onClick={() => openProfile(item.slug)}
                   >
-                    <Avatar name={item.name} logo={item.logo} accent={item.accent} size={48} />
+                    <Avatar
+                      name={item.name}
+                      logo={item.logo}
+                      accent={item.accent}
+                      size={48}
+                    />
 
                     <span className="mini-text">
                       <strong>{item.name}</strong>
@@ -407,7 +465,10 @@ export default function AffiliatesView() {
         <div className="wrap">
           <h1>Affiliates</h1>
 
-          <p>The servers and creators we stand with. Open a profile to see who they are.</p>
+          <p>
+            The servers and creators we stand with. Open a profile to see who
+            they are.
+          </p>
 
           <div className="aff-toolbar">
             <label className="aff-search">
@@ -423,7 +484,11 @@ export default function AffiliatesView() {
             </label>
 
             {allTags.length > 2 && (
-              <div className="aff-filters" role="group" aria-label="Filter by tag">
+              <div
+                className="aff-filters"
+                role="group"
+                aria-label="Filter by tag"
+              >
                 {allTags.map((item) => (
                   <button
                     key={item}
@@ -443,14 +508,18 @@ export default function AffiliatesView() {
 
       <section className="wrap aff-section">
         <p className="aff-count" aria-live="polite">
-          {filtered.length} {filtered.length === 1 ? "affiliate" : "affiliates"}
+          {filtered.length}{" "}
+          {filtered.length === 1 ? "affiliate" : "affiliates"}
         </p>
 
         {filtered.length === 0 ? (
           <div className="aff-empty glass">
             <h2>No matches</h2>
 
-            <p>Nothing fits that search. Try a different word or clear the filter.</p>
+            <p>
+              Nothing fits that search. Try a different word or clear the
+              filter.
+            </p>
 
             <button
               className="btn btn-ghost"
@@ -480,7 +549,12 @@ export default function AffiliatesView() {
 
                   <div className="aff-card-body">
                     <div className="aff-card-id">
-                      <Avatar name={item.name} logo={item.logo} accent={item.accent} size={68} />
+                      <Avatar
+                        name={item.name}
+                        logo={item.logo}
+                        accent={item.accent}
+                        size={68}
+                      />
 
                       {stat && (
                         <span className="aff-stat">
@@ -506,7 +580,7 @@ export default function AffiliatesView() {
 
                   <div className="aff-card-foot">
                     <div className="aff-icons">
-                      {item.links.slice(0, 4).map((link) => (
+                      {(item.links || []).slice(0, 4).map((link) => (
                         <a
                           key={link.url}
                           className="icon-btn"
@@ -543,7 +617,12 @@ export default function AffiliatesView() {
             <p>Join the Discord and open a ticket. We'll get back to you.</p>
           </div>
 
-          <a className="btn" href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
+          <a
+            className="btn"
+            href={DISCORD_INVITE}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Join the Discord
           </a>
         </div>
