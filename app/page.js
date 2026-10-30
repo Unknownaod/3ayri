@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import "./globals.css";
 
@@ -8,47 +9,60 @@ import { BRAND, DISCORD_INVITE } from "./site";
 import { AFFILIATES } from "./affiliates/data";
 
 const SUBTAGLINE =
-  "A Discord community for good people, late-night conversations, gaming, and a little bit of chaos.";
+  "A place above the ordinary. Find your people, share your moments, and make yourself at home.";
 
 export const metadata = {
-  title: `${BRAND} — Find Your People`,
+  title: `${BRAND} — A Place to Belong`,
   description: SUBTAGLINE,
 };
 
 const STATS = [
-  ["24/7", "Voice lounge always open"],
-  ["Weekly", "Game & movie nights"],
-  ["Zero", "Tolerance for toxicity"],
-  ["Everyone", "Welcome, no gatekeeping"],
+  ["24/7", "A place that's always here"],
+  ["Weekly", "Events & shared moments"],
+  ["One", "Community, countless connections"],
+  ["Everyone", "A place for you"],
 ];
 
 const ROW_A = [
-  ["🎮", "Game nights", "Queue up with people who show up."],
-  ["🌙", "Late-night talks", "The best conversations start after midnight."],
-  ["🎧", "Voice lounge", "Hop in, hang out, leave whenever."],
-  ["🍿", "Movie nights", "Watch together, argue about it after."],
-  ["😂", "Memes", "Quality control is strictly vibes."],
-  ["🎵", "Music sharing", "Drop a song, start a thread."],
+  ["☁️", "Find your people", "Good company makes everything better."],
+  ["🌙", "Late-night conversations", "Some of the best moments happen after dark."],
+  ["🎧", "Voice lounges", "Come in, get comfortable, stay awhile."],
+  ["✨", "Community events", "Little moments worth looking forward to."],
+  ["🕊️", "A little escape", "Leave the outside noise behind."],
+  ["🎵", "Music & memories", "Share the sounds that mean something."],
 ];
+
 const ROW_B = [
-  ["👋", "New friends", "Everyone starts as a stranger."],
-  ["🎉", "Community events", "Reasons to check in all week."],
-  ["🎲", "Surprises", "We keep a few up our sleeves."],
-  ["🤝", "Co-op runs", "Find your squad in minutes."],
-  ["☕", "Chill hangouts", "No agenda, no pressure."],
-  ["✨", "Inside jokes", "You’ll have your own soon."],
+  ["🤍", "New connections", "Every friendship starts somewhere."],
+  ["🌟", "Special moments", "Make memories with your people."],
+  ["🎮", "Gaming together", "Find your next favorite teammate."],
+  ["🪽", "Good company", "A community that feels like home."],
+  ["☕", "Quiet hangouts", "No pressure. Just be yourself."],
+  ["💫", "Your own space", "Find a place where you belong."],
 ];
 
 const FAQ = [
-  ["Do I need to play games to join?", "No. Games are a big part of the server, but plenty of people come just to talk, hang out in voice, or see what’s going on."],
-  ["How do I join?", "Select Join the Discord and the invite opens in Discord. If you don’t have an account yet, Discord walks you through making one."],
-  ["What are affiliates?", "Communities and creators we know and like. You can browse them all on the affiliates page."],
+  [
+    "Do I need to play games to join?",
+    "Not at all. Gaming is just one part of Haven. You can join for conversations, music, events, voice chats, or simply to meet new people.",
+  ],
+  [
+    "How do I join?",
+    "Select Join Haven and your Discord invite will open. If you don't have an account, Discord will guide you through creating one.",
+  ],
+  [
+    "What are affiliates?",
+    "Affiliates are communities and creators we connect with. You can explore our affiliated communities on the affiliates page.",
+  ],
   [
     "Are there rules?",
     <>
-      A few, and they keep the place good. Be decent to people and we’ll all get along. You can{" "}
-      <Link className="text-link" href="/terms">visit our Terms of Service page</Link>{" "}
-      for the full details.
+      Of course. We want Haven to remain a welcoming place for everyone.
+      You can{" "}
+      <Link className="text-link" href="/terms">
+        visit our Terms of Service page
+      </Link>{" "}
+      to read the community guidelines.
     </>,
   ],
 ];
@@ -56,7 +70,13 @@ const FAQ = [
 function ArrowUpRight() {
   return (
     <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path d="M4.5 15.5 15 5M6 5h9v9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M4.5 15.5 15 5M6 5h9v9"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -64,7 +84,13 @@ function ArrowUpRight() {
 function SmallArrow() {
   return (
     <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path d="M3.5 10h12m-5-5 5 5-5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M3.5 10h12m-5-5 5 5-5 5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -72,17 +98,22 @@ function SmallArrow() {
 function Crown() {
   return (
     <svg className="crown" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-      <path d="M8 46 4 20l15 13L32 10l13 23 15-13-4 26H8Z" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round" fill="rgba(139,60,255,.18)" />
-      <path d="M10 54h44" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
-      <circle cx="32" cy="10" r="2.6" fill="currentColor" />
-      <circle cx="4" cy="20" r="2.2" fill="currentColor" />
-      <circle cx="60" cy="20" r="2.2" fill="currentColor" />
+      <path
+        d="M32 4L36.5 22L54 13L43 30L60 34L40 38L32 59L24 38L4 34L21 30L10 13L27.5 22L32 4Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+        fill="rgba(215,205,255,.12)"
+      />
+      <circle cx="32" cy="32" r="9" stroke="currentColor" strokeWidth="1.2" />
+      <circle cx="32" cy="32" r="3" fill="currentColor" />
     </svg>
   );
 }
 
 function Marquee({ items, reverse }) {
   const list = [...items, ...items];
+
   return (
     <div className={`marquee${reverse ? " rev" : ""}`} aria-hidden="true">
       <div className="track">
@@ -123,26 +154,40 @@ export default function Home() {
           <div className="medallion reveal" aria-hidden="true">
             <img src="/logo.png" alt="" />
           </div>
+
           <p className="pill reveal">
-            <span className="live-dot" /> Your people are here
+            <span className="live-dot" /> A little place in the clouds
           </p>
+
           <h1 className="reveal">
-            Not just another <span className="shimmer">server.</span>
+            Somewhere you can <span className="shimmer">belong.</span>
           </h1>
+
           <p className="hero-sub reveal">{SUBTAGLINE}</p>
 
           <div className="hero-actions reveal">
-            <a className="btn-glow" data-magnetic href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
-              Join the Discord <ArrowUpRight />
+            <a
+              className="btn-glow"
+              data-magnetic
+              href={DISCORD_INVITE}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Enter Haven <ArrowUpRight />
             </a>
+
             <Link className="btn-ghost" data-magnetic href="/affiliates">
-              Meet our affiliates <SmallArrow />
+              Explore our community <SmallArrow />
             </Link>
           </div>
 
           <div className="stats">
             {STATS.map(([big, small], i) => (
-              <div className="stat reveal" key={big} style={{ "--delay": `${i * 0.08}s` }}>
+              <div
+                className="stat reveal"
+                key={big}
+                style={{ "--delay": `${i * 0.08}s` }}
+              >
                 <b>{big}</b>
                 <small>{small}</small>
               </div>
@@ -154,24 +199,37 @@ export default function Home() {
               <div className="dm">
                 <div className="dm-row">
                   <img className="dm-av" src="/logo.png" alt="" />
+
                   <div>
                     <p className="dm-name">
-                      Mika <span className="dm-tag">MOD</span> <time>Today at 11:42 PM</time>
+                      Mika <span className="dm-tag">MOD</span>{" "}
+                      <time>Today at 11:42 PM</time>
                     </p>
-                    <p>game night’s starting, who’s in? 🎮</p>
+                    <p>anyone around? come hang out 🤍</p>
                   </div>
                 </div>
+
                 <div className="dm-embed">
-                  <b>Game night starts in 20 minutes</b>
-                  <p>Hop in the lounge, we’ll sort out teams there.</p>
-                  <span className="dm-btn">🔊 Join voice</span>
+                  <b>Welcome to Haven ☁️</b>
+                  <p>
+                    Your place to unwind, meet new people, and make yourself
+                    at home.
+                  </p>
+                  <span className="dm-btn">✨ Find your place</span>
                 </div>
-                <p className="dm-typing"><i /><i /><i /> Jo is typing</p>
+
+                <p className="dm-typing">
+                  <i />
+                  <i />
+                  <i /> Jo is typing
+                </p>
               </div>
 
-              <div className="float f1"><span className="live-dot" /> 4 in Late-night lounge</div>
-              <div className="float f2">🎉 Movie night</div>
-              <div className="float f3">👋 New member joined</div>
+              <div className="float f1">
+                <span className="live-dot" /> 4 in the lounge
+              </div>
+              <div className="float f2">☁️ Welcome to Haven</div>
+              <div className="float f3">🤍 New member joined</div>
             </div>
           </div>
         </div>
@@ -179,36 +237,47 @@ export default function Home() {
 
       {/* Marquees */}
       <section className="strip">
-        <p className="strip-title reveal">Always something going on</p>
+        <p className="strip-title reveal">A little something for everyone</p>
         <Marquee items={ROW_A} />
         <Marquee items={ROW_B} reverse />
       </section>
 
-      {/* Bento */}
+      {/* Features */}
       <section className="wrap section" id="features">
-        <p className="eyebrow reveal">Inside the server</p>
-        <h2 className="section-title reveal">Come for one reason. Find a few more.</h2>
+        <p className="eyebrow reveal">Inside Haven</p>
+
+        <h2 className="section-title reveal">
+          More than a server. A place to call your own.
+        </h2>
 
         <div className="bento">
           <article className="tile spot wide reveal">
             <div>
-              <h3>Find your people</h3>
-              <p>Meet new people, join conversations, and find your own corner of the community.</p>
+              <h3>Find where you belong</h3>
+              <p>
+                Meet people from all walks of life, discover new friendships,
+                and find your own little corner of Haven.
+              </p>
             </div>
+
             <div className="bubbles" aria-hidden="true">
-              <span>what are you playing lately?</span>
-              <span className="r">honestly? too many things</span>
-              <span>same. let’s fix that tonight</span>
+              <span>anyone wanna talk?</span>
+              <span className="r">always, what's up? 🤍</span>
+              <span>this place is actually so chill</span>
             </div>
           </article>
 
           <article className="tile spot reveal">
             <div>
-              <h3>Pull up and play</h3>
-              <p>Queue into games, jump in voice, or hang out while everyone does their own thing.</p>
+              <h3>Escape into something fun</h3>
+              <p>
+                Play your favorite games, find teammates, and enjoy the little
+                moments together.
+              </p>
             </div>
+
             <div className="voices" aria-hidden="true">
-              {["#8b7bff", "#c084fc", "#e8e4ff", "#6d28d9"].map((c, i) => (
+              {["#d9d0ff", "#b9c8ff", "#f1eaff", "#a78bfa"].map((c, i) => (
                 <span key={c} style={{ "--c": c, "--i": i }} />
               ))}
             </div>
@@ -216,26 +285,34 @@ export default function Home() {
 
           <article className="tile spot reveal">
             <div>
-              <h3>There’s always something on</h3>
-              <p>Community moments, events, and occasional surprises give everyone a reason to check in.</p>
+              <h3>Moments worth remembering</h3>
+              <p>
+                From community events to spontaneous late-night conversations,
+                there's always something happening.
+              </p>
             </div>
+
             <ul className="events" aria-hidden="true">
               <li><b>Game night</b><em>soon</em></li>
               <li><b>Movie night</b><em>voting</em></li>
-              <li><b>Chaos hour</b><em>anytime</em></li>
+              <li><b>Community night</b><em>anytime</em></li>
             </ul>
           </article>
 
           <article className="tile spot wide reveal">
             <div>
-              <h3>Make it your own</h3>
-              <p>Pick the channels and roles that fit you. Your corner of the server looks like you.</p>
+              <h3>Your space, your way</h3>
+              <p>
+                Discover channels, choose your interests, and make Haven feel
+                like somewhere that belongs to you.
+              </p>
             </div>
+
             <div className="roles" aria-hidden="true">
-              <span style={{ "--c": "#a78bfa" }}>Night owl</span>
-              <span style={{ "--c": "#e879f9" }}>Co-op only</span>
-              <span style={{ "--c": "#c4b5fd" }}>Ranked grinder</span>
-              <span style={{ "--c": "#8b3cff" }}>Here for the memes</span>
+              <span style={{ "--c": "#c4b5fd" }}>Cloud nine</span>
+              <span style={{ "--c": "#bfdbfe" }}>Night owl</span>
+              <span style={{ "--c": "#e9d5ff" }}>Good company</span>
+              <span style={{ "--c": "#f5e6c8" }}>Just visiting</span>
             </div>
           </article>
         </div>
@@ -245,17 +322,26 @@ export default function Home() {
       <section className="wrap section" id="realm">
         <div className="showcase">
           <div>
-            <p className="eyebrow reveal">The realm</p>
-            <h2 className="section-title reveal">A kingdom built after dark.</h2>
+            <p className="eyebrow reveal">A place above the ordinary</p>
+
+            <h2 className="section-title reveal">
+              Find your little piece of heaven.
+            </h2>
+
             <p className="reveal">
-              Moonlit, a little dramatic, and always open. {BRAND} is where the night crowd gathers, and everyone gets a seat at the table.
+              A welcoming space built around friendship, connection, and
+              shared experiences. Whether you're here to meet someone new,
+              spend the night talking, or simply escape the everyday,
+              there's a place for you in {BRAND}.
             </p>
+
             <ul className="checks reveal">
-              <li>Active voice channels around the clock</li>
-              <li>Events, game nights and community picks</li>
-              <li>Friendly mods and a no-drama culture</li>
+              <li>A welcoming community, day and night</li>
+              <li>Events, gaming, and shared experiences</li>
+              <li>Friendly moderation and a respectful atmosphere</li>
             </ul>
           </div>
+
           <div className="frame reveal" aria-hidden="true">
             <img src="/banner.png" alt="" />
           </div>
@@ -265,27 +351,51 @@ export default function Home() {
       {/* Manifesto */}
       <section className="manifesto">
         <div className="wrap">
-          <div className="reveal"><Crown /></div>
+          <div className="reveal">
+            <Crown />
+          </div>
+
           <h2 className="reveal">
-            A server feels different when the <span className="shimmer">people do.</span>
+            Some places just feel like <span className="shimmer">home.</span>
           </h2>
+
           <p className="reveal">
-            {BRAND} is a Discord community built around good company and shared moments. Drop in to talk, find people to play with, or just see where the conversation takes you. No big pitch, just a place to belong.
+            Haven is more than a place to chat. It's a place to connect,
+            laugh, share experiences, and create friendships that extend
+            beyond a screen. No expectations, no pressure. Just good people
+            and a place where you can be yourself.
           </p>
         </div>
       </section>
 
-      {/* Steps */}
+      {/* Getting Started */}
       <section className="wrap section" id="how">
-        <p className="eyebrow reveal">Get started</p>
-        <h2 className="section-title reveal">Getting in takes a minute.</h2>
+        <p className="eyebrow reveal">Your journey starts here</p>
+
+        <h2 className="section-title reveal">
+          Your place is waiting.
+        </h2>
+
         <ol className="steps">
           {[
-            ["Join the server", "Select the invite and Discord opens. No account yet? Discord will help you make one."],
-            ["Say hi in #gen", "Interact with the community."],
-            ["Find your corner", "Browse the channels that fit you, then drop into voice whenever you feel like it."],
+            [
+              "Find your way in",
+              "Follow the invite and step into Haven. Your new community is just a click away.",
+            ],
+            [
+              "Make yourself at home",
+              "Introduce yourself, explore the channels, and get to know everyone.",
+            ],
+            [
+              "Find your people",
+              "Join conversations, discover shared interests, and make Haven your own.",
+            ],
           ].map(([t, d], i) => (
-            <li className="spot reveal" key={t} style={{ "--delay": `${i * 0.12}s` }}>
+            <li
+              className="spot reveal"
+              key={t}
+              style={{ "--delay": `${i * 0.12}s` }}
+            >
               <span>{i + 1}</span>
               <h3>{t}</h3>
               <p>{d}</p>
@@ -300,13 +410,18 @@ export default function Home() {
           <div className="wrap">
             <div className="partners-heading">
               <div>
-                <p className="eyebrow reveal">Affiliates</p>
-                <h2 className="section-title reveal">Good company knows good company.</h2>
+                <p className="eyebrow reveal">Our connections</p>
+
+                <h2 className="section-title reveal">
+                  Good people know good people.
+                </h2>
               </div>
+
               <Link className="text-link" href="/affiliates">
                 All affiliates <SmallArrow />
               </Link>
             </div>
+
             <div className="partner-list">
               {featured.map((item) => (
                 <Link
@@ -315,12 +430,21 @@ export default function Home() {
                   key={item.slug}
                   style={{ "--partner-accent": item.accent }}
                 >
-                  <Avatar name={item.name} logo={item.logo} accent={item.accent} size={54} />
+                  <Avatar
+                    name={item.name}
+                    logo={item.logo}
+                    accent={item.accent}
+                    size={54}
+                  />
+
                   <span className="partner-copy">
                     <strong>{item.name}</strong>
                     <small>{item.tagline}</small>
                   </span>
-                  <span className="partner-arrow"><ArrowUpRight /></span>
+
+                  <span className="partner-arrow">
+                    <ArrowUpRight />
+                  </span>
                 </Link>
               ))}
             </div>
@@ -330,8 +454,12 @@ export default function Home() {
 
       {/* FAQ */}
       <section className="wrap section faq" id="faq">
-        <p className="eyebrow reveal">FAQ</p>
-        <h2 className="section-title reveal">Before you jump in</h2>
+        <p className="eyebrow reveal">A few questions</p>
+
+        <h2 className="section-title reveal">
+          Everything you might want to know.
+        </h2>
+
         <div className="faq-list reveal">
           {FAQ.map(([q, a]) => (
             <details key={q}>
@@ -342,18 +470,37 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Final call */}
+      {/* Final Call */}
       <section className="wrap" id="join">
         <div className="final-call reveal">
-          <img className="final-call-logo" src="/logo.png" alt="" aria-hidden="true" />
-          <h2>Come as you are. Stay a while.</h2>
-          <p>Good people, open conversations, and room to make the place yours.</p>
-          <a className="btn-glow" data-magnetic href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
-            Join {BRAND} <ArrowUpRight />
+          <img
+            className="final-call-logo"
+            src="/logo.png"
+            alt=""
+            aria-hidden="true"
+          />
+
+          <h2>There's a place for you here.</h2>
+
+          <p>
+            Leave the noise behind. Meet your people. Welcome to Haven.
+          </p>
+
+          <a
+            className="btn-glow"
+            data-magnetic
+            href={DISCORD_INVITE}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Enter {BRAND} <ArrowUpRight />
           </a>
+
           <p>
             By joining, you agree to our{" "}
-            <Link className="text-link" href="/terms">Terms of Service</Link>.
+            <Link className="text-link" href="/terms">
+              Terms of Service
+            </Link>.
           </p>
         </div>
       </section>
