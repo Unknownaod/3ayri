@@ -13,6 +13,12 @@ export const metadata = {
   description: TAGLINE,
 };
 
+const FEATURES = [
+  ["Find your people", "Meet friendly people and make real connections."],
+  ["Hang out", "Chat, play games and join community events."],
+  ["Feel at home", "A welcoming space with friendly moderation."],
+];
+
 export default async function Home() {
   const affiliates = await getAffiliates();
   const featured = affiliates.filter((item) => item.featured).slice(0, 3);
@@ -21,11 +27,20 @@ export default async function Home() {
     <main className="site">
       <Nav current="home" />
 
+      {/* Hero */}
       <section className="hero">
+        <div className="hero-bg" aria-hidden="true">
+          <div className="hero-banner" />
+        </div>
+
         <div className="wrap hero-in">
           <div className="medallion" aria-hidden="true">
             <img src="/logo.png" alt="" />
           </div>
+
+          <p className="pill">
+            <span className="live-dot" /> Now open
+          </p>
 
           <h1>
             Somewhere you can <span className="shimmer">belong.</span>
@@ -50,6 +65,21 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Features */}
+      <section className="wrap section" id="features">
+        <div className="bento">
+          {FEATURES.map(([title, text]) => (
+            <article className="tile" key={title}>
+              <div>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* Featured affiliates */}
       {featured.length > 0 && (
         <section className="partners" id="affiliates">
           <div className="wrap">
