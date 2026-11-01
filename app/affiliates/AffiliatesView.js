@@ -5,6 +5,19 @@ import { BRAND, DISCORD_INVITE } from "../site";
 
 const FALLBACK_ACCENT = "#8b7cff";
 
+// Badge images live in /public.
+const BADGES = {
+  partnered: { src: "/partner.png", label: "Discord Partner" },
+  verified: { src: "/verified.png", label: "Verified" },
+  community: { src: "/community.png", label: "Community server" },
+};
+const BOOSTS_ICON = "/boosts.png";
+
+// Live "Members" / "Online" stats the bot injects. They are shown as live tiles instead.
+const LIVE_STAT_LABEL = /^(members?|member count|total members|online( now)?)$/i;
+
+const formatNumber = (value) => Number(value).toLocaleString("en-US");
+
 function getInitials(name = "") {
   return name
     .trim()
@@ -45,6 +58,27 @@ function getLinks(affiliate) {
           link.url.trim()
       )
     : [];
+}
+
+function getDiscord(affiliate) {
+  const discord = affiliate?.discord;
+  return discord && typeof discord === "object" ? discord : null;
+}
+
+function hasCounts(discord) {
+  return (
+    Boolean(discord) &&
+    (discord.memberCount != null || discord.onlineCount != null)
+  );
+}
+
+function getBadges(affiliate) {
+  const discord = getDiscord(affiliate);
+  if (!discord) return [];
+
+  return ["partnered", "verified", "community"]
+    .filter((key) => discord[key])
+    .map((key) => ({ key, ...BADGES[key] }));
 }
 
 function validUrl(value) {
@@ -140,6 +174,90 @@ function Icon({ name, size = 17 }) {
   return <svg {...common}>{paths[name] || null}</svg>;
 }
 
+// Hide a badge image quietly if the file is missing from /public.
+function hideOnError(event) {
+  event.currentTarget.style.display = "none";
+}
+
+/* ---------- Discord icons, badges and counts ---------- */
+
+// Discord icon for "total members". The online variant gets a green status dot.
+function DiscordCountIcon({ online = false, size = 14 }) {
+  return (
+    <span className={`directory-count-icon${online ? " is-online" : ""}`}>
+      <Icon name="discord" size={size} />
+    </span>
+  );
+}
+
+function CountPill({ kind, value }) {
+  const online = kind === "online";
+
+  return (
+    <span
+      className={`directory-count directory-count-${kind}`}
+      title={online ? "Online now" : "Total members"}
+    >
+      <DiscordCountIcon online={online} />
+      {formatNumber(value)}
+      <small>{online ? "online" : "members"}</small>
+    </span>
+  );
+}
+
+function DiscordCounts({ discord }) {
+  if (!hasCounts(discord)) return null;
+
+  return (
+    <div className="directory-counts">
+      {discord.memberCount != null && (
+        <CountPill kind="members" value={discord.memberCount} />
+      )}
+      {discord.onlineCount != null && (
+        <CountPill kind="online" value={discord.onlineCount} />
+      )}
+    </div>
+  );
+}
+
+// Icon-only badges (used on cards). Hover shows the name.
+function BadgeIcons({ affiliate }) {
+  const badges = getBadges(affiliate);
+  if (badges.length === 0) return null;
+
+  return (
+    <span className="directory-badges">
+      {badges.map((badge) => (
+        <span className="directory-badge" key={badge.key} title={badge.label}>
+          <img src={badge.src} alt={badge.label} onError={hideOnError} />
+        </span>
+      ))}
+    </span>
+  );
+}
+
+// Badge chips with labels (used on the profile).
+function BadgeChips({ affiliate }) {
+  return getBadges(affiliate).map((badge) => (
+    <span className="directory-badge-chip" key={badge.key}>
+      <img src={badge.src} alt="" onError={hideOnError} />
+      {badge.label}
+    </span>
+  ));
+}
+
+function BoostChip({ discord }) {
+  if (!discord?.boostCount) return null;
+
+  return (
+    <span className="directory-boosts" title="Server boosts">
+      <img src={BOOSTS_ICON} alt="" onError={hideOnError} />
+      {formatNumber(discord.boostCount)}
+      <small>{discord.boostCount === 1 ? "boost" : "boosts"}</small>
+    </span>
+  );
+}
+
 function Avatar({ affiliate, large = false }) {
   const logo = validUrl(affiliate?.logo);
   const name = cleanText(affiliate?.name) || "Community";
@@ -200,12 +318,15 @@ function CommunityCard({ affiliate, onOpen }) {
     cleanText(affiliate.tagline) ||
     "Discover this community.";
   const tags = getTags(affiliate).slice(0, 3);
-  const stats = getStats(affiliate);
-  const memberStat = stats.find((stat) =>
-    /member|user|population/i.test(
-      `${stat.label || ""} ${stat.name || ""}`
-    )
-  );
+  const discord = getDiscord(affiliate);
+  const liveCounts = hasCounts(discord);
+
+  // Fallback for listings without a Discord invite: use a manual "members" stat.
+  const memberStat = liveCounts
+    ? null
+    : getStats(affiliate).find((stat) =>
+        /member|user|population/i.test(`${stat.label || ""} ${stat.name || ""}`)
+      );
 
   return (
     <article
@@ -224,12 +345,16 @@ function CommunityCard({ affiliate, onOpen }) {
           <div className="directory-card-identity">
             <Avatar affiliate={affiliate} />
 
-            {affiliate.featured && (
-              <span className="directory-featured">
-                <Icon name="sparkle" size={12} />
-                Featured
-              </span>
-            )}
+            <div className="directory-card-flags">
+              <BadgeIcons affiliate={affiliate} />
+
+              {affiliate.featured && (
+                <span className="directory-featured">
+                  <Icon name="sparkle" size={12} />
+                  Featured
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="directory-card-heading">
@@ -247,13 +372,17 @@ function CommunityCard({ affiliate, onOpen }) {
 
           <p className="directory-description">{description}</p>
 
+          {liveCounts && <DiscordCounts discord={discord} />}
+
           <div className="directory-card-meta">
             {memberStat && (
               <span className="directory-members">
-                <Icon name="users" size={14} />
+                <Icon name="discord" size={14} />
                 {memberStat.value || memberStat.count || memberStat.label}
               </span>
             )}
+
+            <BoostChip discord={discord} />
 
             {tags.length > 0 && (
               <div className="directory-tags">
@@ -297,6 +426,54 @@ function ProfileStat({ stat, index }) {
   );
 }
 
+// Big live tiles at the top of the statistics panel.
+function LiveStats({ discord }) {
+  const tiles = [];
+
+  if (discord.memberCount != null) {
+    tiles.push({
+      key: "members",
+      label: "Total members",
+      value: discord.memberCount,
+      icon: <DiscordCountIcon size={16} />,
+    });
+  }
+
+  if (discord.onlineCount != null) {
+    tiles.push({
+      key: "online",
+      label: "Online now",
+      value: discord.onlineCount,
+      icon: <DiscordCountIcon online size={16} />,
+    });
+  }
+
+  if (discord.boostCount > 0) {
+    tiles.push({
+      key: "boosts",
+      label: discord.boostCount === 1 ? "Server boost" : "Server boosts",
+      value: discord.boostCount,
+      icon: <img src={BOOSTS_ICON} alt="" onError={hideOnError} />,
+    });
+  }
+
+  if (tiles.length === 0) return null;
+
+  return (
+    <div className="directory-live-stats">
+      {tiles.map((tile) => (
+        <div className="directory-profile-stat is-live" key={tile.key}>
+          <span className="directory-live-tile-label">
+            {tile.icon}
+            {tile.label}
+          </span>
+          <strong>{formatNumber(tile.value)}</strong>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function ProfileLink({ link }) {
   const href = validUrl(link.url);
   if (!href) return null;
@@ -321,8 +498,20 @@ function CommunityProfile({ affiliate, affiliates, onBack, onOpen }) {
     : [];
   const description = cleanText(affiliate.description);
   const links = getLinks(affiliate);
-  const stats = getStats(affiliate);
   const tags = getTags(affiliate);
+  const discord = getDiscord(affiliate);
+
+  const showLive =
+    Boolean(discord) && (hasCounts(discord) || discord.boostCount > 0);
+
+  // The live tiles already show Members / Online, so don't repeat them below.
+  const stats = showLive
+    ? getStats(affiliate).filter(
+        (stat) => !LIVE_STAT_LABEL.test(String(stat.label || stat.name || "").trim())
+      )
+    : getStats(affiliate);
+
+  const hasFlags = getBadges(affiliate).length > 0 || Boolean(discord?.boostCount);
 
   const related = affiliates
     .filter(
@@ -394,6 +583,13 @@ function CommunityProfile({ affiliate, affiliates, onBack, onOpen }) {
             {affiliate.tagline && (
               <p className="directory-tagline">{affiliate.tagline}</p>
             )}
+
+            {hasFlags && (
+              <div className="directory-profile-flags">
+                <BadgeChips affiliate={affiliate} />
+                <BoostChip discord={discord} />
+              </div>
+            )}
           </div>
         </div>
 
@@ -449,24 +645,39 @@ function CommunityProfile({ affiliate, affiliates, onBack, onOpen }) {
             )}
           </section>
 
-          {stats.length > 0 && (
+          {(showLive || stats.length > 0) && (
             <section className="directory-panel">
               <div className="directory-panel-heading">
                 <span className="directory-panel-icon">
                   <Icon name="users" size={16} />
                 </span>
                 <h2>Community statistics</h2>
+
+                {showLive && (
+                  <span
+                    className={`directory-live-tag${
+                      discord.stale ? " is-stale" : ""
+                    }`}
+                  >
+                    <i />
+                    {discord.stale ? "Last known data" : "Live from Discord"}
+                  </span>
+                )}
               </div>
 
-              <div className="directory-profile-stats">
-                {stats.map((stat, index) => (
-                  <ProfileStat
-                    key={`${stat.label || stat.name || "stat"}-${index}`}
-                    stat={stat}
-                    index={index}
-                  />
-                ))}
-              </div>
+              {showLive && <LiveStats discord={discord} />}
+
+              {stats.length > 0 && (
+                <div className="directory-profile-stats">
+                  {stats.map((stat, index) => (
+                    <ProfileStat
+                      key={`${stat.label || stat.name || "stat"}-${index}`}
+                      stat={stat}
+                      index={index}
+                    />
+                  ))}
+                </div>
+              )}
             </section>
           )}
 
@@ -583,6 +794,16 @@ export default function AffiliatesView({ affiliates = [] }) {
     return ["All", ...Array.from(new Set(tags)).sort((a, b) => a.localeCompare(b))];
   }, [safeAffiliates]);
 
+  // Combined members across the whole network (from the live Discord data).
+  const totalMembers = useMemo(
+    () =>
+      safeAffiliates.reduce(
+        (sum, affiliate) => sum + (getDiscord(affiliate)?.memberCount ?? 0),
+        0
+      ),
+    [safeAffiliates]
+  );
+
   const selectedAffiliate = useMemo(
     () =>
       safeAffiliates.find(
@@ -655,6 +876,14 @@ export default function AffiliatesView({ affiliates = [] }) {
           return cleanText(a.name).localeCompare(cleanText(b.name));
         }
 
+        if (sort === "members") {
+          return (
+            (getDiscord(b)?.memberCount ?? -1) -
+              (getDiscord(a)?.memberCount ?? -1) ||
+            cleanText(a.name).localeCompare(cleanText(b.name))
+          );
+        }
+
         return Number(Boolean(b.featured)) - Number(Boolean(a.featured)) ||
           cleanText(a.name).localeCompare(cleanText(b.name));
       });
@@ -695,14 +924,28 @@ export default function AffiliatesView({ affiliates = [] }) {
           </p>
         </div>
 
-        <div className="directory-heading-stat">
-          <span className="directory-heading-stat-icon">
-            <Icon name="users" size={20} />
-          </span>
-          <div>
-            <strong>{safeAffiliates.length}</strong>
-            <span>communities</span>
+        <div className="directory-heading-stats">
+          <div className="directory-heading-stat">
+            <span className="directory-heading-stat-icon">
+              <Icon name="users" size={20} />
+            </span>
+            <div>
+              <strong>{safeAffiliates.length}</strong>
+              <span>communities</span>
+            </div>
           </div>
+
+          {totalMembers > 0 && (
+            <div className="directory-heading-stat">
+              <span className="directory-heading-stat-icon">
+                <Icon name="discord" size={20} />
+              </span>
+              <div>
+                <strong>{formatNumber(totalMembers)}</strong>
+                <span>total members</span>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
@@ -732,6 +975,7 @@ export default function AffiliatesView({ affiliates = [] }) {
           <span>Sort by</span>
           <select value={sort} onChange={(event) => setSort(event.target.value)}>
             <option value="featured">Featured</option>
+            <option value="members">Most members</option>
             <option value="az">Name A–Z</option>
           </select>
         </label>
