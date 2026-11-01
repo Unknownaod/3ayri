@@ -1,16 +1,24 @@
 /* =========================================================
    AFFILIATES DIRECTORY
-   Dark directory UI / purple glass / responsive cards
+   Night terrace palette from the /haven logo:
+   lantern amber, bougainvillea wine, cream-rose and warm black.
+   Includes the live Discord counts, badges, boosts and tiles.
    ========================================================= */
 
 .directory {
-  --directory-bg: #0b0a11;
-  --directory-panel: #12111b;
-  --directory-panel-light: #171522;
-  --directory-border: rgba(255, 255, 255, 0.075);
-  --directory-muted: rgba(235, 232, 247, 0.53);
-  --directory-purple: #9b8cff;
-  --directory-purple-light: #c1b6ff;
+  /* Colour channels (use as rgba(var(--dir-amber), 0.2)) */
+  --dir-amber: 231, 171, 114;   /* lantern glow  #e7ab72 */
+  --dir-rose: 209, 180, 165;    /* wordmark      #d1b4a5 */
+  --dir-wine: 142, 43, 75;      /* bougainvillea #8e2b4b */
+  --dir-cream: 245, 232, 220;
+
+  --directory-bg: #0b0809;
+  --directory-panel: #140e10;
+  --directory-panel-light: #1a1214;
+  --directory-border: rgba(245, 225, 205, 0.085);
+  --directory-muted: rgba(245, 232, 220, 0.55);
+  --directory-accent: #e7ab72;
+  --directory-accent-light: #f3cfa8;
 
   width: 100%;
   max-width: 1180px;
@@ -38,7 +46,7 @@
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  color: #b7aaff;
+  color: #e9bf99;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 1.8px;
@@ -48,8 +56,8 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #9b8cff;
-  box-shadow: 0 0 13px rgba(155, 140, 255, 0.8);
+  background: #f09853;
+  box-shadow: 0 0 13px rgba(240, 152, 83, 0.8);
 }
 
 .directory-heading h1 {
@@ -63,8 +71,8 @@
 }
 
 .directory-heading h1 span {
-  color: #a99aff;
-  background: linear-gradient(100deg, #c2b8ff 0%, #927cff 48%, #df9dff 100%);
+  color: #e7ab72;
+  background: linear-gradient(100deg, #f6dcc0 0%, #e7ab72 48%, #d17a8f 100%);
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -72,7 +80,7 @@
 .directory-heading-copy > p {
   max-width: 570px;
   margin: 0;
-  color: rgba(235, 232, 247, 0.57);
+  color: rgba(245, 232, 220, 0.6);
   font-size: 14px;
   line-height: 1.8;
 }
@@ -83,12 +91,12 @@
   gap: 13px;
   flex-shrink: 0;
   padding: 15px 19px;
-  border: 1px solid rgba(255, 255, 255, 0.085);
+  border: 1px solid rgba(245, 225, 205, 0.09);
   border-radius: 14px;
   background: linear-gradient(
     145deg,
-    rgba(255, 255, 255, 0.055),
-    rgba(255, 255, 255, 0.018)
+    rgba(255, 245, 235, 0.055),
+    rgba(255, 245, 235, 0.018)
   );
 }
 
@@ -97,10 +105,10 @@
   width: 42px;
   height: 42px;
   place-items: center;
-  border: 1px solid rgba(155, 140, 255, 0.2);
+  border: 1px solid rgba(var(--dir-amber), 0.22);
   border-radius: 12px;
-  background: rgba(155, 140, 255, 0.12);
-  color: #b9adff;
+  background: rgba(var(--dir-amber), 0.12);
+  color: #f0c397;
 }
 
 .directory-heading-stat div {
@@ -139,15 +147,15 @@
   padding: 0 16px;
   border: 1px solid var(--directory-border);
   border-radius: 13px;
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(255, 245, 235, 0.035);
   color: rgba(255, 255, 255, 0.4);
   transition: 0.2s ease;
 }
 
 .directory-search:focus-within {
-  border-color: rgba(155, 140, 255, 0.55);
-  background: rgba(155, 140, 255, 0.045);
-  box-shadow: 0 0 0 3px rgba(155, 140, 255, 0.08);
+  border-color: rgba(var(--dir-amber), 0.55);
+  background: rgba(var(--dir-amber), 0.045);
+  box-shadow: 0 0 0 3px rgba(var(--dir-amber), 0.09);
 }
 
 .directory-search input {
@@ -193,7 +201,7 @@
   padding: 0 14px;
   border: 1px solid var(--directory-border);
   border-radius: 13px;
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(255, 245, 235, 0.035);
 }
 
 .directory-sort span {
@@ -214,7 +222,7 @@
 }
 
 .directory-sort select option {
-  background: #171522;
+  background: #1a1214;
   color: #fff;
 }
 
@@ -242,10 +250,10 @@
   gap: 8px;
   min-height: 36px;
   padding: 0 14px;
-  border: 1px solid rgba(255, 255, 255, 0.075);
+  border: 1px solid rgba(245, 225, 205, 0.08);
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.025);
-  color: rgba(255, 255, 255, 0.53);
+  background: rgba(255, 245, 235, 0.025);
+  color: rgba(255, 255, 255, 0.55);
   font-family: inherit;
   font-size: 11px;
   font-weight: 650;
@@ -258,20 +266,20 @@
 }
 
 .directory-categories button:hover {
-  border-color: rgba(155, 140, 255, 0.3);
-  background: rgba(155, 140, 255, 0.08);
-  color: #d2caff;
+  border-color: rgba(var(--dir-amber), 0.32);
+  background: rgba(var(--dir-amber), 0.08);
+  color: #f6dcc0;
 }
 
 .directory-categories button.is-active {
-  border-color: rgba(155, 140, 255, 0.45);
+  border-color: rgba(var(--dir-amber), 0.48);
   background: linear-gradient(
     135deg,
-    rgba(155, 140, 255, 0.2),
-    rgba(155, 140, 255, 0.09)
+    rgba(var(--dir-amber), 0.22),
+    rgba(var(--dir-amber), 0.09)
   );
-  color: #d5ceff;
-  box-shadow: inset 0 0 15px rgba(155, 140, 255, 0.04);
+  color: #f8e2cb;
+  box-shadow: inset 0 0 15px rgba(var(--dir-amber), 0.05);
 }
 
 /* Section headings */
@@ -291,7 +299,7 @@
 .directory-section-kicker {
   display: block;
   margin-bottom: 7px;
-  color: #a99aff;
+  color: #e9bf99;
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 1.7px;
@@ -310,7 +318,7 @@
 }
 
 .directory-section-heading h2 svg {
-  color: #b3a7ff;
+  color: #f0c397;
 }
 
 .directory-section-count {
@@ -331,19 +339,19 @@
 /* Community card */
 
 .directory-card {
-  --community-accent: #8b7cff;
+  --community-accent: #d99a63;
 
   position: relative;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.085);
+  border: 1px solid rgba(245, 225, 205, 0.09);
   border-radius: 16px;
   background: linear-gradient(
     145deg,
-    rgba(24, 22, 36, 0.98),
-    rgba(15, 14, 23, 0.99)
+    rgba(32, 21, 23, 0.98),
+    rgba(18, 12, 13, 0.99)
   );
-  box-shadow: 0 9px 28px rgba(0, 0, 0, 0.13);
+  box-shadow: 0 9px 28px rgba(0, 0, 0, 0.18);
   transition:
     transform 0.25s ease,
     border-color 0.25s ease,
@@ -354,8 +362,8 @@
   transform: translateY(-4px);
   border-color: color-mix(in srgb, var(--community-accent) 48%, transparent);
   box-shadow:
-    0 18px 38px rgba(0, 0, 0, 0.28),
-    0 0 30px color-mix(in srgb, var(--community-accent) 9%, transparent);
+    0 18px 38px rgba(0, 0, 0, 0.32),
+    0 0 30px color-mix(in srgb, var(--community-accent) 10%, transparent);
 }
 
 .directory-card-main {
@@ -371,28 +379,26 @@
 
 /* Banner image */
 
-/* Banner image */
-
 .directory-banner {
-  --community-accent: #8b7cff;
+  --community-accent: #d99a63;
 
   position: relative;
   isolation: isolate;
   height: 155px;
   overflow: hidden;
-  background-color: #211c38;
+  background-color: #2a1a1d;
   background-image:
     radial-gradient(
       ellipse at 78% 20%,
-      color-mix(in srgb, var(--community-accent) 75%, transparent),
+      color-mix(in srgb, var(--community-accent) 70%, transparent),
       transparent 52%
     ),
     radial-gradient(
       ellipse at 12% 100%,
-      rgba(83, 65, 155, 0.48),
+      rgba(var(--dir-wine), 0.5),
       transparent 58%
     ),
-    linear-gradient(115deg, #292344 0%, #171525 65%, #242039 100%);
+    linear-gradient(115deg, #2e1d20 0%, #171012 65%, #2a1b1e 100%);
   background-position: center;
   background-size: cover;
 }
@@ -434,13 +440,13 @@
   background:
     linear-gradient(
       180deg,
-      rgba(7, 6, 13, 0.02) 0%,
-      rgba(7, 6, 13, 0.04) 45%,
-      rgba(12, 10, 19, 0.72) 100%
+      rgba(10, 6, 7, 0.02) 0%,
+      rgba(10, 6, 7, 0.04) 45%,
+      rgba(16, 10, 11, 0.74) 100%
     ),
     linear-gradient(
       90deg,
-      rgba(10, 9, 17, 0.22),
+      rgba(12, 8, 9, 0.22),
       transparent 70%
     );
   content: "";
@@ -456,12 +462,12 @@
   bottom: -135px;
   width: 310px;
   height: 220px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 235, 215, 0.12);
   border-radius: 50%;
   box-shadow:
-    0 0 0 24px rgba(255, 255, 255, 0.025),
-    0 0 0 53px rgba(255, 255, 255, 0.018),
-    0 0 0 83px rgba(255, 255, 255, 0.012);
+    0 0 0 24px rgba(255, 235, 215, 0.025),
+    0 0 0 53px rgba(255, 235, 215, 0.018),
+    0 0 0 83px rgba(255, 235, 215, 0.012);
   content: "";
   pointer-events: none;
 }
@@ -474,13 +480,13 @@
   inset: 0;
   background: linear-gradient(
     0deg,
-    rgba(12, 10, 19, 0.2),
+    rgba(16, 10, 11, 0.2),
     transparent 70%
   );
   pointer-events: none;
 }
 
-/* Purple accent glow */
+/* Accent glow */
 
 .directory-banner-glow {
   position: absolute;
@@ -504,7 +510,7 @@
 /* Avatar */
 
 .directory-avatar {
-  --community-accent: #8b7cff;
+  --community-accent: #d99a63;
 
   display: grid;
   width: 68px;
@@ -512,7 +518,7 @@
   flex-shrink: 0;
   place-items: center;
   overflow: hidden;
-  border: 4px solid #191724;
+  border: 4px solid #1b1214;
   border-radius: 19px;
   background:
     radial-gradient(
@@ -520,12 +526,12 @@
       color-mix(in srgb, var(--community-accent) 50%, transparent),
       transparent 65%
     ),
-    #242039;
+    #2a1b1e;
   color: #fff;
   font-family: "Bricolage Grotesque", sans-serif;
   font-size: 20px;
   font-weight: 800;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
 .directory-avatar img {
@@ -565,10 +571,10 @@
   gap: 5px;
   min-height: 25px;
   padding: 0 9px;
-  border: 1px solid rgba(196, 175, 255, 0.2);
+  border: 1px solid rgba(var(--dir-amber), 0.28);
   border-radius: 7px;
-  background: rgba(34, 27, 57, 0.84);
-  color: #d5caff;
+  background: rgba(44, 28, 22, 0.86);
+  color: #f6d8b8;
   font-size: 9px;
   font-weight: 750;
   backdrop-filter: blur(12px);
@@ -603,9 +609,9 @@
   height: 29px;
   flex-shrink: 0;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.075);
+  border: 1px solid rgba(245, 225, 205, 0.08);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(255, 245, 235, 0.035);
   color: rgba(255, 255, 255, 0.55);
   transition: 0.2s ease;
 }
@@ -619,7 +625,7 @@
 
 .directory-tagline {
   margin: 5px 0 0;
-  color: #b2a5ff;
+  color: #e9b98f;
   font-size: 11px;
   font-weight: 650;
   line-height: 1.5;
@@ -630,7 +636,7 @@
   overflow: hidden;
   min-height: 40px;
   margin: 11px 0 14px;
-  color: rgba(235, 232, 247, 0.56);
+  color: rgba(245, 232, 220, 0.58);
   font-size: 12px;
   line-height: 1.7;
   -webkit-box-orient: vertical;
@@ -639,6 +645,7 @@
 
 .directory-card-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
@@ -650,13 +657,13 @@
   align-items: center;
   flex-shrink: 0;
   gap: 6px;
-  color: rgba(255, 255, 255, 0.56);
+  color: rgba(255, 255, 255, 0.58);
   font-size: 10px;
   font-weight: 650;
 }
 
 .directory-members svg {
-  color: #a99aff;
+  color: #f0c397;
 }
 
 .directory-tags {
@@ -672,10 +679,10 @@
   align-items: center;
   min-height: 23px;
   padding: 0 8px;
-  border: 1px solid rgba(155, 140, 255, 0.14);
+  border: 1px solid rgba(var(--dir-amber), 0.16);
   border-radius: 6px;
-  background: rgba(155, 140, 255, 0.075);
-  color: rgba(207, 198, 255, 0.85);
+  background: rgba(var(--dir-amber), 0.08);
+  color: rgba(246, 220, 192, 0.9);
   font-size: 9px;
   font-weight: 650;
 }
@@ -689,15 +696,15 @@
   gap: 10px;
   min-height: 49px;
   padding: 0 19px;
-  border-top: 1px solid rgba(255, 255, 255, 0.065);
-  background: rgba(0, 0, 0, 0.13);
+  border-top: 1px solid rgba(245, 225, 205, 0.07);
+  background: rgba(0, 0, 0, 0.16);
 }
 
 .directory-card-category {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  color: rgba(255, 255, 255, 0.42);
+  color: rgba(255, 255, 255, 0.44);
   font-size: 10px;
   font-weight: 600;
 }
@@ -706,8 +713,8 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #9b8cff;
-  box-shadow: 0 0 9px rgba(155, 140, 255, 0.65);
+  background: #f09853;
+  box-shadow: 0 0 9px rgba(240, 152, 83, 0.65);
 }
 
 .directory-card-view {
@@ -718,7 +725,7 @@
   border: 0;
   border-radius: 7px;
   background: transparent;
-  color: #b9adff;
+  color: #f0c397;
   font-family: inherit;
   font-size: 10px;
   font-weight: 750;
@@ -727,7 +734,7 @@
 }
 
 .directory-card-view:hover {
-  background: rgba(155, 140, 255, 0.1);
+  background: rgba(var(--dir-amber), 0.12);
   color: #fff;
 }
 
@@ -740,9 +747,9 @@
   align-items: center;
   justify-content: center;
   padding: 35px 20px;
-  border: 1px dashed rgba(255, 255, 255, 0.13);
+  border: 1px dashed rgba(245, 225, 205, 0.14);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.018);
+  background: rgba(255, 245, 235, 0.018);
   text-align: center;
 }
 
@@ -752,10 +759,10 @@
   height: 53px;
   margin-bottom: 16px;
   place-items: center;
-  border: 1px solid rgba(155, 140, 255, 0.18);
+  border: 1px solid rgba(var(--dir-amber), 0.2);
   border-radius: 16px;
-  background: rgba(155, 140, 255, 0.09);
-  color: #b9adff;
+  background: rgba(var(--dir-amber), 0.09);
+  color: #f0c397;
 }
 
 .directory-empty h3 {
@@ -777,10 +784,10 @@
   min-height: 35px;
   margin-top: 18px;
   padding: 0 13px;
-  border: 1px solid rgba(155, 140, 255, 0.3);
+  border: 1px solid rgba(var(--dir-amber), 0.32);
   border-radius: 8px;
-  background: rgba(155, 140, 255, 0.1);
-  color: #c8beff;
+  background: rgba(var(--dir-amber), 0.1);
+  color: #f6d8b8;
   font-family: inherit;
   font-size: 11px;
   font-weight: 700;
@@ -797,14 +804,14 @@
   overflow: hidden;
   margin-top: 58px;
   padding: 27px 29px;
-  border: 1px solid rgba(155, 140, 255, 0.2);
+  border: 1px solid rgba(var(--dir-amber), 0.22);
   border-radius: 17px;
   background:
     linear-gradient(
       110deg,
-      rgba(116, 94, 205, 0.13),
-      rgba(27, 23, 43, 0.94) 52%,
-      rgba(31, 23, 48, 0.96)
+      rgba(var(--dir-wine), 0.2),
+      rgba(26, 16, 18, 0.94) 52%,
+      rgba(36, 21, 18, 0.96)
     );
 }
 
@@ -815,7 +822,7 @@
   width: 300px;
   height: 230px;
   border-radius: 50%;
-  background: rgba(139, 124, 255, 0.18);
+  background: rgba(var(--dir-amber), 0.17);
   filter: blur(80px);
   pointer-events: none;
 }
@@ -827,10 +834,10 @@
   height: 55px;
   flex-shrink: 0;
   place-items: center;
-  border: 1px solid rgba(190, 178, 255, 0.2);
+  border: 1px solid rgba(var(--dir-amber), 0.24);
   border-radius: 15px;
-  background: rgba(155, 140, 255, 0.14);
-  color: #c9beff;
+  background: rgba(var(--dir-amber), 0.14);
+  color: #f6d8b8;
 }
 
 .directory-join-copy {
@@ -839,7 +846,7 @@
 }
 
 .directory-join-copy > span {
-  color: #b7aaff;
+  color: #e9bf99;
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 1.5px;
@@ -856,7 +863,7 @@
 
 .directory-join-copy p {
   margin: 0;
-  color: rgba(235, 232, 247, 0.55);
+  color: rgba(245, 232, 220, 0.57);
   font-size: 11px;
   line-height: 1.7;
 }
@@ -870,20 +877,20 @@
   min-height: 42px;
   flex-shrink: 0;
   padding: 0 16px;
-  border: 1px solid rgba(203, 193, 255, 0.3);
+  border: 1px solid rgba(255, 235, 215, 0.3);
   border-radius: 10px;
-  background: linear-gradient(135deg, #9582f4, #7865d6);
-  color: #fff;
+  background: linear-gradient(135deg, #f0b27a, #d38b58);
+  color: #1d1009;
   font-size: 11px;
   font-weight: 800;
   text-decoration: none;
-  box-shadow: 0 5px 18px rgba(113, 91, 207, 0.2);
+  box-shadow: 0 5px 18px rgba(var(--dir-amber), 0.22);
   transition: 0.2s ease;
 }
 
 .directory-join > a:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 23px rgba(113, 91, 207, 0.32);
+  box-shadow: 0 8px 23px rgba(var(--dir-amber), 0.36);
 }
 
 /* =========================================================
@@ -891,10 +898,16 @@
    ========================================================= */
 
 .directory-profile {
+  --dir-amber: 231, 171, 114;
+  --dir-rose: 209, 180, 165;
+  --dir-wine: 142, 43, 75;
+  --directory-muted: rgba(245, 232, 220, 0.55);
+
   width: 100%;
   max-width: 1080px;
   margin: 0 auto;
   padding: 35px 24px 70px;
+  color: #fff;
 }
 
 .directory-profile-topbar {
@@ -912,10 +925,10 @@
   gap: 8px;
   min-height: 36px;
   padding: 0 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(245, 225, 205, 0.09);
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.03);
-  color: rgba(255, 255, 255, 0.67);
+  background: rgba(255, 245, 235, 0.03);
+  color: rgba(255, 255, 255, 0.68);
   font-family: inherit;
   font-size: 11px;
   font-weight: 650;
@@ -925,23 +938,23 @@
 
 .directory-back:hover,
 .directory-share:hover {
-  border-color: rgba(155, 140, 255, 0.35);
-  background: rgba(155, 140, 255, 0.1);
+  border-color: rgba(var(--dir-amber), 0.38);
+  background: rgba(var(--dir-amber), 0.1);
   color: #fff;
 }
 
 .directory-profile-hero {
-  --community-accent: #8b7cff;
+  --community-accent: #d99a63;
 
   position: relative;
   overflow: hidden;
   padding-bottom: 23px;
-  border: 1px solid rgba(255, 255, 255, 0.085);
+  border: 1px solid rgba(245, 225, 205, 0.09);
   border-radius: 17px;
   background: linear-gradient(
     145deg,
-    rgba(24, 22, 36, 0.98),
-    rgba(15, 14, 23, 0.99)
+    rgba(32, 21, 23, 0.98),
+    rgba(18, 12, 13, 0.99)
   );
 }
 
@@ -1000,9 +1013,9 @@
   gap: 9px;
   min-height: 39px;
   padding: 0 14px;
-  border: 1px solid rgba(155, 140, 255, 0.3);
+  border: 1px solid rgba(var(--dir-amber), 0.32);
   border-radius: 9px;
-  color: #e1dcff;
+  color: #f6dcc0;
   font-size: 11px;
   font-weight: 750;
   text-decoration: none;
@@ -1010,15 +1023,15 @@
 }
 
 .directory-primary-action {
-  background: linear-gradient(135deg, #9582f4, #7865d6);
-  color: #fff;
-  box-shadow: 0 5px 16px rgba(113, 91, 207, 0.16);
+  background: linear-gradient(135deg, #f0b27a, #d38b58);
+  color: #1d1009;
+  box-shadow: 0 5px 16px rgba(var(--dir-amber), 0.18);
 }
 
 .directory-secondary-action {
-  border-color: rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.72);
+  border-color: rgba(245, 225, 205, 0.1);
+  background: rgba(255, 245, 235, 0.04);
+  color: rgba(255, 255, 255, 0.74);
 }
 
 .directory-primary-action:hover,
@@ -1048,12 +1061,12 @@
 .directory-panel {
   min-width: 0;
   padding: 21px;
-  border: 1px solid rgba(255, 255, 255, 0.075);
+  border: 1px solid rgba(245, 225, 205, 0.08);
   border-radius: 14px;
   background: linear-gradient(
     145deg,
-    rgba(23, 21, 34, 0.96),
-    rgba(16, 15, 24, 0.98)
+    rgba(30, 20, 22, 0.96),
+    rgba(19, 13, 14, 0.98)
   );
 }
 
@@ -1079,16 +1092,16 @@
   height: 29px;
   flex-shrink: 0;
   place-items: center;
-  border: 1px solid rgba(155, 140, 255, 0.16);
+  border: 1px solid rgba(var(--dir-amber), 0.18);
   border-radius: 8px;
-  background: rgba(155, 140, 255, 0.09);
-  color: #b8acff;
+  background: rgba(var(--dir-amber), 0.09);
+  color: #f0c397;
 }
 
 .directory-about,
 .directory-about-list p {
   margin: 0;
-  color: rgba(235, 232, 247, 0.63);
+  color: rgba(245, 232, 220, 0.66);
   font-size: 12px;
   line-height: 1.85;
 }
@@ -1102,7 +1115,7 @@
 
 .directory-about-list p {
   padding-left: 13px;
-  border-left: 2px solid rgba(155, 140, 255, 0.35);
+  border-left: 2px solid rgba(var(--dir-amber), 0.4);
 }
 
 .directory-muted {
@@ -1127,13 +1140,13 @@
   justify-content: center;
   gap: 6px;
   padding: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(245, 225, 205, 0.065);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(255, 245, 235, 0.025);
 }
 
 .directory-profile-stat span {
-  color: rgba(255, 255, 255, 0.43);
+  color: rgba(255, 255, 255, 0.45);
   font-size: 10px;
   font-weight: 600;
 }
@@ -1175,10 +1188,10 @@
   gap: 12px;
   min-height: 42px;
   padding: 0 12px;
-  border: 1px solid rgba(255, 255, 255, 0.075);
+  border: 1px solid rgba(245, 225, 205, 0.08);
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.025);
-  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 245, 235, 0.025);
+  color: rgba(255, 255, 255, 0.74);
   font-size: 11px;
   font-weight: 650;
   text-decoration: none;
@@ -1186,20 +1199,20 @@
 }
 
 .directory-profile-link:hover {
-  border-color: rgba(155, 140, 255, 0.32);
-  background: rgba(155, 140, 255, 0.08);
+  border-color: rgba(var(--dir-amber), 0.34);
+  background: rgba(var(--dir-amber), 0.08);
   color: #fff;
 }
 
 .directory-profile-link svg {
   flex-shrink: 0;
-  color: #a99aff;
+  color: #f0c397;
 }
 
 .directory-profile-link.is-primary {
-  border-color: rgba(155, 140, 255, 0.28);
-  background: rgba(155, 140, 255, 0.1);
-  color: #d5ceff;
+  border-color: rgba(var(--dir-amber), 0.3);
+  background: rgba(var(--dir-amber), 0.1);
+  color: #f8e2cb;
 }
 
 /* Related communities */
@@ -1217,9 +1230,9 @@
   width: 100%;
   min-width: 0;
   padding: 9px;
-  border: 1px solid rgba(255, 255, 255, 0.065);
+  border: 1px solid rgba(245, 225, 205, 0.07);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(255, 245, 235, 0.025);
   color: #fff;
   text-align: left;
   cursor: pointer;
@@ -1227,8 +1240,8 @@
 }
 
 .directory-related-card:hover {
-  border-color: rgba(155, 140, 255, 0.28);
-  background: rgba(155, 140, 255, 0.07);
+  border-color: rgba(var(--dir-amber), 0.3);
+  background: rgba(var(--dir-amber), 0.07);
 }
 
 .directory-related-card .directory-avatar {
@@ -1257,7 +1270,7 @@
 
 .directory-related-card small {
   overflow: hidden;
-  color: rgba(255, 255, 255, 0.42);
+  color: rgba(255, 255, 255, 0.44);
   font-size: 9px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1265,7 +1278,7 @@
 
 .directory-related-card > svg {
   flex-shrink: 0;
-  color: #a99aff;
+  color: #f0c397;
 }
 
 /* Partnership card */
@@ -1274,15 +1287,15 @@
   position: relative;
   overflow: hidden;
   padding: 20px;
-  border: 1px solid rgba(155, 140, 255, 0.2);
+  border: 1px solid rgba(var(--dir-amber), 0.22);
   border-radius: 14px;
   background:
     radial-gradient(
       ellipse at 100% 0%,
-      rgba(155, 140, 255, 0.16),
+      rgba(var(--dir-amber), 0.15),
       transparent 60%
     ),
-    linear-gradient(145deg, rgba(34, 29, 54, 0.95), rgba(19, 17, 29, 0.98));
+    linear-gradient(145deg, rgba(44, 27, 28, 0.95), rgba(22, 14, 15, 0.98));
 }
 
 .directory-partner-icon {
@@ -1291,10 +1304,10 @@
   height: 37px;
   margin-bottom: 13px;
   place-items: center;
-  border: 1px solid rgba(190, 178, 255, 0.2);
+  border: 1px solid rgba(var(--dir-amber), 0.24);
   border-radius: 11px;
-  background: rgba(155, 140, 255, 0.12);
-  color: #c5baff;
+  background: rgba(var(--dir-amber), 0.13);
+  color: #f6d8b8;
 }
 
 .directory-partner-card h3 {
@@ -1308,7 +1321,7 @@
 
 .directory-partner-card p {
   margin: 0;
-  color: rgba(235, 232, 247, 0.57);
+  color: rgba(245, 232, 220, 0.6);
   font-size: 11px;
   line-height: 1.75;
 }
@@ -1318,7 +1331,7 @@
   align-items: center;
   gap: 8px;
   margin-top: 15px;
-  color: #c6bbff;
+  color: #f0c397;
   font-size: 11px;
   font-weight: 750;
   text-decoration: none;
@@ -1326,6 +1339,240 @@
 
 .directory-partner-card > a:hover {
   color: #fff;
+}
+
+/* =========================================================
+   LIVE DISCORD DATA
+   Member / online counts, badge icons, boosts and live tiles.
+   ========================================================= */
+
+/* ---------- Discord counts (cards) ---------- */
+
+.directory-counts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 13px;
+}
+
+.directory-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  padding: 0 11px 0 8px;
+  border: 1px solid rgba(245, 225, 205, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 245, 235, 0.035);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1;
+}
+
+.directory-count small {
+  color: rgba(255, 255, 255, 0.46);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Discord icon. The "online" version gets a green status dot. */
+
+.directory-count-icon {
+  position: relative;
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  color: #f0c397;
+}
+
+.directory-count-icon.is-online::after {
+  position: absolute;
+  right: -4px;
+  bottom: -3px;
+  box-sizing: content-box;
+  width: 6px;
+  height: 6px;
+  border: 2px solid #1b1214;
+  border-radius: 50%;
+  background: #3ba55d;
+  box-shadow: 0 0 8px rgba(59, 165, 93, 0.65);
+  content: "";
+}
+
+.directory-count-online {
+  border-color: rgba(59, 165, 93, 0.22);
+  background: rgba(59, 165, 93, 0.07);
+}
+
+/* ---------- Badges (community / verified / partner) ---------- */
+
+.directory-card-flags {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.directory-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 25px;
+  padding: 0 7px;
+  border: 1px solid rgba(245, 225, 205, 0.09);
+  border-radius: 7px;
+  background: rgba(44, 28, 22, 0.86);
+  backdrop-filter: blur(12px);
+}
+
+.directory-badge {
+  display: inline-grid;
+  place-items: center;
+}
+
+.directory-badge img {
+  display: block;
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
+}
+
+.directory-profile-flags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.directory-badge-chip,
+.directory-boosts {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  padding: 0 11px 0 8px;
+  border: 1px solid rgba(var(--dir-amber), 0.22);
+  border-radius: 8px;
+  background: rgba(var(--dir-amber), 0.08);
+  color: #f6d8b8;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.directory-badge-chip img,
+.directory-boosts img {
+  display: block;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.directory-boosts small {
+  color: rgba(246, 216, 184, 0.62);
+  font-size: 9px;
+  font-weight: 600;
+}
+
+/* In the card footer row, keep the boost chip compact and the tags on the right. */
+
+.directory-card-meta .directory-boosts {
+  min-height: 25px;
+  padding: 0 9px 0 7px;
+}
+
+.directory-card-meta .directory-tags {
+  margin-left: auto;
+}
+
+/* ---------- Heading stats (communities + total members) ---------- */
+
+.directory-heading-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* ---------- Live tiles on the profile ---------- */
+
+.directory-live-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 9px;
+  margin-bottom: 9px;
+}
+
+.directory-profile-stat.is-live {
+  min-height: 84px;
+  border-color: rgba(var(--dir-amber), 0.2);
+  background:
+    radial-gradient(
+      ellipse at 100% 0%,
+      rgba(var(--dir-amber), 0.13),
+      transparent 70%
+    ),
+    rgba(255, 245, 235, 0.025);
+}
+
+.directory-live-tile-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.directory-live-tile-label img {
+  display: block;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.directory-profile-stat.is-live strong {
+  font-size: 24px;
+  letter-spacing: -0.5px;
+}
+
+/* "Live from Discord" tag in the panel heading */
+
+.directory-live-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 10px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.directory-live-tag i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3ba55d;
+  box-shadow: 0 0 0 0 rgba(59, 165, 93, 0.55);
+  animation: directory-live-ping 2s infinite;
+}
+
+.directory-live-tag.is-stale i {
+  background: #d8a24a;
+  box-shadow: none;
+  animation: none;
+}
+
+@keyframes directory-live-ping {
+  70% {
+    box-shadow: 0 0 0 7px rgba(59, 165, 93, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 165, 93, 0);
+  }
 }
 
 /* =========================================================
@@ -1367,6 +1614,10 @@
     padding: 11px 14px;
   }
 
+  .directory-heading-stats {
+    justify-content: flex-start;
+  }
+
   .directory-profile {
     padding: 25px 18px 55px;
   }
@@ -1399,6 +1650,14 @@
 
   .directory-heading-copy > p {
     font-size: 12px;
+  }
+
+  .directory-heading-stats {
+    width: 100%;
+  }
+
+  .directory-heading-stats .directory-heading-stat {
+    flex: 1 1 140px;
   }
 
   .directory-controls {
@@ -1435,6 +1694,10 @@
   .directory-card-footer {
     padding-right: 16px;
     padding-left: 16px;
+  }
+
+  .directory-card-meta .directory-tags {
+    margin-left: 0;
   }
 
   .directory-section-heading h2 {
@@ -1507,6 +1770,14 @@
     display: flex;
   }
 
+  .directory-live-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .directory-profile-flags {
+    gap: 6px;
+  }
+
   .directory-profile-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1519,280 +1790,5 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-  }
-}
-
-/* =========================================================
-   LIVE DISCORD DATA
-   Paste this at the BOTTOM of your directory stylesheet.
-   Member / online counts, badge icons, boosts and live tiles.
-   ========================================================= */
-
-/* ---------- Discord counts (cards) ---------- */
-
-.directory-counts {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 7px;
-  margin: 0 0 13px;
-}
-
-.directory-count {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 28px;
-  padding: 0 11px 0 8px;
-  border: 1px solid rgba(255, 255, 255, 0.075);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.035);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 750;
-  line-height: 1;
-}
-
-.directory-count small {
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 10px;
-  font-weight: 600;
-}
-
-/* Discord icon. The "online" version gets a green status dot. */
-
-.directory-count-icon {
-  position: relative;
-  display: grid;
-  flex-shrink: 0;
-  place-items: center;
-  color: #8f9bff;
-}
-
-.directory-count-icon.is-online::after {
-  position: absolute;
-  right: -4px;
-  bottom: -3px;
-  box-sizing: content-box;
-  width: 6px;
-  height: 6px;
-  border: 2px solid #1a1826;
-  border-radius: 50%;
-  background: #3ba55d;
-  box-shadow: 0 0 8px rgba(59, 165, 93, 0.65);
-  content: "";
-}
-
-.directory-count-online {
-  border-color: rgba(59, 165, 93, 0.2);
-  background: rgba(59, 165, 93, 0.07);
-}
-
-/* ---------- Badges (community / verified / partner) ---------- */
-
-.directory-card-flags {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.directory-badges {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  min-height: 25px;
-  padding: 0 7px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 7px;
-  background: rgba(34, 27, 57, 0.84);
-  backdrop-filter: blur(12px);
-}
-
-.directory-badge {
-  display: inline-grid;
-  place-items: center;
-}
-
-.directory-badge img {
-  display: block;
-  width: 17px;
-  height: 17px;
-  object-fit: contain;
-}
-
-.directory-profile-flags {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 7px;
-  margin-top: 12px;
-}
-
-.directory-badge-chip,
-.directory-boosts {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 28px;
-  padding: 0 11px 0 8px;
-  border: 1px solid rgba(155, 140, 255, 0.2);
-  border-radius: 8px;
-  background: rgba(155, 140, 255, 0.08);
-  color: #d5ceff;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.directory-badge-chip img,
-.directory-boosts img {
-  display: block;
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-}
-
-.directory-boosts small {
-  color: rgba(213, 206, 255, 0.6);
-  font-size: 9px;
-  font-weight: 600;
-}
-
-/* In the card footer row, keep the boost chip compact and the tags on the right. */
-
-.directory-card-meta {
-  flex-wrap: wrap;
-}
-
-.directory-card-meta .directory-boosts {
-  min-height: 25px;
-  padding: 0 9px 0 7px;
-}
-
-.directory-card-meta .directory-tags {
-  margin-left: auto;
-}
-
-/* The old "members" fallback (listings without an invite) */
-
-.directory-members svg {
-  color: #8f9bff;
-}
-
-/* ---------- Heading stats (communities + total members) ---------- */
-
-.directory-heading-stats {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  justify-content: flex-end;
-  gap: 12px;
-  flex-shrink: 0;
-}
-
-/* ---------- Live tiles on the profile ---------- */
-
-.directory-live-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 9px;
-  margin-bottom: 9px;
-}
-
-.directory-profile-stat.is-live {
-  min-height: 84px;
-  border-color: rgba(143, 155, 255, 0.18);
-  background:
-    radial-gradient(
-      ellipse at 100% 0%,
-      rgba(143, 155, 255, 0.12),
-      transparent 70%
-    ),
-    rgba(255, 255, 255, 0.025);
-}
-
-.directory-live-tile-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.directory-live-tile-label img {
-  display: block;
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-}
-
-.directory-profile-stat.is-live strong {
-  font-size: 24px;
-  letter-spacing: -0.5px;
-}
-
-/* "Live from Discord" tag in the panel heading */
-
-.directory-live-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin-left: auto;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 10px;
-  font-weight: 650;
-  white-space: nowrap;
-}
-
-.directory-live-tag i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #3ba55d;
-  box-shadow: 0 0 0 0 rgba(59, 165, 93, 0.55);
-  animation: directory-live-ping 2s infinite;
-}
-
-.directory-live-tag.is-stale i {
-  background: #d8a24a;
-  box-shadow: none;
-  animation: none;
-}
-
-@keyframes directory-live-ping {
-  70% {
-    box-shadow: 0 0 0 7px rgba(59, 165, 93, 0);
-  }
-
-  100% {
-    box-shadow: 0 0 0 0 rgba(59, 165, 93, 0);
-  }
-}
-
-/* ---------- Responsive ---------- */
-
-@media (max-width: 720px) {
-  .directory-heading-stats {
-    justify-content: flex-start;
-  }
-}
-
-@media (max-width: 560px) {
-  .directory-heading-stats {
-    width: 100%;
-  }
-
-  .directory-heading-stats .directory-heading-stat {
-    flex: 1 1 140px;
-  }
-
-  .directory-live-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .directory-profile-flags {
-    gap: 6px;
-  }
-
-  .directory-card-meta .directory-tags {
-    margin-left: 0;
   }
 }
