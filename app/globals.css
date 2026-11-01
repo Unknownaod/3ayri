@@ -1,8 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap");
 
 /* =========================================================
-   HAVEN — CELESTIAL DESIGN SYSTEM
-   Heavenly skies, silver, moonlight, clouds and starlight.
+   HAVEN — NIGHT TERRACE DESIGN SYSTEM
+   Palette taken from the /haven logo: a starlit night sky,
+   glowing lantern amber, bougainvillea wine, and the soft
+   cream-rose of the wordmark.
    ========================================================= */
 
 @property --a {
@@ -14,47 +16,57 @@
 :root {
   color-scheme: dark;
 
-  --bg: #070b18;
-  --bg-2: #0b1122;
-  --card: #10182b;
-  --card-2: #17223a;
+  /* Core surfaces: warm near-black night */
+  --bg: #0a0708;
+  --bg-2: #110c0d;
+  --card: #171112;
+  --card-2: #20171a;
 
-  --line: rgba(190, 207, 255, 0.13);
-  --line-strong: rgba(205, 220, 255, 0.3);
+  /* Colour channels (use as rgba(var(--amber), 0.2)) */
+  --amber: 231, 171, 114;   /* lantern glow     #e7ab72 */
+  --rose: 209, 180, 165;    /* logo wordmark    #d1b4a5 */
+  --wine: 142, 43, 75;      /* bougainvillea    #8e2b4b */
+  --line-rgb: 235, 200, 175;
 
-  --text: #f5f7ff;
-  --muted: #a3aec9;
-  --text-secondary: #d0d8ed;
+  --line: rgba(var(--line-rgb), 0.13);
+  --line-strong: rgba(var(--line-rgb), 0.3);
 
-  --v: #a9baff;
-  --p: #d0d9ff;
-  --c: #f5f4ff;
-  --silver: #dce5f8;
+  /* Text */
+  --text: #f7eee6;
+  --muted: #a99a90;
+  --text-secondary: #dccbbd;
+
+  /* Accents */
+  --v: #e7ab72;
+  --p: #f0cba6;
+  --c: #f8f0dc;
+  --silver: #ead9cc;
 
   --grad: linear-gradient(
     110deg,
-    #8e9edc,
-    #c2ceff 38%,
-    #fff 70%,
-    #e6d9bd
+    #c98a5b,
+    #e7ab72 38%,
+    #f8f0dc 70%,
+    #d1b4a5
   );
 
   --chrome: linear-gradient(
     180deg,
-    #fff 5%,
-    #e4eaff 38%,
-    #b7c5eb 72%,
-    #f1e5ce 100%
+    #fff8ee 5%,
+    #f3dcc8 38%,
+    #d1b4a5 72%,
+    #e7ab72 100%
   );
 
-  --purple-100: #edf0ff;
-  --purple-300: #c2ceff;
-  --purple-400: #a9baff;
+  /* Legacy aliases (kept so older components still work) */
+  --purple-100: #fbeee0;
+  --purple-300: #f0cba6;
+  --purple-400: #e7ab72;
 
   --border: var(--line);
   --border-strong: var(--line-strong);
   --text-muted: var(--muted);
-  --glow-soft: rgba(169, 186, 255, 0.3);
+  --glow-soft: rgba(var(--amber), 0.3);
 
   --radius: 18px;
   --radius-lg: 26px;
@@ -84,9 +96,9 @@ body {
   min-width: 320px;
   overflow-x: clip;
   background:
-    radial-gradient(ellipse at 50% -15%, rgba(104, 130, 205, 0.19), transparent 55%),
-    radial-gradient(ellipse at 0% 45%, rgba(104, 125, 190, 0.08), transparent 45%),
-    radial-gradient(ellipse at 100% 75%, rgba(185, 174, 220, 0.07), transparent 45%),
+    radial-gradient(ellipse at 50% -15%, rgba(var(--wine), 0.2), transparent 55%),
+    radial-gradient(ellipse at 0% 45%, rgba(var(--amber), 0.07), transparent 45%),
+    radial-gradient(ellipse at 100% 75%, rgba(var(--wine), 0.09), transparent 45%),
     var(--bg);
   color: var(--text);
   font: 400 16px/1.65 var(--body);
@@ -108,12 +120,12 @@ button, input, textarea, select {
 }
 
 ::selection {
-  background: #a9baff;
-  color: #101629;
+  background: #e7ab72;
+  color: #1a0f0a;
 }
 
 :focus-visible {
-  outline: 2px solid #dce5ff;
+  outline: 2px solid #f0cba6;
   outline-offset: 3px;
 }
 
@@ -126,7 +138,7 @@ button, input, textarea, select {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #283653;
+  background: #3a2521;
   border: 2px solid var(--bg);
   border-radius: 99px;
 }
@@ -137,8 +149,8 @@ button, input, textarea, select {
   min-height: 100vh;
   overflow: clip;
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(128, 151, 220, 0.12), transparent 55%),
-    linear-gradient(180deg, #080d1c 0%, #070b18 55%, #090e1e 100%);
+    radial-gradient(ellipse at 50% 0%, rgba(var(--wine), 0.14), transparent 55%),
+    linear-gradient(180deg, #0c090a 0%, #0a0708 55%, #0d0a0b 100%);
 }
 
 .site > .bg {
@@ -173,7 +185,7 @@ button, input, textarea, select {
   pointer-events: none;
   background: radial-gradient(
     520px circle at var(--cx, 50%) var(--cy, 30%),
-    rgba(184, 204, 255, 0.13),
+    rgba(var(--amber), 0.11),
     transparent 70%
   );
 }
@@ -203,7 +215,7 @@ button, input, textarea, select {
   transform-origin: 0 50%;
   transform: scaleX(var(--prog, 0));
   background: var(--grad);
-  box-shadow: 0 0 18px rgba(190, 207, 255, 0.5);
+  box-shadow: 0 0 18px rgba(var(--amber), 0.5);
 }
 
 /* Scroll reveal */
@@ -230,11 +242,11 @@ button, input, textarea, select {
 .shimmer {
   background: linear-gradient(
     110deg,
-    #b7c8ff,
-    #fff 35%,
-    #e6d9bd 55%,
-    #fff 75%,
-    #b7c8ff
+    #d9b9a8,
+    #fff8ee 35%,
+    #e7ab72 55%,
+    #fff8ee 75%,
+    #d9b9a8
   );
   background-size: 240% 100%;
   -webkit-background-clip: text;
@@ -254,7 +266,7 @@ button, input, textarea, select {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 0 25px rgba(183, 200, 255, 0.3));
+  filter: drop-shadow(0 0 25px rgba(var(--amber), 0.28));
 }
 
 @keyframes breathe {
@@ -274,14 +286,14 @@ button, input, textarea, select {
   border: 1px solid var(--line);
   background: linear-gradient(
     160deg,
-    rgba(25, 37, 65, 0.8),
-    rgba(9, 15, 31, 0.82)
+    rgba(40, 28, 30, 0.8),
+    rgba(14, 10, 11, 0.84)
   );
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   box-shadow:
     0 30px 80px -40px rgba(0, 0, 0, 0.9),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 
 .avatar {
@@ -329,7 +341,7 @@ button, input, textarea, select {
   padding: 0 22px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
-  background: rgba(169, 186, 255, 0.12);
+  background: rgba(var(--amber), 0.12);
   color: #fff;
   font-size: 14.5px;
   font-weight: 700;
@@ -343,16 +355,16 @@ button, input, textarea, select {
 
 .btn:hover {
   transform: translateY(-2px);
-  background: rgba(169, 186, 255, 0.22);
-  box-shadow: 0 10px 34px -8px rgba(169, 186, 255, 0.3);
+  background: rgba(var(--amber), 0.22);
+  box-shadow: 0 10px 34px -8px rgba(var(--amber), 0.3);
 }
 
 .btn.primary,
 .btn-primary {
   border-color: transparent;
-  background: linear-gradient(110deg, #aabaff, #e3e9ff);
-  color: #101629;
-  box-shadow: 0 10px 34px -10px rgba(169, 186, 255, 0.55);
+  background: linear-gradient(110deg, #e7ab72, #f6d9b8);
+  color: #1a0f0a;
+  box-shadow: 0 10px 34px -10px rgba(var(--amber), 0.55);
 }
 
 .btn.ghost,
@@ -400,9 +412,9 @@ button, input, textarea, select {
   justify-content: center;
   overflow: hidden;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 0 18px rgba(190, 175, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(var(--rose), 0.35);
+  box-shadow: 0 0 18px rgba(var(--amber), 0.2);
 }
 
 .brand-mark img {
@@ -425,10 +437,10 @@ button, input, textarea, select {
   padding: 5px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgba(11, 17, 35, 0.72);
+  background: rgba(18, 12, 13, 0.74);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  box-shadow: 0 10px 40px -16px rgba(151, 175, 235, 0.25);
+  box-shadow: 0 10px 40px -16px rgba(var(--amber), 0.2);
 }
 
 .nav-links a {
@@ -452,8 +464,8 @@ button, input, textarea, select {
   color: #fff;
   background: linear-gradient(
     110deg,
-    rgba(169, 186, 255, 0.24),
-    rgba(255, 255, 255, 0.07)
+    rgba(var(--amber), 0.24),
+    rgba(255, 255, 255, 0.06)
   );
   box-shadow: inset 0 0 0 1px var(--line-strong);
 }
@@ -471,8 +483,8 @@ button, input, textarea, select {
   padding: 0 22px;
   border: 0;
   border-radius: 999px;
-  background: linear-gradient(110deg, #fff, #dce5ff);
-  color: #101629;
+  background: linear-gradient(110deg, #fff8ee, #f0d4b8);
+  color: #1a0f0a;
   font-size: 14px;
   font-weight: 800;
   cursor: pointer;
@@ -483,7 +495,7 @@ button, input, textarea, select {
 .nav-cta a:hover,
 .nav-cta button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px -6px rgba(190, 207, 255, 0.5);
+  box-shadow: 0 10px 30px -6px rgba(var(--amber), 0.5);
 }
 
 /* =========================================================
@@ -510,11 +522,11 @@ button, input, textarea, select {
 }
 
 .btn-glow {
-  background: linear-gradient(110deg, #fff, #dce5ff);
-  color: #11182c;
+  background: linear-gradient(110deg, #fff6ea, #f0cfae);
+  color: #1a0f0a;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.3),
-    0 14px 50px -8px rgba(169, 186, 255, 0.45);
+    0 14px 50px -8px rgba(var(--amber), 0.45);
 }
 
 .btn-glow::after {
@@ -535,7 +547,7 @@ button, input, textarea, select {
   transform: translateY(-3px);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.5),
-    0 20px 64px -8px rgba(169, 186, 255, 0.65);
+    0 20px 64px -8px rgba(var(--amber), 0.65);
 }
 
 .btn-glow:hover::after {
@@ -544,13 +556,13 @@ button, input, textarea, select {
 
 .btn-ghost {
   border: 1px solid var(--line-strong);
-  background: rgba(169, 186, 255, 0.07);
+  background: rgba(var(--amber), 0.07);
   backdrop-filter: blur(10px);
 }
 
 .btn-ghost:hover {
-  border-color: #dce5ff;
-  background: rgba(169, 186, 255, 0.16);
+  border-color: #f0cba6;
+  background: rgba(var(--amber), 0.16);
   transform: translateY(-3px);
 }
 
@@ -584,8 +596,8 @@ button, input, textarea, select {
   position: absolute;
   inset: 0;
   background: url("/banner.png") center top / cover no-repeat;
-  opacity: 0.48;
-  filter: saturate(0.7) brightness(1.1);
+  opacity: 0.5;
+  filter: saturate(0.9) brightness(1);
   -webkit-mask-image: linear-gradient(
     to bottom,
     #000 15%,
@@ -606,7 +618,7 @@ button, input, textarea, select {
   position: absolute;
   border-radius: 50%;
   filter: blur(115px);
-  opacity: 0.32;
+  opacity: 0.3;
   animation: drift 16s ease-in-out infinite alternate;
 }
 
@@ -615,7 +627,7 @@ button, input, textarea, select {
   height: 540px;
   left: 4%;
   top: -160px;
-  background: #829bdc;
+  background: #8e2b4b;
 }
 
 .b2 {
@@ -623,8 +635,8 @@ button, input, textarea, select {
   height: 480px;
   right: 2%;
   top: 60px;
-  background: #b4b9ed;
-  opacity: 0.25;
+  background: #c98a5b;
+  opacity: 0.2;
   animation-delay: -5s;
 }
 
@@ -633,8 +645,8 @@ button, input, textarea, select {
   height: 420px;
   left: 40%;
   top: 320px;
-  background: #d8c9e8;
-  opacity: 0.2;
+  background: #5e2a46;
+  opacity: 0.22;
   animation-delay: -9s;
 }
 
@@ -647,10 +659,10 @@ button, input, textarea, select {
 .gridlines {
   position: absolute;
   inset: 0;
-  opacity: 0.2;
+  opacity: 0.18;
   background-image:
-    linear-gradient(rgba(190, 207, 255, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(190, 207, 255, 0.1) 1px, transparent 1px);
+    linear-gradient(rgba(var(--line-rgb), 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--line-rgb), 0.1) 1px, transparent 1px);
   background-size: 72px 72px;
   mask-image: radial-gradient(ellipse 70% 60% at 50% 25%, #000, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 25%, #000, transparent 75%);
@@ -670,7 +682,7 @@ button, input, textarea, select {
   width: clamp(130px, 15vw, 190px);
   aspect-ratio: 1;
   margin-bottom: 26px;
-  filter: drop-shadow(0 0 35px rgba(185, 205, 255, 0.25));
+  filter: drop-shadow(0 0 35px rgba(var(--amber), 0.28));
 }
 
 .medallion img {
@@ -688,18 +700,18 @@ button, input, textarea, select {
   position: absolute;
   inset: -10px;
   border-radius: 50%;
-  border: 1px solid rgba(205, 219, 255, 0.35);
+  border: 1px solid rgba(var(--rose), 0.35);
 }
 
 .medallion::before {
-  border-top-color: #fff;
+  border-top-color: #fff8ee;
   border-right-color: transparent;
   animation: orbit 8s linear infinite;
 }
 
 .medallion::after {
   inset: -22px;
-  border-bottom-color: #e6d9bd;
+  border-bottom-color: #e7ab72;
   border-left-color: transparent;
   opacity: 0.65;
   animation: orbit 14s linear infinite reverse;
@@ -719,9 +731,9 @@ button, input, textarea, select {
   padding: 8px 18px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
-  background: rgba(169, 186, 255, 0.09);
+  background: rgba(var(--amber), 0.09);
   backdrop-filter: blur(10px);
-  color: #e3e9ff;
+  color: #f5e2d0;
   font-size: 14px;
   font-weight: 600;
 }
@@ -730,14 +742,14 @@ button, input, textarea, select {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #c5e8d8;
-  box-shadow: 0 0 0 0 rgba(197, 232, 216, 0.6);
+  background: #f09853;
+  box-shadow: 0 0 0 0 rgba(240, 152, 83, 0.6);
   animation: ping 2s infinite;
 }
 
 @keyframes ping {
-  70% { box-shadow: 0 0 0 9px rgba(197, 232, 216, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(197, 232, 216, 0); }
+  70% { box-shadow: 0 0 0 9px rgba(240, 152, 83, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(240, 152, 83, 0); }
 }
 
 .hero h1 {
@@ -750,11 +762,11 @@ button, input, textarea, select {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 0 38px rgba(181, 199, 255, 0.28));
+  filter: drop-shadow(0 0 38px rgba(var(--amber), 0.25));
 }
 
 .hero h1 .shimmer {
-  filter: drop-shadow(0 0 25px rgba(205, 219, 255, 0.35));
+  filter: drop-shadow(0 0 25px rgba(var(--amber), 0.32));
 }
 
 .hero-sub {
@@ -790,8 +802,8 @@ button, input, textarea, select {
   border-radius: 20px;
   background: linear-gradient(
     160deg,
-    rgba(27, 40, 68, 0.72),
-    rgba(9, 15, 31, 0.76)
+    rgba(40, 28, 30, 0.72),
+    rgba(14, 10, 11, 0.78)
   );
   backdrop-filter: blur(14px);
   text-align: left;
@@ -844,14 +856,14 @@ button, input, textarea, select {
   border-radius: 24px;
   background: linear-gradient(
     160deg,
-    rgba(29, 43, 72, 0.9),
-    rgba(9, 15, 31, 0.94)
+    rgba(44, 30, 32, 0.9),
+    rgba(14, 10, 11, 0.95)
   );
   backdrop-filter: blur(20px);
   box-shadow:
     0 50px 100px -30px rgba(0, 0, 0, 0.9),
-    0 0 90px -20px rgba(169, 186, 255, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 0 90px -20px rgba(var(--amber), 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
   animation: bob 6s ease-in-out infinite;
 }
 
@@ -870,7 +882,7 @@ button, input, textarea, select {
   flex-shrink: 0;
   border-radius: 50%;
   object-fit: cover;
-  box-shadow: 0 0 18px rgba(169, 186, 255, 0.3);
+  box-shadow: 0 0 18px rgba(var(--amber), 0.3);
 }
 
 .dm-name {
@@ -887,7 +899,7 @@ button, input, textarea, select {
 .dm-tag {
   padding: 1px 6px;
   border-radius: 5px;
-  background: #879bd5;
+  background: #a96137;
   color: #fff;
   font-size: 10px;
   font-weight: 800;
@@ -897,9 +909,9 @@ button, input, textarea, select {
 .dm-embed {
   margin: 14px 0 0 58px;
   padding: 14px 16px;
-  border-left: 4px solid #aabaff;
+  border-left: 4px solid #e7ab72;
   border-radius: 8px;
-  background: rgba(169, 186, 255, 0.09);
+  background: rgba(var(--amber), 0.09);
 }
 
 .dm-embed p {
@@ -956,13 +968,13 @@ button, input, textarea, select {
   padding: 10px 16px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
-  background: rgba(17, 27, 48, 0.92);
+  background: rgba(28, 19, 21, 0.92);
   backdrop-filter: blur(14px);
   font-size: 14px;
   font-weight: 600;
   box-shadow:
     0 20px 40px -12px rgba(0, 0, 0, 0.8),
-    0 0 30px -8px rgba(169, 186, 255, 0.25);
+    0 0 30px -8px rgba(var(--amber), 0.25);
   animation: bob 5s ease-in-out infinite;
   transform: translateZ(60px);
 }
@@ -1032,7 +1044,7 @@ button, input, textarea, select {
 .mq-card:hover {
   border-color: var(--line-strong);
   transform: translateY(-3px);
-  box-shadow: 0 16px 40px -16px rgba(169, 186, 255, 0.25);
+  box-shadow: 0 16px 40px -16px rgba(var(--amber), 0.25);
 }
 
 .mq-icon {
@@ -1042,7 +1054,7 @@ button, input, textarea, select {
   height: 46px;
   flex-shrink: 0;
   border-radius: 14px;
-  background: rgba(169, 186, 255, 0.12);
+  background: rgba(var(--amber), 0.12);
   box-shadow: inset 0 0 0 1px var(--line);
   font-size: 22px;
 }
@@ -1071,7 +1083,7 @@ button, input, textarea, select {
   align-items: center;
   gap: 10px;
   margin: 0 0 16px;
-  color: #c3d0ff;
+  color: #e9bf99;
   font-size: 12.5px;
   font-weight: 700;
   letter-spacing: 0.2em;
@@ -1082,7 +1094,7 @@ button, input, textarea, select {
   content: "";
   width: 26px;
   height: 1px;
-  background: #c3d0ff;
+  background: #e9bf99;
 }
 
 .section-title {
@@ -1119,7 +1131,7 @@ button, input, textarea, select {
   opacity: 0;
   background: radial-gradient(
     380px circle at var(--mx, 50%) var(--my, 50%),
-    rgba(169, 186, 255, 0.2),
+    rgba(var(--amber), 0.18),
     transparent 65%
   );
   transition: opacity 0.3s;
@@ -1186,15 +1198,15 @@ button, input, textarea, select {
 .bubbles span {
   padding: 11px 18px;
   border-radius: 20px 20px 20px 6px;
-  background: rgba(255, 255, 255, 0.065);
+  background: rgba(255, 255, 255, 0.06);
   font-size: 15px;
 }
 
 .bubbles span.r {
   align-self: flex-end;
   border-radius: 20px 20px 6px 20px;
-  background: linear-gradient(110deg, #8e9edc, #b9c8f4);
-  color: #11182c;
+  background: linear-gradient(110deg, #c98a5b, #f0cba6);
+  color: #1a0f0a;
   font-weight: 700;
 }
 
@@ -1210,15 +1222,15 @@ button, input, textarea, select {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #c6d3ff;
-  box-shadow: 0 0 24px -4px rgba(198, 211, 255, 0.7);
+  background: #e7c9a8;
+  box-shadow: 0 0 24px -4px rgba(var(--amber), 0.7);
 }
 
 .voices span::after {
   content: "";
   position: absolute;
   inset: -4px;
-  border: 2px solid #dce5ff;
+  border: 2px solid #f3d9bd;
   border-radius: 50%;
   opacity: 0;
   animation: speak 2.4s ease-out infinite;
@@ -1247,15 +1259,15 @@ button, input, textarea, select {
   padding: 11px 16px;
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: rgba(169, 186, 255, 0.06);
+  background: rgba(var(--amber), 0.06);
   font-size: 15px;
 }
 
 .events em {
   padding: 2px 10px;
   border-radius: 999px;
-  background: rgba(169, 186, 255, 0.2);
-  color: #e0e7ff;
+  background: rgba(var(--amber), 0.2);
+  color: #f8e6d2;
   font-size: 12px;
   font-style: normal;
   font-weight: 600;
@@ -1340,8 +1352,8 @@ button, input, textarea, select {
   flex-shrink: 0;
   border-radius: 50%;
   background:
-    rgba(169, 186, 255, 0.2)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m5 10.5 3.2 3.2L15 6.8' stroke='%23e4eaff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    rgba(var(--amber), 0.2)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m5 10.5 3.2 3.2L15 6.8' stroke='%23f8e6d2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
     center / 14px no-repeat;
   box-shadow: inset 0 0 0 1px var(--line-strong);
 }
@@ -1353,10 +1365,10 @@ button, input, textarea, select {
   border-radius: 30px;
   background: linear-gradient(
     160deg,
-    rgba(169, 186, 255, 0.2),
-    rgba(8, 14, 29, 0.7)
+    rgba(var(--amber), 0.18),
+    rgba(10, 7, 8, 0.7)
   );
-  box-shadow: 0 50px 120px -40px rgba(169, 186, 255, 0.3);
+  box-shadow: 0 50px 120px -40px rgba(var(--amber), 0.28);
   transform:
     perspective(1400px)
     rotateY(calc(var(--ry, 0) * -5deg))
@@ -1377,7 +1389,7 @@ button, input, textarea, select {
   position: absolute;
   width: 34px;
   height: 34px;
-  border: 2px solid #dce5ff;
+  border: 2px solid #f0cba6;
   pointer-events: none;
 }
 
@@ -1418,7 +1430,7 @@ button, input, textarea, select {
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(169, 186, 255, 0.2),
+    rgba(var(--wine), 0.22),
     transparent 65%
   );
   pointer-events: none;
@@ -1429,8 +1441,8 @@ button, input, textarea, select {
   width: 56px;
   height: 56px;
   margin: 0 auto 22px;
-  color: #dce5ff;
-  filter: drop-shadow(0 0 18px rgba(169, 186, 255, 0.55));
+  color: #f0cba6;
+  filter: drop-shadow(0 0 18px rgba(var(--amber), 0.5));
   animation: bob 6s ease-in-out infinite;
 }
 
@@ -1447,7 +1459,7 @@ button, input, textarea, select {
 }
 
 .manifesto h2 .shimmer {
-  filter: drop-shadow(0 0 24px rgba(205, 219, 255, 0.4));
+  filter: drop-shadow(0 0 24px rgba(var(--amber), 0.38));
 }
 
 .manifesto p {
@@ -1491,10 +1503,10 @@ button, input, textarea, select {
   height: 44px;
   margin-bottom: 22px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #9cafea, #e2e9ff);
-  color: #11182c;
+  background: linear-gradient(135deg, #d99a63, #f6dcc0);
+  color: #1a0f0a;
   font: 800 18px var(--display);
-  box-shadow: 0 10px 30px -8px rgba(169, 186, 255, 0.45);
+  box-shadow: 0 10px 30px -8px rgba(var(--amber), 0.45);
 }
 
 .steps h3 {
@@ -1517,7 +1529,7 @@ button, input, textarea, select {
   border-block: 1px solid var(--line);
   background: linear-gradient(
     180deg,
-    rgba(169, 186, 255, 0.07),
+    rgba(var(--amber), 0.06),
     transparent 70%
   );
 }
@@ -1539,14 +1551,14 @@ button, input, textarea, select {
   gap: 10px;
   margin-bottom: 48px;
   padding-bottom: 4px;
-  border-bottom: 2px solid #b7c8ff;
+  border-bottom: 2px solid #e7ab72;
   font-weight: 700;
   transition: color 0.2s, gap 0.2s;
 }
 
 .text-link:hover {
   gap: 14px;
-  color: #dce5ff;
+  color: #f6dcc0;
 }
 
 .partner-list {
@@ -1573,8 +1585,8 @@ button, input, textarea, select {
 
 .partner-row:hover {
   transform: translateY(-4px);
-  border-color: var(--partner-accent, #b8c8ff);
-  box-shadow: 0 24px 60px -24px var(--partner-accent, #a9baff);
+  border-color: var(--partner-accent, #e7ab72);
+  box-shadow: 0 24px 60px -24px var(--partner-accent, #e7ab72);
 }
 
 .partner-row .avatar {
@@ -1661,7 +1673,7 @@ button, input, textarea, select {
 
 .faq summary::after {
   content: "+";
-  color: #c5d2ff;
+  color: #e9bf99;
   font-size: 28px;
   line-height: 1;
   transition: transform 0.25s;
@@ -1690,14 +1702,14 @@ button, input, textarea, select {
   border: 2px solid transparent;
   border-radius: 38px;
   background:
-    linear-gradient(#0b1224, #0b1224) padding-box,
+    linear-gradient(#130d0e, #130d0e) padding-box,
     conic-gradient(
       from var(--a),
-      #8e9edc,
-      #fff,
-      #d8c9e8,
-      #b7c8ff,
-      #8e9edc
+      #c98a5b,
+      #fff8ee,
+      #8e2b4b,
+      #e7ab72,
+      #c98a5b
     ) border-box;
   animation: spin 7s linear infinite;
 }
@@ -1714,9 +1726,9 @@ button, input, textarea, select {
   right: -120px;
   top: -180px;
   border-radius: 50%;
-  background: #a9baff;
+  background: #8e2b4b;
   filter: blur(130px);
-  opacity: 0.22;
+  opacity: 0.28;
   pointer-events: none;
 }
 
@@ -1726,7 +1738,7 @@ button, input, textarea, select {
   inset: 0;
   background: url("/banner.png") center / cover;
   opacity: 0.2;
-  filter: saturate(0.7) brightness(1.15);
+  filter: saturate(0.9) brightness(1.05);
   mix-blend-mode: screen;
   pointer-events: none;
 }
@@ -1769,7 +1781,7 @@ button, input, textarea, select {
   opacity: 0.95;
   object-fit: contain;
   transform: translateY(-50%);
-  box-shadow: 0 0 75px rgba(169, 186, 255, 0.35);
+  box-shadow: 0 0 75px rgba(var(--amber), 0.3);
   animation: bob 7s ease-in-out infinite;
 }
 
@@ -1782,7 +1794,7 @@ button, input, textarea, select {
   background: linear-gradient(
     180deg,
     transparent,
-    rgba(169, 186, 255, 0.045)
+    rgba(var(--amber), 0.04)
   );
 }
 
@@ -1810,7 +1822,7 @@ button, input, textarea, select {
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  box-shadow: 0 0 20px rgba(169, 186, 255, 0.25);
+  box-shadow: 0 0 20px rgba(var(--amber), 0.22);
 }
 
 .footer-about p {
@@ -1839,7 +1851,7 @@ button, input, textarea, select {
 }
 
 .footer-col a:hover {
-  color: #dce5ff;
+  color: #f6dcc0;
 }
 
 .footer-bottom {
