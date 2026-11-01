@@ -1521,3 +1521,278 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* =========================================================
+   LIVE DISCORD DATA
+   Paste this at the BOTTOM of your directory stylesheet.
+   Member / online counts, badge icons, boosts and live tiles.
+   ========================================================= */
+
+/* ---------- Discord counts (cards) ---------- */
+
+.directory-counts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 13px;
+}
+
+.directory-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  padding: 0 11px 0 8px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1;
+}
+
+.directory-count small {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Discord icon. The "online" version gets a green status dot. */
+
+.directory-count-icon {
+  position: relative;
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  color: #8f9bff;
+}
+
+.directory-count-icon.is-online::after {
+  position: absolute;
+  right: -4px;
+  bottom: -3px;
+  box-sizing: content-box;
+  width: 6px;
+  height: 6px;
+  border: 2px solid #1a1826;
+  border-radius: 50%;
+  background: #3ba55d;
+  box-shadow: 0 0 8px rgba(59, 165, 93, 0.65);
+  content: "";
+}
+
+.directory-count-online {
+  border-color: rgba(59, 165, 93, 0.2);
+  background: rgba(59, 165, 93, 0.07);
+}
+
+/* ---------- Badges (community / verified / partner) ---------- */
+
+.directory-card-flags {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.directory-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 25px;
+  padding: 0 7px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  background: rgba(34, 27, 57, 0.84);
+  backdrop-filter: blur(12px);
+}
+
+.directory-badge {
+  display: inline-grid;
+  place-items: center;
+}
+
+.directory-badge img {
+  display: block;
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
+}
+
+.directory-profile-flags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.directory-badge-chip,
+.directory-boosts {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  padding: 0 11px 0 8px;
+  border: 1px solid rgba(155, 140, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(155, 140, 255, 0.08);
+  color: #d5ceff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.directory-badge-chip img,
+.directory-boosts img {
+  display: block;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.directory-boosts small {
+  color: rgba(213, 206, 255, 0.6);
+  font-size: 9px;
+  font-weight: 600;
+}
+
+/* In the card footer row, keep the boost chip compact and the tags on the right. */
+
+.directory-card-meta {
+  flex-wrap: wrap;
+}
+
+.directory-card-meta .directory-boosts {
+  min-height: 25px;
+  padding: 0 9px 0 7px;
+}
+
+.directory-card-meta .directory-tags {
+  margin-left: auto;
+}
+
+/* The old "members" fallback (listings without an invite) */
+
+.directory-members svg {
+  color: #8f9bff;
+}
+
+/* ---------- Heading stats (communities + total members) ---------- */
+
+.directory-heading-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* ---------- Live tiles on the profile ---------- */
+
+.directory-live-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 9px;
+  margin-bottom: 9px;
+}
+
+.directory-profile-stat.is-live {
+  min-height: 84px;
+  border-color: rgba(143, 155, 255, 0.18);
+  background:
+    radial-gradient(
+      ellipse at 100% 0%,
+      rgba(143, 155, 255, 0.12),
+      transparent 70%
+    ),
+    rgba(255, 255, 255, 0.025);
+}
+
+.directory-live-tile-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.directory-live-tile-label img {
+  display: block;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.directory-profile-stat.is-live strong {
+  font-size: 24px;
+  letter-spacing: -0.5px;
+}
+
+/* "Live from Discord" tag in the panel heading */
+
+.directory-live-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 10px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.directory-live-tag i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3ba55d;
+  box-shadow: 0 0 0 0 rgba(59, 165, 93, 0.55);
+  animation: directory-live-ping 2s infinite;
+}
+
+.directory-live-tag.is-stale i {
+  background: #d8a24a;
+  box-shadow: none;
+  animation: none;
+}
+
+@keyframes directory-live-ping {
+  70% {
+    box-shadow: 0 0 0 7px rgba(59, 165, 93, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 165, 93, 0);
+  }
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 720px) {
+  .directory-heading-stats {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .directory-heading-stats {
+    width: 100%;
+  }
+
+  .directory-heading-stats .directory-heading-stat {
+    flex: 1 1 140px;
+  }
+
+  .directory-live-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .directory-profile-flags {
+    gap: 6px;
+  }
+
+  .directory-card-meta .directory-tags {
+    margin-left: 0;
+  }
+}
