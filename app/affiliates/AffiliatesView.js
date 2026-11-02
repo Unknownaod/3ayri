@@ -258,8 +258,29 @@ function BoostChip({ discord }) {
   );
 }
 
+// Ordered, valid image URLs to try (falls back to the single legacy field).
+function getImageSources(list, single) {
+  const sources = Array.isArray(list) && list.length > 0 ? list : [single];
+  return sources.map(validUrl).filter(Boolean);
+}
+
 function Avatar({ affiliate, large = false }) {
-  const logo = validUrl(affiliate?.logo);
+  const sources = getImageSources(affiliate?.logoSources, affiliate?.logo);
+
+  // The key resets the fallback position whenever the list of images changes.
+  return (
+    <AvatarInner
+      key={sources.join("|")}
+      affiliate={affiliate}
+      sources={sources}
+      large={large}
+    />
+  );
+}
+
+function AvatarInner({ affiliate, sources, large }) {
+  const [index, setIndex] = useState(0);
+  const logo = sources[index] || "";
   const name = cleanText(affiliate?.name) || "Community";
 
   return (
@@ -268,7 +289,11 @@ function Avatar({ affiliate, large = false }) {
       style={{ "--community-accent": affiliate?.accent || FALLBACK_ACCENT }}
     >
       {logo ? (
-        <img src={logo} alt={`${name} icon`} />
+        <img
+          src={logo}
+          alt={`${name} icon`}
+          onError={() => setIndex((current) => current + 1)}
+        />
       ) : (
         <span>{getInitials(name)}</span>
       )}
@@ -277,7 +302,23 @@ function Avatar({ affiliate, large = false }) {
 }
 
 function Banner({ affiliate, className = "" }) {
-  const banner = validUrl(affiliate?.banner);
+  const sources = getImageSources(affiliate?.bannerSources, affiliate?.banner);
+
+  return (
+    <BannerInner
+      key={sources.join("|")}
+      affiliate={affiliate}
+      className={className}
+      sources={sources}
+    />
+  );
+}
+
+function BannerInner({ affiliate, className, sources }) {
+  const [index, setIndex] = useState(0);
+
+  // When every source fails, no image is drawn and the gradient banner shows.
+  const banner = sources[index] || "";
 
   return (
     <div
@@ -301,6 +342,7 @@ function Banner({ affiliate, className = "" }) {
             className="directory-banner-full"
             src={banner}
             alt={`${affiliate?.name || "Community"} banner`}
+            onError={() => setIndex((current) => current + 1)}
           />
         </>
       )}
@@ -525,8 +567,8 @@ function CommunityProfile({ affiliate, affiliates, onBack, onOpen }) {
   const primaryHref = validUrl(primaryLink?.url);
 
   const handleShare = async () => {
-    const url = `${window.location.origin}${window.location.pathname}#${getSlug(
-      affiliate
+    const url = `${window.location.origin}/affiliates/${encodeURIComponent(
+      getSlug(affiliate)
     )}`;
 
     try {
@@ -769,10 +811,10 @@ function CommunityProfile({ affiliate, affiliates, onBack, onOpen }) {
   );
 }
 
-export default function AffiliatesView({ affiliates = [] }) {
+export default function AffiliatesView({ affiliates = [], initialSlug = "" }) {
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState("All");
-  const [selectedSlug, setSelectedSlug] = useState("");
+  const [selectedSlug, setSelectedSlug] = useState(initialSlug);
   const [sort, setSort] = useState("featured");
 
   const safeAffiliates = useMemo(
@@ -816,24 +858,25 @@ export default function AffiliatesView({ affiliates = [] }) {
     const slug = getSlug(affiliate);
     if (!slug) return;
 
-    window.history.pushState(null, "", `#${encodeURIComponent(slug)}`);
+    window.history.pushState(null, "", `/affiliates/${encodeURIComponent(slug)}`);
     setSelectedSlug(slug);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const closeProfile = useCallback(() => {
-    window.history.pushState(
-      null,
-      "",
-      `${window.location.pathname}${window.location.search}`
-    );
+    window.history.pushState(null, "", "/affiliates");
     setSelectedSlug("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   useEffect(() => {
     const syncHash = () => {
-      const slug = decodeURIComponent(window.location.hash.slice(1)).toLowerCase();
+      // /affiliates/<slug> first, then the old /affiliates#<slug> links.
+      const parts = window.location.pathname.split("/").filter(Boolean);
+      const fromPath = parts[0] === "affiliates" && parts[1] ? parts[1] : "";
+      const slug = decodeURIComponent(
+        fromPath || window.location.hash.slice(1)
+      ).toLowerCase();
       setSelectedSlug(
         safeAffiliates.some((affiliate) => getSlug(affiliate) === slug)
           ? slug
