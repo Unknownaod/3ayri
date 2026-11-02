@@ -3,6 +3,8 @@
    Night terrace palette from the /haven logo:
    lantern amber, bougainvillea wine, cream-rose and warm black.
    Includes the live Discord counts, badges, boosts and tiles.
+
+   WEBVIEW-SAFE: see "IN-APP BROWSER FALLBACKS" at the bottom.
    ========================================================= */
 
 .directory {
@@ -71,8 +73,9 @@
 }
 
 .directory-heading h1 span {
-  color: #e7ab72;
+  color: #e7ab72; /* shown if background-clip:text is unsupported */
   background: linear-gradient(100deg, #f6dcc0 0%, #e7ab72 48%, #d17a8f 100%);
+  -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -233,6 +236,7 @@
   align-items: center;
   gap: 8px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin: 17px 0 42px;
   padding: 2px 0 7px;
   scrollbar-width: none;
@@ -336,7 +340,8 @@
   gap: 19px;
 }
 
-/* Community card */
+/* Community card
+   (color-mix fallbacks live in the IN-APP BROWSER FALLBACKS section) */
 
 .directory-card {
   --community-accent: #d99a63;
@@ -408,7 +413,10 @@
 .directory-banner-backdrop {
   position: absolute;
   z-index: 0;
-  inset: -15px;
+  top: -15px;
+  right: -15px;
+  bottom: -15px;
+  left: -15px;
   width: calc(100% + 30px);
   height: calc(100% + 30px);
   object-fit: cover;
@@ -423,7 +431,10 @@
 .directory-banner-full {
   position: absolute;
   z-index: 1;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -436,7 +447,10 @@
 .directory-banner::before {
   position: absolute;
   z-index: 2;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   background:
     linear-gradient(
       180deg,
@@ -477,7 +491,10 @@
 .directory-banner-shade {
   position: absolute;
   z-index: 4;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   background: linear-gradient(
     0deg,
     rgba(16, 10, 11, 0.2),
@@ -577,6 +594,7 @@
   color: #f6d8b8;
   font-size: 9px;
   font-weight: 750;
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
 
@@ -641,6 +659,7 @@
   line-height: 1.7;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .directory-card-meta {
@@ -1423,6 +1442,7 @@
   border: 1px solid rgba(245, 225, 205, 0.09);
   border-radius: 7px;
   background: rgba(44, 28, 22, 0.86);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
 
@@ -1791,4 +1811,96 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* =========================================================
+   IN-APP BROWSER FALLBACKS
+   Discord / Instagram / Facebook / TikTok / Line webviews.
+   ========================================================= */
+
+/* 1. color-mix() with var() is not dropped at parse time in old
+      browsers, it becomes invalid at computed time, so a plain
+      fallback line above it would not help. @supports is the
+      reliable way to override it with solid rgba() colours. */
+
+@supports not (color: color-mix(in srgb, red 50%, blue)) {
+  .directory-card:hover {
+    border-color: rgba(var(--dir-amber), 0.48);
+    box-shadow:
+      0 18px 38px rgba(0, 0, 0, 0.32),
+      0 0 30px rgba(var(--dir-amber), 0.1);
+  }
+
+  .directory-banner {
+    background-image:
+      radial-gradient(
+        ellipse at 78% 20%,
+        rgba(var(--dir-amber), 0.55),
+        transparent 52%
+      ),
+      radial-gradient(
+        ellipse at 12% 100%,
+        rgba(var(--dir-wine), 0.5),
+        transparent 58%
+      ),
+      linear-gradient(115deg, #2e1d20 0%, #171012 65%, #2a1b1e 100%);
+  }
+
+  .directory-banner-glow {
+    background: rgba(var(--dir-amber), 0.25);
+  }
+
+  .directory-avatar {
+    background:
+      radial-gradient(
+        circle at 25% 15%,
+        rgba(var(--dir-amber), 0.4),
+        transparent 65%
+      ),
+      #2a1b1e;
+  }
+
+  .directory-card:hover .directory-card-arrow {
+    border-color: rgba(var(--dir-amber), 0.4);
+    background: rgba(var(--dir-amber), 0.15);
+  }
+}
+
+/* 2. No backdrop-filter: use a more opaque background instead */
+
+@supports not (backdrop-filter: blur(1px)) {
+  .directory-featured,
+  .directory-badges {
+    background: rgba(36, 22, 18, 0.96);
+  }
+}
+
+/* 3. Applied by a tiny script when an in-app browser is detected:
+      document.documentElement.classList.add("iab") */
+
+.iab .directory-featured,
+.iab .directory-badges {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background: rgba(36, 22, 18, 0.96) !important;
+}
+
+.iab .directory-banner-backdrop {
+  filter: none;
+  opacity: 0.35;
+}
+
+.iab .directory-banner-glow,
+.iab .directory-join-glow {
+  filter: none;
+  opacity: 0.35;
+}
+
+.iab .directory-live-tag i {
+  animation: none !important;
+}
+
+.iab .directory-card,
+.iab .directory-card * {
+  transition-duration: 0.01ms !important;
 }
