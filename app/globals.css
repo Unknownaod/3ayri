@@ -2265,3 +2265,1912 @@ button, input, textarea, select {
   mix-blend-mode: normal;
   opacity: 0.1;
 }
+
+/* DIRECTORY */
+
+/* =========================================================
+   AFFILIATES DIRECTORY
+   Night terrace palette from the /haven logo:
+   lantern amber, bougainvillea wine, cream-rose and warm black.
+   Includes the live Discord counts, badges, boosts and tiles.
+
+   WEBVIEW-SAFE: see "IN-APP BROWSER FALLBACKS" at the bottom.
+   ========================================================= */
+
+.directory {
+  /* Colour channels (use as rgba(var(--dir-amber), 0.2)) */
+  --dir-amber: 231, 171, 114;   /* lantern glow  #e7ab72 */
+  --dir-rose: 209, 180, 165;    /* wordmark      #d1b4a5 */
+  --dir-wine: 142, 43, 75;      /* bougainvillea #8e2b4b */
+  --dir-cream: 245, 232, 220;
+
+  --directory-bg: #0b0809;
+  --directory-panel: #140e10;
+  --directory-panel-light: #1a1214;
+  --directory-border: rgba(245, 225, 205, 0.085);
+  --directory-muted: rgba(245, 232, 220, 0.55);
+  --directory-accent: #e7ab72;
+  --directory-accent-light: #f3cfa8;
+
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 44px 24px 70px;
+  color: #fff;
+}
+
+/* Heading */
+
+.directory-heading {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 35px;
+  padding: 24px 0 34px;
+}
+
+.directory-heading-copy {
+  max-width: 680px;
+}
+
+.directory-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #e9bf99;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+}
+
+.directory-eyebrow-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f09853;
+  box-shadow: 0 0 13px rgba(240, 152, 83, 0.8);
+}
+
+.directory-heading h1 {
+  margin: 16px 0 13px;
+  color: #fff;
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: clamp(38px, 5.5vw, 62px);
+  font-weight: 800;
+  letter-spacing: -3px;
+  line-height: 1.02;
+}
+
+.directory-heading h1 span {
+  color: #e7ab72; /* shown if background-clip:text is unsupported */
+  background: linear-gradient(100deg, #f6dcc0 0%, #e7ab72 48%, #d17a8f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.directory-heading-copy > p {
+  max-width: 570px;
+  margin: 0;
+  color: rgba(245, 232, 220, 0.6);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.directory-heading-stat {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  flex-shrink: 0;
+  padding: 15px 19px;
+  border: 1px solid rgba(245, 225, 205, 0.09);
+  border-radius: 14px;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 245, 235, 0.055),
+    rgba(255, 245, 235, 0.018)
+  );
+}
+
+.directory-heading-stat-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(var(--dir-amber), 0.22);
+  border-radius: 12px;
+  background: rgba(var(--dir-amber), 0.12);
+  color: #f0c397;
+}
+
+.directory-heading-stat div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.directory-heading-stat strong {
+  color: #fff;
+  font-size: 21px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.directory-heading-stat div > span {
+  color: var(--directory-muted);
+  font-size: 11px;
+}
+
+/* Search and sorting */
+
+.directory-controls {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-top: 12px;
+}
+
+.directory-search {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 12px;
+  height: 51px;
+  padding: 0 16px;
+  border: 1px solid var(--directory-border);
+  border-radius: 13px;
+  background: rgba(255, 245, 235, 0.035);
+  color: rgba(255, 255, 255, 0.4);
+  transition: 0.2s ease;
+}
+
+.directory-search:focus-within {
+  border-color: rgba(var(--dir-amber), 0.55);
+  background: rgba(var(--dir-amber), 0.045);
+  box-shadow: 0 0 0 3px rgba(var(--dir-amber), 0.09);
+}
+
+.directory-search input {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+}
+
+.directory-search input::placeholder {
+  color: rgba(255, 255, 255, 0.37);
+}
+
+.directory-search input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.directory-search-clear {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  flex-shrink: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 19px;
+  cursor: pointer;
+}
+
+.directory-sort {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 51px;
+  padding: 0 14px;
+  border: 1px solid var(--directory-border);
+  border-radius: 13px;
+  background: rgba(255, 245, 235, 0.035);
+}
+
+.directory-sort span {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11px;
+}
+
+.directory-sort select {
+  max-width: 125px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.directory-sort select option {
+  background: #1a1214;
+  color: #fff;
+}
+
+/* Category navigation */
+
+.directory-categories {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 17px 0 42px;
+  padding: 2px 0 7px;
+  scrollbar-width: none;
+}
+
+.directory-categories::-webkit-scrollbar {
+  display: none;
+}
+
+.directory-categories button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgba(245, 225, 205, 0.08);
+  border-radius: 9px;
+  background: rgba(255, 245, 235, 0.025);
+  color: rgba(255, 255, 255, 0.55);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.directory-categories button:hover {
+  border-color: rgba(var(--dir-amber), 0.32);
+  background: rgba(var(--dir-amber), 0.08);
+  color: #f6dcc0;
+}
+
+.directory-categories button.is-active {
+  border-color: rgba(var(--dir-amber), 0.48);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--dir-amber), 0.22),
+    rgba(var(--dir-amber), 0.09)
+  );
+  color: #f8e2cb;
+  box-shadow: inset 0 0 15px rgba(var(--dir-amber), 0.05);
+}
+
+/* Section headings */
+
+.directory-section {
+  margin-top: 39px;
+}
+
+.directory-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 19px;
+}
+
+.directory-section-kicker {
+  display: block;
+  margin-bottom: 7px;
+  color: #e9bf99;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.7px;
+}
+
+.directory-section-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: #fff;
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 22px;
+  font-weight: 750;
+  letter-spacing: -0.65px;
+}
+
+.directory-section-heading h2 svg {
+  color: #f0c397;
+}
+
+.directory-section-count {
+  padding-bottom: 3px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* Community grid */
+
+.directory-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 19px;
+}
+
+/* Community card
+   (color-mix fallbacks live in the IN-APP BROWSER FALLBACKS section) */
+
+.directory-card {
+  --community-accent: #d99a63;
+
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(245, 225, 205, 0.09);
+  border-radius: 16px;
+  background: linear-gradient(
+    145deg,
+    rgba(32, 21, 23, 0.98),
+    rgba(18, 12, 13, 0.99)
+  );
+  box-shadow: 0 9px 28px rgba(0, 0, 0, 0.18);
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.directory-card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--community-accent) 48%, transparent);
+  box-shadow:
+    0 18px 38px rgba(0, 0, 0, 0.32),
+    0 0 30px color-mix(in srgb, var(--community-accent) 10%, transparent);
+}
+
+.directory-card-main {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Banner image */
+
+.directory-banner {
+  --community-accent: #d99a63;
+
+  position: relative;
+  isolation: isolate;
+  height: 155px;
+  overflow: hidden;
+  background-color: #2a1a1d;
+  background-image:
+    radial-gradient(
+      ellipse at 78% 20%,
+      color-mix(in srgb, var(--community-accent) 70%, transparent),
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse at 12% 100%,
+      rgba(var(--dir-wine), 0.5),
+      transparent 58%
+    ),
+    linear-gradient(115deg, #2e1d20 0%, #171012 65%, #2a1b1e 100%);
+  background-position: center;
+  background-size: cover;
+}
+
+/* Blurred background fills any unused space */
+
+.directory-banner-backdrop {
+  position: absolute;
+  z-index: 0;
+  top: -15px;
+  right: -15px;
+  bottom: -15px;
+  left: -15px;
+  width: calc(100% + 30px);
+  height: calc(100% + 30px);
+  object-fit: cover;
+  object-position: center;
+  filter: blur(12px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* Full original banner, without cropping */
+
+.directory-banner-full {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  pointer-events: none;
+}
+
+/* Dark gradient overlay */
+
+.directory-banner::before {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 6, 7, 0.02) 0%,
+      rgba(10, 6, 7, 0.04) 45%,
+      rgba(16, 10, 11, 0.74) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(12, 8, 9, 0.22),
+      transparent 70%
+    );
+  content: "";
+  pointer-events: none;
+}
+
+/* Decorative rings */
+
+.directory-banner::after {
+  position: absolute;
+  z-index: 3;
+  right: -45px;
+  bottom: -135px;
+  width: 310px;
+  height: 220px;
+  border: 1px solid rgba(255, 235, 215, 0.12);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 24px rgba(255, 235, 215, 0.025),
+    0 0 0 53px rgba(255, 235, 215, 0.018),
+    0 0 0 83px rgba(255, 235, 215, 0.012);
+  content: "";
+  pointer-events: none;
+}
+
+/* Additional shade */
+
+.directory-banner-shade {
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(
+    0deg,
+    rgba(16, 10, 11, 0.2),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+/* Accent glow */
+
+.directory-banner-glow {
+  position: absolute;
+  z-index: 5;
+  top: -80px;
+  left: 38%;
+  width: 220px;
+  height: 170px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--community-accent) 25%, transparent);
+  filter: blur(65px);
+  opacity: 0.75;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.directory-card:hover .directory-banner-glow {
+  opacity: 1;
+}
+
+/* Avatar */
+
+.directory-avatar {
+  --community-accent: #d99a63;
+
+  display: grid;
+  width: 68px;
+  height: 68px;
+  flex-shrink: 0;
+  place-items: center;
+  overflow: hidden;
+  border: 4px solid #1b1214;
+  border-radius: 19px;
+  background:
+    radial-gradient(
+      circle at 25% 15%,
+      color-mix(in srgb, var(--community-accent) 50%, transparent),
+      transparent 65%
+    ),
+    #2a1b1e;
+  color: #fff;
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.directory-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.directory-avatar-large {
+  width: 100px;
+  height: 100px;
+  border-width: 5px;
+  border-radius: 25px;
+  font-size: 28px;
+}
+
+/* Card content */
+
+.directory-card-content {
+  padding: 0 19px 19px;
+}
+
+.directory-card-identity {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  min-height: 39px;
+  margin-top: -35px;
+  margin-bottom: 13px;
+  z-index: 2;
+}
+
+.directory-featured {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 25px;
+  padding: 0 9px;
+  border: 1px solid rgba(var(--dir-amber), 0.28);
+  border-radius: 7px;
+  background: rgba(44, 28, 22, 0.86);
+  color: #f6d8b8;
+  font-size: 9px;
+  font-weight: 750;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.directory-card-heading {
+  min-width: 0;
+}
+
+.directory-card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.directory-card-title h3 {
+  overflow: hidden;
+  margin: 0;
+  color: #fff;
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.45px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.directory-card-arrow {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  flex-shrink: 0;
+  place-items: center;
+  border: 1px solid rgba(245, 225, 205, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 245, 235, 0.035);
+  color: rgba(255, 255, 255, 0.55);
+  transition: 0.2s ease;
+}
+
+.directory-card:hover .directory-card-arrow {
+  border-color: color-mix(in srgb, var(--community-accent) 40%, transparent);
+  background: color-mix(in srgb, var(--community-accent) 15%, transparent);
+  color: #fff;
+  transform: translateX(2px);
+}
+
+.directory-tagline {
+  margin: 5px 0 0;
+  color: #e9b98f;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.directory-description {
+  display: -webkit-box;
+  overflow: hidden;
+  min-height: 40px;
+  margin: 11px 0 14px;
+  color: rgba(245, 232, 220, 0.58);
+  font-size: 12px;
+  line-height: 1.7;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.directory-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 25px;
+}
+
+.directory-members {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.directory-members svg {
+  color: #f0c397;
+}
+
+.directory-tags {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.directory-tags span,
+.directory-profile-tags span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 23px;
+  padding: 0 8px;
+  border: 1px solid rgba(var(--dir-amber), 0.16);
+  border-radius: 6px;
+  background: rgba(var(--dir-amber), 0.08);
+  color: rgba(246, 220, 192, 0.9);
+  font-size: 9px;
+  font-weight: 650;
+}
+
+/* Card footer */
+
+.directory-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 49px;
+  padding: 0 19px;
+  border-top: 1px solid rgba(245, 225, 205, 0.07);
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.directory-card-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(255, 255, 255, 0.44);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.directory-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f09853;
+  box-shadow: 0 0 9px rgba(240, 152, 83, 0.65);
+}
+
+.directory-card-view {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #f0c397;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.directory-card-view:hover {
+  background: rgba(var(--dir-amber), 0.12);
+  color: #fff;
+}
+
+/* Empty state */
+
+.directory-empty {
+  display: flex;
+  min-height: 260px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 35px 20px;
+  border: 1px dashed rgba(245, 225, 205, 0.14);
+  border-radius: 16px;
+  background: rgba(255, 245, 235, 0.018);
+  text-align: center;
+}
+
+.directory-empty-icon {
+  display: grid;
+  width: 53px;
+  height: 53px;
+  margin-bottom: 16px;
+  place-items: center;
+  border: 1px solid rgba(var(--dir-amber), 0.2);
+  border-radius: 16px;
+  background: rgba(var(--dir-amber), 0.09);
+  color: #f0c397;
+}
+
+.directory-empty h3 {
+  margin: 0 0 7px;
+  color: #fff;
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 18px;
+}
+
+.directory-empty p {
+  max-width: 380px;
+  margin: 0;
+  color: var(--directory-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.directory-empty button {
+  min-height: 35px;
+  margin-top: 18px;
+  padding: 0 13px;
+  border: 1px solid rgba(var(--dir-amber), 0.32);
+  border-radius: 8px;
+  background: rgba(var(--dir-amber), 0.1);
+  color: #f6d8b8;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Join banner */
+
+.directory-join {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 21px;
+  overflow: hidden;
+  margin-top: 58px;
+  padding: 27px 29px;
+  border: 1px solid rgba(var(--dir-amber), 0.22);
+  border-radius: 17px;
+  background:
+    linear-gradient(
+      110deg,
+      rgba(var(--dir-wine), 0.2),
+      rgba(26, 16, 18, 0.94) 52%,
+      rgba(36, 21, 18, 0.96)
+    );
+}
+
+.directory-join-glow {
+  position: absolute;
+  top: -100px;
+  right: 10%;
+  width: 300px;
+  height: 230px;
+  border-radius: 50%;
+  background: rgba(var(--dir-amber), 0.17);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.directory-join-icon {
+  position: relative;
+  display: grid;
+  width: 55px;
+  height: 55px;
+  flex-shrink: 0;
+  place-items: center;
+  border: 1px solid rgba(var(--dir-amber), 0.24);
+  border-radius: 15px;
+  background: rgba(var(--dir-amber), 0.14);
+  color: #f6d8b8;
+}
+
+.directory-join-copy {
+  position: relative;
+  flex: 1;
+}
+
+.directory-join-copy > span {
+  color: #e9bf99;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.directory-join-copy h2 {
+  margin: 5px 0 5px;
+  color: #fff;
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.45px;
+}
+
+.directory-join-copy p {
+  margin: 0;
+  color: rgba(245, 232, 220, 0.57);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.directory-join > a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 42px;
+  flex-shrink: 0;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 235, 215, 0.3);
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f0b27a, #d38b58);
+  color: #1d1009;
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 5px 18px rgba(var(--dir-amber), 0.22);
+  transition: 0.2s ease;
+}
+
+.directory-join > a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 23px rgba(var(--dir-amber), 0.36);
+}
+
+/* =========================================================
+   COMMUNITY PROFILE
+   ========================================================= */
+
+.directory-profile {
+  --dir-amber: 231, 171, 114;
+  --dir-rose: 209, 180, 165;
+  --dir-wine: 142, 43, 75;
+  --directory-muted: rgba(245, 232, 220, 0.55);
+
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 35px 24px 70px;
+  color: #fff;
+}
+
+.directory-profile-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.directory-back,
+.directory-share {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid rgba(245, 225, 205, 0.09);
+  border-radius: 9px;
+  background: rgba(255, 245, 235, 0.03);
+  color: rgba(255, 255, 255, 0.68);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.directory-back:hover,
+.directory-share:hover {
+  border-color: rgba(var(--dir-amber), 0.38);
+  background: rgba(var(--dir-amber), 0.1);
+  color: #fff;
+}
+
+.directory-profile-hero {
+  --community-accent: #d99a63;
+
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 23px;
+  border: 1px solid rgba(245, 225, 205, 0.09);
+  border-radius: 17px;
+  background: linear-gradient(
+    145deg,
+    rgba(32, 21, 23, 0.98),
+    rgba(18, 12, 13, 0.99)
+  );
+}
+
+.directory-profile-banner {
+  height: 235px;
+  border-radius: 0;
+}
+
+.directory-profile-identity {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 19px;
+  margin: -51px 25px 0;
+  z-index: 2;
+}
+
+.directory-profile-title {
+  min-width: 0;
+  padding-bottom: 7px;
+}
+
+.directory-profile-name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.directory-profile-name-row h1 {
+  margin: 0;
+  color: #fff;
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: clamp(24px, 4vw, 34px);
+  font-weight: 800;
+  letter-spacing: -1.1px;
+}
+
+.directory-profile-title .directory-tagline {
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.directory-profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 21px 25px 0;
+}
+
+.directory-primary-action,
+.directory-secondary-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 39px;
+  padding: 0 14px;
+  border: 1px solid rgba(var(--dir-amber), 0.32);
+  border-radius: 9px;
+  color: #f6dcc0;
+  font-size: 11px;
+  font-weight: 750;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.directory-primary-action {
+  background: linear-gradient(135deg, #f0b27a, #d38b58);
+  color: #1d1009;
+  box-shadow: 0 5px 16px rgba(var(--dir-amber), 0.18);
+}
+
+.directory-secondary-action {
+  border-color: rgba(245, 225, 205, 0.1);
+  background: rgba(255, 245, 235, 0.04);
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.directory-primary-action:hover,
+.directory-secondary-action:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+/* Profile columns */
+
+.directory-profile-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  align-items: start;
+  gap: 19px;
+  margin-top: 20px;
+}
+
+.directory-profile-main,
+.directory-profile-sidebar {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 17px;
+}
+
+.directory-panel {
+  min-width: 0;
+  padding: 21px;
+  border: 1px solid rgba(245, 225, 205, 0.08);
+  border-radius: 14px;
+  background: linear-gradient(
+    145deg,
+    rgba(30, 20, 22, 0.96),
+    rgba(19, 13, 14, 0.98)
+  );
+}
+
+.directory-panel-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.directory-panel-heading h2 {
+  margin: 0;
+  color: #fff;
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 15px;
+  font-weight: 750;
+  letter-spacing: -0.25px;
+}
+
+.directory-panel-icon {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  flex-shrink: 0;
+  place-items: center;
+  border: 1px solid rgba(var(--dir-amber), 0.18);
+  border-radius: 8px;
+  background: rgba(var(--dir-amber), 0.09);
+  color: #f0c397;
+}
+
+.directory-about,
+.directory-about-list p {
+  margin: 0;
+  color: rgba(245, 232, 220, 0.66);
+  font-size: 12px;
+  line-height: 1.85;
+}
+
+.directory-about-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 13px;
+}
+
+.directory-about-list p {
+  padding-left: 13px;
+  border-left: 2px solid rgba(var(--dir-amber), 0.4);
+}
+
+.directory-muted {
+  margin: 0;
+  color: var(--directory-muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+/* Stats */
+
+.directory-profile-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.directory-profile-stat {
+  display: flex;
+  min-height: 69px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid rgba(245, 225, 205, 0.065);
+  border-radius: 10px;
+  background: rgba(255, 245, 235, 0.025);
+}
+
+.directory-profile-stat span {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.directory-profile-stat strong {
+  overflow-wrap: anywhere;
+  color: #fff;
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+/* Profile categories */
+
+.directory-profile-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.directory-profile-tags span {
+  min-height: 27px;
+  padding: 0 10px;
+  font-size: 10px;
+}
+
+/* Profile links */
+
+.directory-profile-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.directory-profile-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid rgba(245, 225, 205, 0.08);
+  border-radius: 9px;
+  background: rgba(255, 245, 235, 0.025);
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 11px;
+  font-weight: 650;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.directory-profile-link:hover {
+  border-color: rgba(var(--dir-amber), 0.34);
+  background: rgba(var(--dir-amber), 0.08);
+  color: #fff;
+}
+
+.directory-profile-link svg {
+  flex-shrink: 0;
+  color: #f0c397;
+}
+
+.directory-profile-link.is-primary {
+  border-color: rgba(var(--dir-amber), 0.3);
+  background: rgba(var(--dir-amber), 0.1);
+  color: #f8e2cb;
+}
+
+/* Related communities */
+
+.directory-related {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.directory-related-card {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid rgba(245, 225, 205, 0.07);
+  border-radius: 10px;
+  background: rgba(255, 245, 235, 0.025);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.directory-related-card:hover {
+  border-color: rgba(var(--dir-amber), 0.3);
+  background: rgba(var(--dir-amber), 0.07);
+}
+
+.directory-related-card .directory-avatar {
+  width: 39px;
+  height: 39px;
+  border-width: 2px;
+  border-radius: 11px;
+  font-size: 12px;
+}
+
+.directory-related-card > span {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.directory-related-card strong {
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.directory-related-card small {
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.44);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.directory-related-card > svg {
+  flex-shrink: 0;
+  color: #f0c397;
+}
+
+/* Partnership card */
+
+.directory-partner-card {
+  position: relative;
+  overflow: hidden;
+  padding: 20px;
+  border: 1px solid rgba(var(--dir-amber), 0.22);
+  border-radius: 14px;
+  background:
+    radial-gradient(
+      ellipse at 100% 0%,
+      rgba(var(--dir-amber), 0.15),
+      transparent 60%
+    ),
+    linear-gradient(145deg, rgba(44, 27, 28, 0.95), rgba(22, 14, 15, 0.98));
+}
+
+.directory-partner-icon {
+  display: grid;
+  width: 37px;
+  height: 37px;
+  margin-bottom: 13px;
+  place-items: center;
+  border: 1px solid rgba(var(--dir-amber), 0.24);
+  border-radius: 11px;
+  background: rgba(var(--dir-amber), 0.13);
+  color: #f6d8b8;
+}
+
+.directory-partner-card h3 {
+  margin: 0 0 7px;
+  color: #fff;
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.35px;
+}
+
+.directory-partner-card p {
+  margin: 0;
+  color: rgba(245, 232, 220, 0.6);
+  font-size: 11px;
+  line-height: 1.75;
+}
+
+.directory-partner-card > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 15px;
+  color: #f0c397;
+  font-size: 11px;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.directory-partner-card > a:hover {
+  color: #fff;
+}
+
+/* =========================================================
+   LIVE DISCORD DATA
+   Member / online counts, badge icons, boosts and live tiles.
+   ========================================================= */
+
+/* ---------- Discord counts (cards) ---------- */
+
+.directory-counts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 13px;
+}
+
+.directory-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  padding: 0 11px 0 8px;
+  border: 1px solid rgba(245, 225, 205, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 245, 235, 0.035);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1;
+}
+
+.directory-count small {
+  color: rgba(255, 255, 255, 0.46);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Discord icon. The "online" version gets a green status dot. */
+
+.directory-count-icon {
+  position: relative;
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  color: #f0c397;
+}
+
+.directory-count-icon.is-online::after {
+  position: absolute;
+  right: -4px;
+  bottom: -3px;
+  box-sizing: content-box;
+  width: 6px;
+  height: 6px;
+  border: 2px solid #1b1214;
+  border-radius: 50%;
+  background: #3ba55d;
+  box-shadow: 0 0 8px rgba(59, 165, 93, 0.65);
+  content: "";
+}
+
+.directory-count-online {
+  border-color: rgba(59, 165, 93, 0.22);
+  background: rgba(59, 165, 93, 0.07);
+}
+
+/* ---------- Badges (community / verified / partner) ---------- */
+
+.directory-card-flags {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.directory-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 25px;
+  padding: 0 7px;
+  border: 1px solid rgba(245, 225, 205, 0.09);
+  border-radius: 7px;
+  background: rgba(44, 28, 22, 0.86);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.directory-badge {
+  display: inline-grid;
+  place-items: center;
+}
+
+.directory-badge img {
+  display: block;
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
+}
+
+.directory-profile-flags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.directory-badge-chip,
+.directory-boosts {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  padding: 0 11px 0 8px;
+  border: 1px solid rgba(var(--dir-amber), 0.22);
+  border-radius: 8px;
+  background: rgba(var(--dir-amber), 0.08);
+  color: #f6d8b8;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.directory-badge-chip img,
+.directory-boosts img {
+  display: block;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.directory-boosts small {
+  color: rgba(246, 216, 184, 0.62);
+  font-size: 9px;
+  font-weight: 600;
+}
+
+/* In the card footer row, keep the boost chip compact and the tags on the right. */
+
+.directory-card-meta .directory-boosts {
+  min-height: 25px;
+  padding: 0 9px 0 7px;
+}
+
+.directory-card-meta .directory-tags {
+  margin-left: auto;
+}
+
+/* ---------- Heading stats (communities + total members) ---------- */
+
+.directory-heading-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* ---------- Live tiles on the profile ---------- */
+
+.directory-live-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 9px;
+  margin-bottom: 9px;
+}
+
+.directory-profile-stat.is-live {
+  min-height: 84px;
+  border-color: rgba(var(--dir-amber), 0.2);
+  background:
+    radial-gradient(
+      ellipse at 100% 0%,
+      rgba(var(--dir-amber), 0.13),
+      transparent 70%
+    ),
+    rgba(255, 245, 235, 0.025);
+}
+
+.directory-live-tile-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.directory-live-tile-label img {
+  display: block;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.directory-profile-stat.is-live strong {
+  font-size: 24px;
+  letter-spacing: -0.5px;
+}
+
+/* "Live from Discord" tag in the panel heading */
+
+.directory-live-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 10px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.directory-live-tag i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3ba55d;
+  box-shadow: 0 0 0 0 rgba(59, 165, 93, 0.55);
+  animation: directory-live-ping 2s infinite;
+}
+
+.directory-live-tag.is-stale i {
+  background: #d8a24a;
+  box-shadow: none;
+  animation: none;
+}
+
+@keyframes directory-live-ping {
+  70% {
+    box-shadow: 0 0 0 7px rgba(59, 165, 93, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 165, 93, 0);
+  }
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .directory-profile-layout {
+    grid-template-columns: minmax(0, 1fr) 250px;
+  }
+
+  .directory-grid {
+    gap: 14px;
+  }
+
+  .directory-card-content {
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+
+  .directory-card-footer {
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+}
+
+@media (max-width: 720px) {
+  .directory {
+    padding: 30px 18px 55px;
+  }
+
+  .directory-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 21px;
+  }
+
+  .directory-heading-stat {
+    padding: 11px 14px;
+  }
+
+  .directory-heading-stats {
+    justify-content: flex-start;
+  }
+
+  .directory-profile {
+    padding: 25px 18px 55px;
+  }
+
+  .directory-profile-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .directory-profile-sidebar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .directory-partner-card {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .directory {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .directory-heading h1 {
+    font-size: 42px;
+    letter-spacing: -2px;
+  }
+
+  .directory-heading-copy > p {
+    font-size: 12px;
+  }
+
+  .directory-heading-stats {
+    width: 100%;
+  }
+
+  .directory-heading-stats .directory-heading-stat {
+    flex: 1 1 140px;
+  }
+
+  .directory-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .directory-sort {
+    justify-content: space-between;
+  }
+
+  .directory-sort select {
+    max-width: none;
+  }
+
+  .directory-categories {
+    margin-bottom: 31px;
+  }
+
+  .directory-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .directory-banner {
+    height: 145px;
+  }
+
+  .directory-card-content {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .directory-card-footer {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .directory-card-meta .directory-tags {
+    margin-left: 0;
+  }
+
+  .directory-section-heading h2 {
+    font-size: 19px;
+  }
+
+  .directory-section-count {
+    font-size: 10px;
+  }
+
+  .directory-join {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 20px;
+  }
+
+  .directory-join-copy {
+    flex-basis: calc(100% - 75px);
+  }
+
+  .directory-join-copy h2 {
+    font-size: 17px;
+  }
+
+  .directory-join > a {
+    width: 100%;
+  }
+
+  .directory-profile {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .directory-profile-banner {
+    height: 170px;
+  }
+
+  .directory-profile-identity {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    margin: -42px 16px 0;
+  }
+
+  .directory-avatar-large {
+    width: 82px;
+    height: 82px;
+    border-radius: 21px;
+  }
+
+  .directory-profile-title {
+    padding-bottom: 0;
+  }
+
+  .directory-profile-name-row h1 {
+    font-size: 26px;
+  }
+
+  .directory-profile-actions {
+    margin-right: 16px;
+    margin-left: 16px;
+  }
+
+  .directory-profile-actions a {
+    flex: 1;
+  }
+
+  .directory-profile-sidebar {
+    display: flex;
+  }
+
+  .directory-live-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .directory-profile-flags {
+    gap: 6px;
+  }
+
+  .directory-profile-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .directory *,
+  .directory-profile * {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =========================================================
+   IN-APP BROWSER FALLBACKS
+   Discord / Instagram / Facebook / TikTok / Line webviews.
+   ========================================================= */
+
+/* 1. color-mix() with var() is not dropped at parse time in old
+      browsers, it becomes invalid at computed time, so a plain
+      fallback line above it would not help. @supports is the
+      reliable way to override it with solid rgba() colours. */
+
+@supports not (color: color-mix(in srgb, red 50%, blue)) {
+  .directory-card:hover {
+    border-color: rgba(var(--dir-amber), 0.48);
+    box-shadow:
+      0 18px 38px rgba(0, 0, 0, 0.32),
+      0 0 30px rgba(var(--dir-amber), 0.1);
+  }
+
+  .directory-banner {
+    background-image:
+      radial-gradient(
+        ellipse at 78% 20%,
+        rgba(var(--dir-amber), 0.55),
+        transparent 52%
+      ),
+      radial-gradient(
+        ellipse at 12% 100%,
+        rgba(var(--dir-wine), 0.5),
+        transparent 58%
+      ),
+      linear-gradient(115deg, #2e1d20 0%, #171012 65%, #2a1b1e 100%);
+  }
+
+  .directory-banner-glow {
+    background: rgba(var(--dir-amber), 0.25);
+  }
+
+  .directory-avatar {
+    background:
+      radial-gradient(
+        circle at 25% 15%,
+        rgba(var(--dir-amber), 0.4),
+        transparent 65%
+      ),
+      #2a1b1e;
+  }
+
+  .directory-card:hover .directory-card-arrow {
+    border-color: rgba(var(--dir-amber), 0.4);
+    background: rgba(var(--dir-amber), 0.15);
+  }
+}
+
+/* 2. No backdrop-filter: use a more opaque background instead */
+
+@supports not (backdrop-filter: blur(1px)) {
+  .directory-featured,
+  .directory-badges {
+    background: rgba(36, 22, 18, 0.96);
+  }
+}
+
+/* 3. Applied by a tiny script when an in-app browser is detected:
+      document.documentElement.classList.add("iab") */
+
+.iab .directory-featured,
+.iab .directory-badges {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background: rgba(36, 22, 18, 0.96) !important;
+}
+
+.iab .directory-banner-backdrop {
+  filter: none;
+  opacity: 0.35;
+}
+
+.iab .directory-banner-glow,
+.iab .directory-join-glow {
+  filter: none;
+  opacity: 0.35;
+}
+
+.iab .directory-live-tag i {
+  animation: none !important;
+}
+
+.iab .directory-card,
+.iab .directory-card * {
+  transition-duration: 0.01ms !important;
+}
