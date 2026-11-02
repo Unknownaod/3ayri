@@ -95,7 +95,7 @@ export default async function Home() {
               {featured.map((item) => (
                 <Link
                   className="partner-row"
-                  href={`/affiliates#${item.slug}`}
+                  href={`/affiliates/${item.slug}`}
                   key={item.slug}
                   style={{ "--partner-accent": item.accent }}
                 >
