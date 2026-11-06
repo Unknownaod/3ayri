@@ -1,4 +1,3 @@
-```js
 // app/api/giveaways/[id]/entries/route.js
 //
 // Returns the people who entered one giveaway, a page at a time, with Discord
@@ -316,4 +315,4 @@ export async function GET(request, { params }) {
     true
   );
 }
-```
+
