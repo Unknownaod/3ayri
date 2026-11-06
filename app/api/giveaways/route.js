@@ -13,10 +13,25 @@ export const dynamic = "force-dynamic";
 
 const MAX_ENDED = 60;
 
-const STAFF_ROLE_IDS = (process.env.STAFF_ROLE_IDS || "")
-  .split(",")
-  .map((id) => id.trim())
-  .filter(Boolean);
+// Supports either environment variable name.
+const GUILD_ID =
+  process.env.GUILD_ID ||
+  process.env.DISCORD_GUILD_ID;
+
+// Staff role IDs.
+const STAFF_ROLE_IDS = new Set([
+  "1563603827863715915", // Founder
+  "1563603827855458414", // Community Manager
+  "1563603827855458413", // Admin
+  "1563603827855458412", // Mod
+  "1563603827855458411", // Trial Mod
+
+  // Optional additional role IDs from environment variables.
+  ...(process.env.STAFF_ROLE_IDS || "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean),
+]);
 
 function normalize(g) {
   const endsAt = toIso(
@@ -60,12 +75,10 @@ function normalize(g) {
     first(g, ["channelId", "channel_id", "channel"])
   );
 
-  const guildId = process.env.GUILD_ID;
-
   const link =
     first(g, ["url", "link"]) ??
-    (guildId && channelId && id
-      ? `https://discord.com/channels/${guildId}/${channelId}/${id}`
+    (GUILD_ID && channelId && id
+      ? `https://discord.com/channels/${GUILD_ID}/${channelId}/${id}`
       : null);
 
   const description = first(g, [
@@ -115,7 +128,7 @@ const byEndedDesc = (a, b) =>
   (Date.parse(b.endedAt) || 0) -
   (Date.parse(a.endedAt) || 0);
 
-// Discord API helper
+// Discord API helper.
 async function discordFetch(path) {
   const token = process.env.DISCORD_BOT_TOKEN;
 
@@ -134,7 +147,10 @@ async function discordFetch(path) {
   );
 
   if (!response.ok) {
-    throw new Error(`Discord API returned ${response.status}.`);
+    const details = await response.text().catch(() => "");
+    throw new Error(
+      `Discord API returned ${response.status}: ${details.slice(0, 300)}`
+    );
   }
 
   return response.json();
@@ -142,20 +158,18 @@ async function discordFetch(path) {
 
 // Collect all role information from the Discord server.
 async function collectServerRoles() {
-  const guildId = process.env.GUILD_ID;
-
-  if (!guildId) {
-    throw new Error("GUILD_ID is not configured.");
+  if (!GUILD_ID) {
+    throw new Error("GUILD_ID or DISCORD_GUILD_ID is not configured.");
   }
 
   const roles = await discordFetch(
-    `/guilds/${guildId}/roles`
+    `/guilds/${GUILD_ID}/roles`
   );
 
   const roleMap = {};
 
   const serverRoles = roles.map((role) => {
-    const isStaffRole = STAFF_ROLE_IDS.includes(role.id);
+    const isStaffRole = STAFF_ROLE_IDS.has(role.id);
 
     const data = {
       id: role.id,
@@ -195,11 +209,11 @@ async function collectMembers(userIds, roleMap) {
     userIds.map(async (userId) => {
       try {
         const member = await discordFetch(
-          `/guilds/${process.env.GUILD_ID}/members/${userId}`
+          `/guilds/${GUILD_ID}/members/${userId}`
         );
 
         const roleIds = Array.isArray(member.roles)
-          ? member.roles
+          ? member.roles.map(String)
           : [];
 
         const roles = roleIds.map(
@@ -207,7 +221,7 @@ async function collectMembers(userIds, roleMap) {
             roleMap[roleId] ?? {
               id: roleId,
               name: "Unknown role",
-              isStaffRole: STAFF_ROLE_IDS.includes(roleId),
+              isStaffRole: STAFF_ROLE_IDS.has(roleId),
             }
         );
 
@@ -222,6 +236,11 @@ async function collectMembers(userIds, roleMap) {
             member.communication_disabled_until ?? null,
         };
       } catch (error) {
+        console.error(
+          `Could not fetch Discord member ${userId}:`,
+          error.message
+        );
+
         members[userId] = {
           roleIds: [],
           roles: [],
@@ -328,6 +347,7 @@ export async function GET(request) {
   // Collect usernames and avatars.
   const users = await resolveUsers(userIds);
 
+  // Combine user profiles with Discord server membership data.
   const person = (id) => {
     if (!id) return null;
 
@@ -364,7 +384,7 @@ export async function GET(request) {
       serverRoles,
 
       // Staff role configuration.
-      staffRoleIds: STAFF_ROLE_IDS,
+      staffRoleIds: [...STAFF_ROLE_IDS],
 
       // Whether Discord role collection succeeded.
       discordDataAvailable: Object.keys(roleMap).length > 0,
