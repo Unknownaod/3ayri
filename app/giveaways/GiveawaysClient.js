@@ -7,6 +7,37 @@ const SOON_MS = 60 * 60 * 1000;
 const PAGE_SIZE = 10;
 const ENTRY_PAGE = 48;
 
+const STAFF_ROLES = [
+  { id: "1563603827863715915", label: "Founder", className: "founder", title: "Founder" },
+  { id: "1563603827855458414", label: "Community Manager", className: "community-manager", title: "Community Manager" },
+  { id: "1563603827855458413", label: "Admin", className: "admin", title: "Administrator" },
+  { id: "1563603827855458412", label: "Mod", className: "moderator", title: "Moderator" },
+  { id: "1563603827855458411", label: "Trial Mod", className: "trial", title: "Trial Moderator" },
+];
+
+function getStaffRoles(user) {
+  if (!user) return [];
+  const assignedIds = new Set([
+    ...(Array.isArray(user.roleIds) ? user.roleIds : []),
+    ...(Array.isArray(user.roles) ? user.roles.map((role) => role?.id).filter(Boolean) : []),
+  ]);
+  return STAFF_ROLES.filter((role) => assignedIds.has(role.id));
+}
+
+function RoleBadges({ user }) {
+  const roles = getStaffRoles(user);
+  if (!roles.length) return null;
+  return (
+    <span className="gw-role-badges" aria-label={roles.map((role) => role.title).join(", ")}>
+      {roles.map((role) => (
+        <span key={role.id} className={`gw-role-badge is-${role.className}`} title={role.title}>
+          {role.label}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 const FILTERS = [
   ["all", "All"],
   ["live", "Live"],
@@ -134,7 +165,10 @@ function Person({ user, size = 24 }) {
   return (
     <span className="gw-person">
       <Avatar user={user} size={size} />
-      <span>{user.name}</span>
+      <span className="gw-person-info">
+        <span className="gw-person-name">{user.name}</span>
+        <RoleBadges user={user} />
+      </span>
     </span>
   );
 }
@@ -321,8 +355,7 @@ function Details({ g, seen, href }) {
           <div className="gw-chips">
             {g.winners.map((u) => (
               <span key={u.id} className="gw-chip">
-                <Avatar user={u} size={24} />
-                {u.name}
+                <Person user={u} size={24} />
               </span>
             ))}
           </div>
@@ -371,8 +404,7 @@ function LiveCard({ g, now, inviteUrl }) {
           <span className="gw-meta">
             {g.host && (
               <span className="gw-meta-item">
-                <Avatar user={g.host} size={22} />
-                Hosted by {g.host.name}
+                Hosted by <Person user={g.host} size={22} />
               </span>
             )}
             {g.entries !== null && (
@@ -452,7 +484,8 @@ function EndedCard({ g, now, inviteUrl }) {
                 ))}
               </span>
               <span className="gw-stack-name">
-                {g.winners[0].name}
+                <span>{g.winners[0].name}</span>
+                <RoleBadges user={g.winners[0]} />
                 {more > 0 ? ` and ${more} more` : ""}
               </span>
             </>
