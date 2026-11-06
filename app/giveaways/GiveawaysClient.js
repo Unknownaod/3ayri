@@ -282,8 +282,7 @@ function Entrants({ g }) {
                 className={`gw-entrant${won ? " is-winner" : ""}`}
                 title={enteredAt ? `Entered ${fullDate(enteredAt)}` : undefined}
               >
-                <Avatar user={user} size={28} />
-                <span>{user.name}</span>
+                <Person user={user} size={28} />
                 {won && <em>{claimed ? "Claimed" : "Winner"}</em>}
               </li>
             );
