@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 const GREED_API = "https://x.greed.best/v1";
 const DISCORD_API = "https://discord.com/api/v10";
-const MAX_ENDED = 30;
+const MAX_ENDED = 60;
 const USER_TTL = 60 * 60 * 1000; // resolved users are remembered for 1 hour
 const RETRY_TTL = 5 * 60 * 1000; // failed lookups are retried after 5 minutes
 
@@ -134,6 +134,7 @@ function normalize(g) {
     id,
     prize: String(first(g, ["prize", "title", "name"]) ?? "Giveaway"),
     ended,
+    startedAt: toIso(first(g, ["startedAt", "startAt", "startTime", "createdAt", "started_at", "created_at"])),
     endsAt,
     endedAt: endedAt ?? (ended ? endsAt : null),
     entries,
