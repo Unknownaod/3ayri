@@ -1166,3 +1166,134 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ---------- Discord staff role identity ---------- */
+
+.gw-person-info {
+  display: inline-flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.gw-person-name {
+  min-width: 0;
+}
+
+.gw-role-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  vertical-align: middle;
+}
+
+.gw-role-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 19px;
+  padding: 2px 7px;
+  overflow: hidden;
+  border: 1px solid var(--role-border);
+  border-radius: 6px;
+  background: var(--role-bg);
+  color: var(--role-text);
+  font: 800 9px/1.2 var(--gw-body);
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 0 11px var(--role-glow);
+}
+
+.gw-role-badge::after {
+  position: absolute;
+  inset: -50% auto -50% -65%;
+  width: 35%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent);
+  content: "";
+  transform: skewX(-22deg);
+  animation: gw-role-shine 4.5s ease-in-out infinite;
+}
+
+.gw-role-badge.is-founder {
+  --role-bg: linear-gradient(120deg, rgba(120, 79, 22, .5), rgba(246, 207, 112, .18));
+  --role-border: rgba(255, 211, 112, .65);
+  --role-text: #ffe4a1;
+  --role-glow: rgba(255, 190, 72, .28);
+  border-radius: 999px;
+  box-shadow: 0 0 10px rgba(255, 190, 72, .25), inset 0 0 9px rgba(255, 218, 135, .1);
+}
+
+.gw-role-badge.is-community-manager {
+  --role-bg: linear-gradient(120deg, rgba(16, 103, 120, .42), rgba(83, 224, 230, .13));
+  --role-border: rgba(92, 225, 235, .58);
+  --role-text: #a9f7fa;
+  --role-glow: rgba(58, 218, 230, .24);
+  border-radius: 999px;
+}
+
+.gw-role-badge.is-admin {
+  --role-bg: linear-gradient(120deg, rgba(117, 42, 65, .48), rgba(238, 105, 133, .14));
+  --role-border: rgba(246, 125, 151, .58);
+  --role-text: #ffc0cf;
+  --role-glow: rgba(238, 87, 125, .23);
+}
+
+.gw-role-badge.is-moderator {
+  --role-bg: linear-gradient(120deg, rgba(39, 76, 139, .48), rgba(104, 164, 255, .14));
+  --role-border: rgba(120, 174, 255, .56);
+  --role-text: #c3dcff;
+  --role-glow: rgba(88, 145, 255, .22);
+}
+
+.gw-role-badge.is-trial {
+  --role-bg: linear-gradient(120deg, rgba(40, 105, 75, .48), rgba(105, 210, 151, .13));
+  --role-border: rgba(121, 218, 163, .52);
+  --role-text: #c0f4d5;
+  --role-glow: rgba(91, 207, 139, .2);
+}
+
+.gw-person:has(.is-founder) .gw-avatar {
+  border-color: rgba(255, 211, 112, .8);
+  box-shadow: 0 0 12px rgba(255, 190, 72, .25);
+}
+
+.gw-person:has(.is-community-manager) .gw-avatar {
+  border-color: rgba(92, 225, 235, .75);
+  box-shadow: 0 0 11px rgba(58, 218, 230, .2);
+}
+
+.gw-person:has(.is-admin) .gw-avatar {
+  border-color: rgba(246, 125, 151, .75);
+  box-shadow: 0 0 11px rgba(238, 87, 125, .2);
+}
+
+.gw-person:has(.is-moderator) .gw-avatar {
+  border-color: rgba(120, 174, 255, .75);
+  box-shadow: 0 0 11px rgba(88, 145, 255, .2);
+}
+
+.gw-person:has(.is-trial) .gw-avatar {
+  border-color: rgba(121, 218, 163, .72);
+  box-shadow: 0 0 10px rgba(91, 207, 139, .18);
+}
+
+@keyframes gw-role-shine {
+  0%, 65% { left: -65%; }
+  100% { left: 140%; }
+}
+
+.gw-stack-name .gw-role-badges {
+  margin-top: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gw-role-badge::after {
+    animation: none;
+  }
+}
+
