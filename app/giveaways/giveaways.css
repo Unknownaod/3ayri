@@ -1,0 +1,297 @@
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap");
+
+/* Retheme the whole page from these variables. */
+.gw {
+  --gw-bg: #eef0ea;
+  --gw-surface: #f8f9f5;
+  --gw-ink: #14292b;
+  --gw-muted: #53706b;
+  --gw-line: #cdd5cd;
+  --gw-signal: #e2512f;
+  --gw-signal-strong: #c23d1c;
+
+  min-height: 100vh;
+  padding: clamp(2rem, 6vw, 5rem) clamp(1.25rem, 5vw, 3rem) 6rem;
+  background: var(--gw-bg);
+  color: var(--gw-ink);
+  font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+.gw-wrap {
+  max-width: 62rem;
+  margin: 0 auto;
+}
+
+.gw a:focus-visible,
+.gw button:focus-visible {
+  outline: 3px solid var(--gw-ink);
+  outline-offset: 3px;
+}
+
+.gw-title {
+  margin: 0 0 1rem;
+  font-size: clamp(2.5rem, 7vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.gw-lede {
+  max-width: 38rem;
+  margin: 0 0 3.5rem;
+  color: var(--gw-muted);
+  font-size: 1.125rem;
+}
+
+.gw-section {
+  margin-bottom: 4rem;
+}
+
+.gw-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin: 0 0 1.25rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.gw-dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  background: var(--gw-signal);
+  animation: gw-pulse 2.4s ease-out infinite;
+}
+
+@keyframes gw-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(226, 81, 47, 0.45);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 0.6rem rgba(226, 81, 47, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gw-dot {
+    animation: none;
+  }
+}
+
+.gw-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Live giveaways: wide rows, the countdown is the focal point */
+.gw-live {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem 2rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 1.75rem 1.5rem;
+  border-left: 4px solid var(--gw-signal);
+  background: var(--gw-surface);
+}
+
+.gw-prize {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.5rem, 3.2vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.gw-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  color: var(--gw-muted);
+  font-size: 0.9375rem;
+}
+
+.gw-person {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.gw-avatar {
+  flex: none;
+  border-radius: 50%;
+  background: var(--gw-line);
+  object-fit: cover;
+}
+
+.gw-enter {
+  display: inline-block;
+  margin-top: 1.25rem;
+  padding: 0.625rem 1.125rem;
+  border-radius: 0.25rem;
+  background: var(--gw-signal-strong);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.gw-enter:hover {
+  filter: brightness(0.92);
+}
+
+.gw-clock {
+  text-align: right;
+}
+
+.gw-clock-time {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.875rem;
+  color: var(--gw-muted);
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.gw-unit b {
+  margin-right: 0.125rem;
+  color: var(--gw-ink);
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.gw-clock-note {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.gw-clock-sub {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--gw-muted);
+  font-size: 0.875rem;
+}
+
+/* Finished giveaways: quiet, dense list */
+.gw-ended-list {
+  border-bottom: 1px solid var(--gw-line);
+}
+
+.gw-ended-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.5rem 2rem;
+  padding: 1.125rem 0;
+  border-top: 1px solid var(--gw-line);
+}
+
+.gw-ended-prize {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.gw-ended-when,
+.gw-ended-entries {
+  color: var(--gw-muted);
+  font-size: 0.9375rem;
+}
+
+.gw-ended-entries {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.gw-winners {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem 1rem;
+  font-size: 0.9375rem;
+}
+
+.gw-empty {
+  margin: 0;
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--gw-line);
+  color: var(--gw-muted);
+}
+
+.gw-empty a {
+  color: var(--gw-ink);
+  font-weight: 600;
+}
+
+.gw-button {
+  padding: 0.625rem 1.125rem;
+  border: 1px solid var(--gw-ink);
+  border-radius: 0.25rem;
+  background: none;
+  color: var(--gw-ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.gw-button:hover {
+  background: var(--gw-ink);
+  color: var(--gw-bg);
+}
+
+.gw-more {
+  margin-top: 1.5rem;
+}
+
+.gw-error {
+  margin-bottom: 2rem;
+  padding: 1rem 1.25rem;
+  border-left: 4px solid var(--gw-signal-strong);
+  background: var(--gw-surface);
+}
+
+.gw-error p {
+  margin: 0 0 0.75rem;
+}
+
+.gw-skel {
+  height: 3.5rem;
+  margin-bottom: 1rem;
+  background: var(--gw-line);
+  opacity: 0.55;
+}
+
+.gw-skel-tall {
+  height: 8rem;
+}
+
+@media (max-width: 40rem) {
+  .gw-live {
+    grid-template-columns: 1fr;
+  }
+
+  .gw-clock {
+    order: -1;
+    text-align: left;
+  }
+
+  .gw-clock-time {
+    justify-content: flex-start;
+  }
+
+  .gw-ended-row {
+    grid-template-columns: 1fr;
+  }
+
+  .gw-ended-entries {
+    text-align: left;
+  }
+}
