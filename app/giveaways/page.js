@@ -1,22 +1,91 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "./giveaways.css";
 
 const POLL_MS = 30_000;
+const SOON_MS = 60 * 60 * 1000;
 const PAGE_SIZE = 10;
 
-const pad = (n) => String(n).padStart(2, "0");
-const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+const FILTERS = [
+  ["all", "All"],
+  ["live", "Live"],
+  ["ended", "Finished"],
+];
 
-function useNow() {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
-  return now;
+const SORTS = [
+  ["recent", "Recent"],
+  ["entries", "Most entries"],
+  ["prize", "Prize A–Z"],
+];
+
+const ICONS = {
+  search: (
+    <>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </>
+  ),
+  refresh: (
+    <>
+      <polyline points="23 4 23 10 17 10" />
+      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+    </>
+  ),
+  chevron: <path d="m6 9 6 6 6-6" />,
+  users: (
+    <>
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </>
+  ),
+  gift: (
+    <>
+      <polyline points="20 12 20 22 4 22 4 12" />
+      <rect x="2" y="7" width="20" height="5" />
+      <line x1="12" y1="22" x2="12" y2="7" />
+      <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+      <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+    </>
+  ),
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </>
+  ),
+  external: (
+    <>
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </>
+  ),
+};
+
+function Icon({ name, size = 16 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {ICONS[name]}
+    </svg>
+  );
 }
+
+const pad = (n) => String(n).padStart(2, "0");
+const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : many}`;
+const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
 
 function timeAgo(iso, now) {
   const diff = Date.parse(iso) - now;
@@ -35,8 +104,40 @@ function timeAgo(iso, now) {
   return "just now";
 }
 
+function updatedAgo(iso, now) {
+  const s = Math.max(0, Math.round((now - Date.parse(iso)) / 1000));
+  if (s < 5) return "just now";
+  if (s < 60) return `${s}s ago`;
+  return timeAgo(iso, now);
+}
+
 const fullDate = (iso) =>
   new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+
+function useNow() {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  return now;
+}
+
+function Avatar({ user, size = 24 }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img className="gw-avatar" src={user.avatar} alt="" width={size} height={size} loading="lazy" />
+  );
+}
+
+function Person({ user, size = 24 }) {
+  return (
+    <span className="gw-person">
+      <Avatar user={user} size={size} />
+      <span>{user.name}</span>
+    </span>
+  );
+}
 
 function Clock({ endsAt, now }) {
   if (!endsAt) return <span className="gw-clock-note">No end time set</span>;
@@ -48,13 +149,14 @@ function Clock({ endsAt, now }) {
   const h = Math.floor((total % 86400) / 3600);
   const m = Math.floor((total % 3600) / 60);
   const s = total % 60;
-  const units = d > 0 ? [[d, "d"], [h, "h"], [m, "m"]] : h > 0 ? [[h, "h"], [m, "m"], [s, "s"]] : [[m, "m"], [s, "s"]];
+  const units =
+    d > 0 ? [[d, "d"], [h, "h"], [m, "m"]] : h > 0 ? [[h, "h"], [m, "m"], [s, "s"]] : [[m, "m"], [s, "s"]];
 
   return (
-    <time className="gw-clock-time" dateTime={endsAt}>
+    <time className="gw-digits" dateTime={endsAt}>
       {units.map(([value, unit]) => (
         <span key={unit} className="gw-unit">
-          <b>{pad(value)}</b>
+          <b className="gw-chrome">{pad(value)}</b>
           {unit}
         </span>
       ))}
@@ -62,73 +164,150 @@ function Clock({ endsAt, now }) {
   );
 }
 
-function Person({ user, label }) {
-  if (!user) return null;
-  return (
-    <span className="gw-person">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="gw-avatar" src={user.avatar} alt="" width={24} height={24} loading="lazy" />
-      <span>
-        {label ? `${label} ` : ""}
-        {user.name}
-      </span>
-    </span>
-  );
-}
-
-function LiveRow({ g, now, inviteUrl }) {
+function LiveCard({ g, now, inviteUrl }) {
   const href = g.link || inviteUrl;
+  const end = Date.parse(g.endsAt);
+  const start = Date.parse(g.startedAt);
+  const soon = Number.isFinite(end) && end - now > 0 && end - now < SOON_MS;
+  const pct =
+    Number.isFinite(start) && Number.isFinite(end) && end > start
+      ? Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100))
+      : null;
+
   return (
-    <li className="gw-live">
-      <div className="gw-live-main">
-        <h3 className="gw-prize">{g.prize}</h3>
-        <div className="gw-meta">
-          <Person user={g.host} label="Hosted by" />
-          {g.entries !== null && <span>{g.entries.toLocaleString()} {g.entries === 1 ? "entry" : "entries"}</span>}
-          <span>{g.winnerCount} {g.winnerCount === 1 ? "winner" : "winners"}</span>
+    <li className={`gw-card is-live${soon ? " is-soon" : ""}`}>
+      <div className="gw-live-body">
+        <div>
+          <h3 className="gw-prize">{g.prize}</h3>
+          <div className="gw-meta">
+            {g.host && (
+              <span className="gw-meta-item">
+                <Avatar user={g.host} size={22} />
+                Hosted by {g.host.name}
+              </span>
+            )}
+            {g.entries !== null && (
+              <span className="gw-meta-item">
+                <Icon name="users" size={15} />
+                {plural(g.entries, "entry", "entries")}
+              </span>
+            )}
+            <span className="gw-meta-item">
+              <Icon name="gift" size={15} />
+              {plural(g.winnerCount, "winner", "winners")}
+            </span>
+          </div>
+          {href && (
+            <a className="gw-enter" href={href} target="_blank" rel="noopener noreferrer">
+              Enter in Discord
+              <Icon name="external" size={14} />
+            </a>
+          )}
         </div>
-        {href && (
-          <a className="gw-enter" href={href} target="_blank" rel="noopener noreferrer">
-            Enter in Discord
-          </a>
-        )}
+        <div className="gw-clock">
+          {soon && <span className="gw-soon">Ending soon</span>}
+          <Clock endsAt={g.endsAt} now={now} />
+          {g.endsAt && <span className="gw-clock-sub">Ends {fullDate(g.endsAt)}</span>}
+        </div>
       </div>
-      <div className="gw-clock">
-        <Clock endsAt={g.endsAt} now={now} />
-        {g.endsAt && <span className="gw-clock-sub">Ends {fullDate(g.endsAt)}</span>}
-      </div>
+      {pct !== null && (
+        <div className="gw-progress" aria-hidden="true">
+          <i style={{ "--pct": `${pct}%` }} />
+        </div>
+      )}
     </li>
   );
 }
 
-function EndedRow({ g, now }) {
+function EndedCard({ g, now, open, onToggle, inviteUrl }) {
+  const panelId = `gw-panel-${g.id}`;
+  const href = g.link || inviteUrl;
   const shown = g.winners.slice(0, 3);
-  const extra = g.winners.length - shown.length;
+  const more = g.winners.length - 1;
+
   return (
-    <li className="gw-ended-row">
-      <div>
-        <h3 className="gw-ended-prize">{g.prize}</h3>
-        {g.endedAt && (
-          <span className="gw-ended-when" title={fullDate(g.endedAt)}>
-            Ended {timeAgo(g.endedAt, now)}
-          </span>
-        )}
-      </div>
-      <div className="gw-winners">
-        {shown.length > 0 ? (
+    <li className="gw-card">
+      <button
+        type="button"
+        className="gw-ended-head"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={onToggle}
+      >
+        <span className="gw-ended-main">
+          <span className="gw-ended-prize">{g.prize}</span>
+          {g.endedAt && <span className="gw-ended-when">Ended {timeAgo(g.endedAt, now)}</span>}
+        </span>
+        <span className="gw-ended-win">
+          {shown.length > 0 ? (
+            <>
+              <span className="gw-avatars">
+                {shown.map((u) => (
+                  <Avatar key={u.id} user={u} size={28} />
+                ))}
+              </span>
+              <span className="gw-stack-name">
+                {g.winners[0].name}
+                {more > 0 ? ` and ${more} more` : ""}
+              </span>
+            </>
+          ) : (
+            <span className="gw-muted">No winners recorded</span>
+          )}
+        </span>
+        <span className="gw-ended-entries">
+          {g.entries !== null ? plural(g.entries, "entry", "entries") : ""}
+        </span>
+        <span className="gw-chev">
+          <Icon name="chevron" size={15} />
+        </span>
+      </button>
+
+      <div id={panelId} className="gw-panel" hidden={!open}>
+        <div className="gw-detail-grid">
+          <div className="gw-detail">
+            <span>Host</span>
+            <strong>{g.host ? <Person user={g.host} size={22} /> : "Unknown"}</strong>
+          </div>
+          <div className="gw-detail">
+            <span>Ended</span>
+            <strong>{g.endedAt ? fullDate(g.endedAt) : "Unknown"}</strong>
+          </div>
+          {g.startedAt && (
+            <div className="gw-detail">
+              <span>Started</span>
+              <strong>{fullDate(g.startedAt)}</strong>
+            </div>
+          )}
+          {g.entries !== null && (
+            <div className="gw-detail">
+              <span>Entries</span>
+              <strong>{g.entries.toLocaleString()}</strong>
+            </div>
+          )}
+        </div>
+
+        {g.winners.length > 0 && (
           <>
-            {shown.map((u) => (
-              <Person key={u.id} user={u} />
-            ))}
-            {extra > 0 && <span className="gw-ended-when">and {extra} more</span>}
+            <p className="gw-panel-label">{g.winners.length === 1 ? "Winner" : "Winners"}</p>
+            <div className="gw-chips">
+              {g.winners.map((u) => (
+                <span key={u.id} className="gw-chip">
+                  <Avatar user={u} size={24} />
+                  {u.name}
+                </span>
+              ))}
+            </div>
           </>
-        ) : (
-          <span className="gw-ended-when">No winners recorded</span>
+        )}
+
+        {href && (
+          <a className="gw-enter gw-enter-sm" href={href} target="_blank" rel="noopener noreferrer">
+            Open in Discord
+            <Icon name="external" size={14} />
+          </a>
         )}
       </div>
-      <span className="gw-ended-entries">
-        {g.entries !== null ? `${g.entries.toLocaleString()} ${g.entries === 1 ? "entry" : "entries"}` : ""}
-      </span>
     </li>
   );
 }
@@ -146,18 +325,27 @@ function Skeleton() {
 export default function GiveawaysPage() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [q, setQ] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [sort, setSort] = useState("recent");
+  const [ready, setReady] = useState(false);
   const [visible, setVisible] = useState(PAGE_SIZE);
+  const [open, setOpen] = useState({});
   const now = useNow();
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (manual = false) => {
+    if (manual) setRefreshing(true);
     try {
-      const res = await fetch("/api/giveaways");
+      const res = await fetch("/api/giveaways", { cache: "no-store" });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || "Could not load giveaways.");
       setData(body);
       setError(null);
     } catch (e) {
       setError(e.message);
+    } finally {
+      if (manual) setRefreshing(false);
     }
   }, []);
 
@@ -169,86 +357,281 @@ export default function GiveawaysPage() {
     return () => clearInterval(t);
   }, [load]);
 
-  const live = data?.live ?? [];
-  const ended = data?.ended ?? [];
+  // Restore search, filter and sort from the URL, then keep the URL in sync.
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    const f = p.get("filter");
+    const s = p.get("sort");
+    if (FILTERS.some(([k]) => k === f)) setFilter(f);
+    if (SORTS.some(([k]) => k === s)) setSort(s);
+    setQ(p.get("q") ?? "");
+    setReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    const p = new URLSearchParams();
+    if (q.trim()) p.set("q", q.trim());
+    if (filter !== "all") p.set("filter", filter);
+    if (sort !== "recent") p.set("sort", sort);
+    const qs = p.toString();
+    window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
+  }, [q, filter, sort, ready]);
+
+  const needle = q.trim().toLowerCase();
+
+  useEffect(() => {
+    setVisible(PAGE_SIZE);
+  }, [needle, filter, sort]);
+
+  const { live, ended } = useMemo(() => {
+    const hit = (g) =>
+      !needle ||
+      [g.prize, g.host?.name, g.host?.username, ...g.winners.flatMap((w) => [w.name, w.username])].some(
+        (v) => v && v.toLowerCase().includes(needle),
+      );
+    const by = (isLive) => (a, b) => {
+      if (sort === "entries") return (b.entries ?? -1) - (a.entries ?? -1);
+      if (sort === "prize") return a.prize.localeCompare(b.prize);
+      return isLive
+        ? (Date.parse(a.endsAt) || Infinity) - (Date.parse(b.endsAt) || Infinity)
+        : (Date.parse(b.endedAt) || 0) - (Date.parse(a.endedAt) || 0);
+    };
+    return {
+      live: (data?.live ?? []).filter(hit).sort(by(true)),
+      ended: (data?.ended ?? []).filter(hit).sort(by(false)),
+    };
+  }, [data, needle, sort]);
+
+  const totalEntries = useMemo(() => {
+    const known = [...(data?.live ?? []), ...(data?.ended ?? [])].filter((g) => g.entries !== null);
+    return known.length ? known.reduce((n, g) => n + g.entries, 0) : null;
+  }, [data]);
+
+  const showLive = filter !== "ended" && live.length > 0;
+  const showEnded = filter !== "live" && ended.length > 0;
+  const nothing = !showLive && !showEnded;
+  const partial = data ? data.totalEnded > data.ended.length : false;
+  const liveTotal = data?.live.length ?? 0;
+  const counts = { all: liveTotal + (data?.totalEnded ?? 0), live: liveTotal, ended: data?.totalEnded ?? 0 };
+
+  const clearAll = () => {
+    setQ("");
+    setFilter("all");
+  };
 
   return (
     <main className="gw">
-      <div className="gw-wrap">
-        <header>
-          <h1 className="gw-title">Giveaways</h1>
+      <header className="gw-head">
+        <div className="gw-head-copy">
+          <h1 className="gw-title gw-chrome">Giveaways</h1>
           <p className="gw-lede">
             {!data
               ? "Loading the latest giveaways."
-              : live.length > 0
-                ? `${live.length} running right now. Enter in our Discord server before the timer runs out.`
+              : liveTotal > 0
+                ? `${liveTotal} running right now. Enter in our Discord server before the timer runs out.`
                 : "Nothing is running right now. New giveaways are posted in our Discord server."}
           </p>
-        </header>
-
-        {error && (
-          <div className="gw-error" role="alert">
-            <p>
-              <strong>Giveaways didn&apos;t load.</strong> {error}
-            </p>
-            <button className="gw-button" onClick={load}>
-              Try again
-            </button>
-          </div>
-        )}
-
-        {!data && !error && <Skeleton />}
+        </div>
 
         {data && (
-          <>
-            <section aria-labelledby="gw-live-h" className="gw-section">
-              <h2 id="gw-live-h" className="gw-section-title">
-                {live.length > 0 && <span className="gw-dot" aria-hidden="true" />}
-                Running now
-              </h2>
-              {live.length > 0 ? (
-                <ul className="gw-list">
-                  {live.map((g) => (
-                    <LiveRow key={g.id} g={g} now={now} inviteUrl={data.inviteUrl} />
-                  ))}
-                </ul>
-              ) : (
-                <p className="gw-empty">
-                  No live giveaways.{" "}
+          <div className="gw-stats">
+            <div className="gw-stat">
+              <span className="gw-stat-icon">
+                <Icon name="gift" size={18} />
+              </span>
+              <div>
+                <strong>{liveTotal}</strong>
+                <span>Live now</span>
+              </div>
+            </div>
+            <div className="gw-stat">
+              <span className="gw-stat-icon">
+                <Icon name="clock" size={18} />
+              </span>
+              <div>
+                <strong>{data.totalEnded.toLocaleString()}</strong>
+                <span>Finished</span>
+              </div>
+            </div>
+            {totalEntries !== null && (
+              <div className="gw-stat">
+                <span className="gw-stat-icon">
+                  <Icon name="users" size={18} />
+                </span>
+                <div>
+                  <strong>
+                    {totalEntries.toLocaleString()}
+                    {partial ? "+" : ""}
+                  </strong>
+                  <span>Total entries</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </header>
+
+      {error && (
+        <div className="gw-error" role="alert">
+          <p>
+            <strong>Giveaways didn’t load.</strong> {error}
+          </p>
+          <button type="button" className="gw-btn" onClick={() => load(true)}>
+            Try again
+          </button>
+        </div>
+      )}
+
+      {!data && !error && <Skeleton />}
+
+      {data && (
+        <>
+          <div className="gw-controls">
+            <label className="gw-search">
+              <Icon name="search" size={17} />
+              <input
+                type="search"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search prizes, hosts, or winners"
+                aria-label="Search giveaways"
+              />
+              {q && (
+                <button type="button" className="gw-search-clear" onClick={() => setQ("")} aria-label="Clear search">
+                  ×
+                </button>
+              )}
+            </label>
+            <label className="gw-sort">
+              <span>Sort</span>
+              <select value={sort} onChange={(e) => setSort(e.target.value)}>
+                {SORTS.map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="gw-toolbar">
+            <div className="gw-filters" role="group" aria-label="Filter giveaways">
+              {FILTERS.map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`gw-pill${filter === value ? " is-active" : ""}`}
+                  aria-pressed={filter === value}
+                  onClick={() => setFilter(value)}
+                >
+                  {label}
+                  <span className="gw-pill-count">{counts[value]}</span>
+                </button>
+              ))}
+            </div>
+            <div className="gw-sync">
+              <span>Updated {updatedAgo(data.updatedAt, now)}</span>
+              <button
+                type="button"
+                className="gw-refresh"
+                onClick={() => load(true)}
+                disabled={refreshing}
+                aria-label="Refresh giveaways"
+              >
+                <Icon name="refresh" size={15} />
+              </button>
+            </div>
+          </div>
+
+          {showLive && (
+            <section className="gw-section" aria-labelledby="gw-live-h">
+              <div className="gw-section-head">
+                <h2 id="gw-live-h">
+                  <span className="gw-dot" aria-hidden="true" />
+                  Running now
+                </h2>
+                <span className="gw-section-count">{live.length} live</span>
+              </div>
+              <ul className="gw-list">
+                {live.map((g) => (
+                  <LiveCard key={g.id} g={g} now={now} inviteUrl={data.inviteUrl} />
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {showEnded && (
+            <section className="gw-section" aria-labelledby="gw-ended-h">
+              <div className="gw-section-head">
+                <h2 id="gw-ended-h">Finished</h2>
+                <span className="gw-section-count">
+                  {Math.min(visible, ended.length)} of {ended.length}
+                </span>
+              </div>
+              <ul className="gw-list">
+                {ended.slice(0, visible).map((g) => (
+                  <EndedCard
+                    key={g.id}
+                    g={g}
+                    now={now}
+                    inviteUrl={data.inviteUrl}
+                    open={Boolean(open[g.id])}
+                    onToggle={() => setOpen((o) => ({ ...o, [g.id]: !o[g.id] }))}
+                  />
+                ))}
+              </ul>
+              {visible < ended.length && (
+                <button type="button" className="gw-btn gw-more" onClick={() => setVisible((v) => v + PAGE_SIZE)}>
+                  Show more
+                </button>
+              )}
+            </section>
+          )}
+
+          {nothing && (
+            <div className="gw-empty">
+              <span className="gw-empty-icon">
+                <Icon name={needle ? "search" : "gift"} size={22} />
+              </span>
+              {needle ? (
+                <>
+                  <h3>No giveaways match your search</h3>
+                  <p>Try a different prize, host, or winner name.</p>
+                  <button type="button" className="gw-btn" onClick={clearAll}>
+                    Clear search
+                  </button>
+                </>
+              ) : filter === "live" ? (
+                <>
+                  <h3>Nothing is running right now</h3>
+                  <p>New giveaways are posted in our Discord server.</p>
                   {data.inviteUrl && (
-                    <a href={data.inviteUrl} target="_blank" rel="noopener noreferrer">
+                    <a className="gw-btn" href={data.inviteUrl} target="_blank" rel="noopener noreferrer">
                       Join our Discord
                     </a>
-                  )}{" "}
-                  to catch the next one.
-                </p>
-              )}
-            </section>
-
-            <section aria-labelledby="gw-ended-h" className="gw-section">
-              <h2 id="gw-ended-h" className="gw-section-title">
-                Finished
-              </h2>
-              {ended.length > 0 ? (
-                <>
-                  <ul className="gw-list gw-ended-list">
-                    {ended.slice(0, visible).map((g) => (
-                      <EndedRow key={g.id} g={g} now={now} />
-                    ))}
-                  </ul>
-                  {visible < ended.length && (
-                    <button className="gw-button gw-more" onClick={() => setVisible((v) => v + PAGE_SIZE)}>
-                      Show more
-                    </button>
                   )}
                 </>
+              ) : filter === "ended" ? (
+                <>
+                  <h3>No finished giveaways yet</h3>
+                  <p>Winners show up here once a giveaway ends.</p>
+                </>
               ) : (
-                <p className="gw-empty">Finished giveaways will show up here with their winners.</p>
+                <>
+                  <h3>No giveaways yet</h3>
+                  <p>Giveaways appear here as soon as one is posted in our Discord server.</p>
+                  {data.inviteUrl && (
+                    <a className="gw-btn" href={data.inviteUrl} target="_blank" rel="noopener noreferrer">
+                      Join our Discord
+                    </a>
+                  )}
+                </>
               )}
-            </section>
-          </>
-        )}
-      </div>
+            </div>
+          )}
+        </>
+      )}
     </main>
   );
 }
