@@ -15,7 +15,7 @@ export async function GET(req) {
       client_secret: process.env.DISCORD_CLIENT_SECRET,
       grant_type: "authorization_code",
       code,
-      redirect_uri: `${url.origin}/api/auth/callback`,
+      redirect_uri: `${process.env.SITE_URL}/api/auth/callback`,
     }),
   }).then((r) => r.json());
   if (!tok.access_token) return NextResponse.redirect(`${url.origin}/?error=discord`);
