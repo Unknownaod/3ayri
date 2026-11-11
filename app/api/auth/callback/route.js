@@ -3,9 +3,11 @@ import { makeToken } from "@/lib/session";
 import { redis } from "@/lib/db";
 
 export async function GET(req) {
-  const url = new URL(req.url);
-  const code = url.searchParams.get("code");
-  if (!code) return NextResponse.redirect(`${url.origin}/?error=discord`);
+  const redirectUri = process.env.DISCORD_REDIRECT_URI;
+  const site = new URL(redirectUri).origin;
+
+  const code = new URL(req.url).searchParams.get("code");
+  if (!code) return NextResponse.redirect(`${site}/?error=discord`);
 
   const tok = await fetch("https://discord.com/api/oauth2/token", {
     method: "POST",
@@ -15,10 +17,10 @@ export async function GET(req) {
       client_secret: process.env.DISCORD_CLIENT_SECRET,
       grant_type: "authorization_code",
       code,
-      redirect_uri: `${process.env.SITE_URL}/api/auth/callback`,
+      redirect_uri: redirectUri,
     }),
   }).then((r) => r.json());
-  if (!tok.access_token) return NextResponse.redirect(`${url.origin}/?error=discord`);
+  if (!tok.access_token) return NextResponse.redirect(`${site}/?error=discord`);
 
   const u = await fetch("https://discord.com/api/users/@me", {
     headers: { Authorization: `Bearer ${tok.access_token}` },
@@ -31,7 +33,7 @@ export async function GET(req) {
     ...existing, discordId: u.id, displayName: u.global_name || u.username, avatar,
   });
 
-  const res = NextResponse.redirect(`${url.origin}/dashboard`);
+  const res = NextResponse.redirect(`${site}/dashboard`);
   res.cookies.set("haven_session", makeToken(u.id), {
     httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 30 * 86400,
   });
