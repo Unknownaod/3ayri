@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import { getSessionId } from "@/lib/session";
 import { redis, validUsername } from "@/lib/db";
-import { PLATFORMS, THEMES, SHAPES, LAYOUTS, FONTS } from "@/lib/platforms";
+import { PLATFORMS, CHOICES, RANGES } from "@/lib/platforms";
 
 const bad = (error, status = 400) => NextResponse.json({ error }, { status });
 const img = (v, max = 900_000) => (typeof v === "string" && /^data:image\/(jpeg|png|webp);base64,/.test(v) && v.length < max ? v : "");
 const url = (v) => (/^https?:\/\//i.test(v) ? String(v).slice(0, 300) : "");
 const num = (v, lo, hi, d) => (Number.isFinite(+v) ? Math.min(hi, Math.max(lo, +v)) : d);
-const pick = (v, list, d) => (list.includes(v) ? v : d);
 const str = (v, n) => String(v || "").slice(0, n);
+const color = (v, d) => (/^#[0-9a-f]{6}$/i.test(v) ? v : d);
+const BOOLS = ["entry", "typewriter", "tilt", "presence"];
 
 async function extras(id, p) {
   const cnt = (t, arr) => Promise.all((arr || []).map((_, i) => redis.get(`clicks:${id}:${t}:${i}`).then((v) => v || 0)));
@@ -35,23 +36,22 @@ export async function PUT(req) {
     if (profile.username) await redis.del(`username:${profile.username}`);
   }
 
-  const color = (v, d) => (/^#[0-9a-f]{6}$/i.test(v) ? v : d);
-  const socials = (Array.isArray(b.socials) ? b.socials : []).slice(0, 14)
+  const socials = (Array.isArray(b.socials) ? b.socials : []).slice(0, 16)
     .map((s) => ({ type: s.type, url: url(s.url) })).filter((s) => PLATFORMS[s.type] && s.url);
-  const links = (Array.isArray(b.links) ? b.links : []).slice(0, 12)
-    .map((l) => ({ label: str(l.label, 40), url: url(l.url) })).filter((l) => l.label && l.url);
+  const links = (Array.isArray(b.links) ? b.links : []).slice(0, 14)
+    .map((l) => ({ label: str(l.label, 40), url: url(l.url), icon: PLATFORMS[l.icon] ? l.icon : "" })).filter((l) => l.label && l.url);
 
   const { views, clicks, ...rest } = profile;
   const next = {
     ...rest, username, socials, links,
-    name: str(b.name, 32), bio: str(b.bio, 280), location: str(b.location, 40),
-    accent: color(b.accent, "#e0a243"), bgColor: color(b.bgColor, ""),
-    theme: pick(b.theme, THEMES, "dark"), avatarShape: pick(b.avatarShape, SHAPES, "circle"),
-    layout: pick(b.layout, LAYOUTS, "center"), font: pick(b.font, Object.keys(FONTS), "sans"),
-    cardOpacity: num(b.cardOpacity, 0, 100, 85), blur: num(b.blur, 0, 30, 12),
+    name: str(b.name, 32), bio: str(b.bio, 280), location: str(b.location, 40), entryText: str(b.entryText, 30),
+    accent: color(b.accent, "#e0a243"), accent2: color(b.accent2, "#ffffff"), bgColor: color(b.bgColor, ""), textColor: color(b.textColor, ""),
+    ...Object.fromEntries(Object.entries(CHOICES).map(([k, list]) => [k, list.includes(b[k]) ? b[k] : list[0]])),
+    ...Object.fromEntries(Object.entries(RANGES).map(([k, [lo, hi, d]]) => [k, num(b[k], lo, hi, d)])),
+    ...Object.fromEntries(BOOLS.map((k) => [k, !!b[k]])),
+    showViews: b.showViews !== false,
     banner: img(b.banner), background: img(b.background, 1_400_000), customAvatar: img(b.customAvatar),
-    entry: !!b.entry, entryText: str(b.entryText, 30), typewriter: !!b.typewriter, tilt: !!b.tilt,
-    presence: !!b.presence, showViews: b.showViews !== false,
+    bgVideo: url(b.bgVideo),
     music: { url: url(b.music?.url), title: str(b.music?.title, 60) },
   };
   await redis.set(`profile:${id}`, next);
