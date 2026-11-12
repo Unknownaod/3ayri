@@ -2,7 +2,7 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import { MongoClient } from "mongodb";
 
-const { DISCORD_BOT_TOKEN, DISCORD_GUILD_ID, MONGODB_URI } = process.env;
+const { DISCORD_TOKEN, DISCORD_GUILD_ID, MONGODB_URI } = process.env;
 const kv = (await new MongoClient(MONGODB_URI).connect()).db("haven").collection("kv");
 const put = (k, value) => kv.updateOne({ _id: k }, { $set: { value } }, { upsert: true });
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildPresences] });
