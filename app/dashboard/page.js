@@ -1,11 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import ProfileCard from "../ProfileCard";
+import Landing from "./Landing";
+import { badgesOf } from "@/lib/badges";
 import { PLATFORMS, SCHEMA, FIELDS, PRESETS } from "@/lib/schema";
 import "../profiles.css";
 
 const TABS = [...Object.keys(SCHEMA), "Stats"];
-const NOTE = { Socials: "Icons row", Links: "Link buttons", Discord: "Live status" };
+const ICON = { Profile: "👤", Theme: "🎨", Card: "🪪", Avatar: "🖼️", Background: "🌌", Effects: "✨", Music: "🎵", Socials: "🔗", Links: "🧷", Discord: "💬", Stats: "📈" };
 
 const compress = (file, max, q = 0.82) => new Promise((resolve) => {
   if (file.type === "image/gif") { const r = new FileReader(); r.onload = () => resolve(r.result); r.readAsDataURL(file); return; }
@@ -20,6 +22,7 @@ const compress = (file, max, q = 0.82) => new Promise((resolve) => {
 });
 
 function Field({ me, set, k, f }) {
+  if (f.t === "head") return <h3 className="sec-h">{f.label}</h3>;
   const v = me[k] ?? (k === "musicUrl" ? me.music?.url : k === "musicTitle" ? me.music?.title : undefined) ?? f.def;
   const L = f.label;
   if (f.t === "seg") return <div className="fld"><span>{L}</span><div className="seg">{f.opts.map((o) => <button type="button" key={o} className={v === o ? "on" : ""} onClick={() => set(k, o)}>{o}</button>)}</div></div>;
@@ -56,13 +59,7 @@ export default function Dashboard() {
   }, [dirty]);
 
   if (me === undefined) return <main className="hp-page"><p>Loading…</p></main>;
-  if (me === null) return (
-    <main className="hp-page"><section className="hp-card">
-      <h1>Make your Haven page</h1>
-      <p className="hp-bio">Sign in with Discord to claim havenshq.xyz/yourname.</p>
-      <a className="hp-btn" href="/api/auth/login">Sign in with Discord</a>
-    </section></main>
-  );
+  if (me === null) return <Landing />;
 
   const patch = (o) => { setMe((m) => ({ ...m, ...o })); setDirty(true); setMsg(""); };
   const set = (k, v) => patch({ [k]: v });
@@ -85,7 +82,7 @@ export default function Dashboard() {
     const r = await fetch("/api/presence", { method: "POST" });
     const d = await r.json();
     setRd(d);
-    if (d.ok && !me.presence) patch({ presence: true });
+    if (d.ok) patch({ discord: d.discord, ...(me.presence ? {} : { presence: true }) });
   }
   async function logout() { await fetch("/api/auth/logout", { method: "POST" }); setMe(null); }
 
@@ -95,15 +92,15 @@ export default function Dashboard() {
   return (
     <main className="dash">
       <nav className="dash-nav" aria-label="Sections">
-        <h1>Haven</h1>
-        {TABS.map((t) => <button type="button" key={t} className={tab === t ? "on" : ""} onClick={() => setTab(t)}>{t}</button>)}
+        <h1 className="dn-logo">Haven</h1>{me.username && <div className="dn-me">{(me.customAvatar || me.avatar) && <img src={me.customAvatar || me.avatar} alt="" />}<div><b>{me.name || me.displayName}</b><small>/{me.username}</small></div></div>}
+        {TABS.map((t) => <button type="button" key={t} className={tab === t ? "on" : ""} onClick={() => setTab(t)}><span>{ICON[t]}</span>{t}</button>)}
         <span className="sp" />
         {me.username && <a className="hp-ghost" href={`/${me.username}`} target="_blank">View page ↗</a>}
         <button type="button" onClick={logout}>Sign out</button>
       </nav>
 
       <form className="dash-main" onSubmit={save}>
-        <h2>{tab}</h2>
+        <h2>{ICON[tab]} {tab}</h2>
         <div className="panel">
           {tab === "Profile" && (
             <label className="fld"><span>Username</span>
@@ -113,6 +110,14 @@ export default function Dashboard() {
           {tab === "Theme" && (
             <div className="fld"><span>Presets (one click, then tweak anything)</span>
               <div className="seg">{Object.keys(PRESETS).map((n) => <button type="button" key={n} onClick={() => patch(PRESETS[n])}>{n}</button>)}</div>
+            </div>
+          )}
+
+          {tab === "Theme" && (
+            <div className="seg">
+              <button type="button" onClick={() => { const o = {}; for (const [k, f] of Object.entries(FIELDS)) if (!["img", "media", "text", "area"].includes(f.t)) o[k] = me[k] ?? f.def; navigator.clipboard?.writeText(JSON.stringify(o)); setMsg("Theme copied"); }}>Copy my theme</button>
+              <button type="button" onClick={() => { try { const o = JSON.parse(prompt("Paste a theme JSON")); const ok = {}; for (const k in o) if (FIELDS[k] && !["img", "media", "text", "area"].includes(FIELDS[k].t)) ok[k] = o[k]; patch(ok); } catch {} }}>Paste a theme</button>
+              <button type="button" onClick={() => { if (confirm("Reset all design options to default?")) { const o = {}; for (const [k, f] of Object.entries(FIELDS)) if (!["text", "area"].includes(f.t)) o[k] = f.def; patch(o); } }}>Reset design</button>
             </div>
           )}
 
@@ -155,6 +160,7 @@ export default function Dashboard() {
           {tab === "Discord" && (
             <div className="rd">
               <b>Read my Discord status</b>
+              {me.discord && <div className="did"><img src={me.discord.avatar || me.avatar} alt="" /><div><b>{me.discord.displayName}</b><small>@{me.discord.username}</small><div className="pc-dbadges">{badgesOf(me.discord).map(([t, e, c], i) => <i key={i} title={t} style={{ "--bc": c }}>{e}</i>)}</div></div></div>}
               <small style={{ color: "var(--muted)" }}>Checks that you're in the server the bot is in, then reads your live status, custom status, game and Spotify from the bot.</small>
               <button type="button" className="hp-btn" onClick={readStatus} disabled={rd?.loading}>{rd?.loading ? "Reading…" : "Read my Discord status"}</button>
               {rd && !rd.loading && !rd.ok && <div className="rd no">{rd.message || rd.error}{rd.invite && <> <a href={rd.invite} target="_blank" style={{ color: "var(--accent)" }}>Join the server ↗</a></>}</div>}

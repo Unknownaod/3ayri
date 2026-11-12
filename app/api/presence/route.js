@@ -22,6 +22,10 @@ export async function POST() {
   const botOnline = !!beat && Date.now() - beat < 120_000;
   const presence = await redis.get(`presence:${id}`);
   if (!botOnline && !presence) return NextResponse.json({ ok: false, reason: "bot_offline", message: "You're in the server, but the bot worker isn't running, so there's nothing to read yet." });
+  const u = m.member.user, prof = await redis.get(`profile:${id}`);
+  const discord = { ...prof?.discord, username: u.username, displayName: u.global_name || u.username, flags: u.public_flags ?? prof?.discord?.flags ?? 0,
+    avatar: u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=256` : prof?.discord?.avatar };
+  if (prof) await redis.set(`profile:${id}`, { ...prof, discord });
   // No record while the bot is online means the bot sees you as offline/invisible.
-  return NextResponse.json({ ok: true, botOnline, nick: m.member.nick || m.member.user?.global_name || m.member.user?.username, presence: presence || { status: "offline", act: null, custom: "", ts: Date.now() } });
+  return NextResponse.json({ ok: true, botOnline, discord, nick: m.member.nick || m.member.user?.global_name || m.member.user?.username, presence: presence || { status: "offline", act: null, custom: "", ts: Date.now() } });
 }
