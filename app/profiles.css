@@ -4,7 +4,7 @@
 .pc-stage{--muted:color-mix(in srgb,var(--text) 62%,transparent);--line:color-mix(in srgb,var(--text) 16%,transparent);--dur:.65s;
   position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:2rem 1rem;
   background:var(--page);font-family:var(--ff),system-ui,sans-serif;font-size:calc(16px * var(--ts,1));color:var(--text);overflow:hidden;isolation:isolate}
-.pc-stage *,.pc-stage *::before,.pc-stage *::after{box-sizing:border-box}
+.pc-stage,.pc-stage *,.pc-stage *::before,.pc-stage *::after{box-sizing:border-box}
 .pc-stage[data-cx=left]{align-items:flex-start}.pc-stage[data-cx=right]{align-items:flex-end}
 .pc-stage[data-cy=top]{justify-content:flex-start}.pc-stage[data-cy=bottom]{justify-content:flex-end}
 .pc-full{min-height:100vh;min-height:100dvh}

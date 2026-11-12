@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useState } from "react";
 import ProfileCard from "../ProfileCard";
 import { Ico } from "@/lib/icons";
 import { applyPreset } from "@/lib/schema";
@@ -48,7 +49,54 @@ function DashMock() {
   );
 }
 
+
+// Cards on Discover are static snapshots: no particles, music, cursor effects or entry screen, so a grid of them stays light.
+const calm = (p) => ({ ...p, particles: "none", cursor: "default", cursorTrail: "none", entry: false, tilt: false, cardFloat: false, typewriter: false, tabTitle: "" });
+
+function Discover() {
+  const [items, setItems] = useState([]);
+  const [q, setQ] = useState("");
+  const [page, setPage] = useState(0);
+  const [more, setMore] = useState(false);
+  const [state, setState] = useState("loading");   // loading | ok | error
+
+  useEffect(() => {
+    let dead = false;
+    setState("loading");
+    const t = setTimeout(() => {
+      fetch(`/api/discover?q=${encodeURIComponent(q)}&page=${page}`).then((r) => r.json())
+        .then((j) => { if (dead) return; setItems((old) => (page ? [...old, ...j.profiles] : j.profiles)); setMore(!!j.more); setState("ok"); })
+        .catch(() => !dead && setState("error"));
+    }, q && page === 0 ? 250 : 0);
+    return () => { dead = true; clearTimeout(t); };
+  }, [q, page]);
+
+  return (
+    <section id="discover" className="lp-sec dc" aria-label="Discover profiles">
+      <h2>Discover pages</h2>
+      <p className="lp-sub">Browse pages made with Haven. Click one to open it.</p>
+      <label className="dc-search"><Ico n="wand" size={15} /><input type="search" value={q} onChange={(e) => { setPage(0); setQ(e.target.value); }} placeholder="Search by name or username" aria-label="Search pages" /></label>
+      {state === "error" && <p className="empty dc-msg">Couldn't load pages. Check your connection and try again.</p>}
+      {state === "ok" && items.length === 0 && <p className="empty dc-msg">{q ? `No pages match "${q}".` : "No pages here yet. Be the first one."}</p>}
+      <div className="dc-grid">
+        {items.map((p) => (
+          <div className="dc-card" key={p.username}>
+            <div className="dc-view" aria-hidden="true"><ProfileCard p={calm(p)} views={p.views} preview /></div>
+            <a className="dc-link" href={`/${p.username}`} aria-label={`Open ${p.name || p.displayName || p.username}'s page`}><span>View page</span></a>
+            <footer><b>{p.name || p.displayName || p.username}</b><small>@{p.username}{p.views ? ` · ${p.views.toLocaleString()} views` : ""}</small></footer>
+          </div>
+        ))}
+        {state === "loading" && Array.from({ length: page ? 3 : 6 }, (_, i) => <div className="dc-card dc-skel" key={`s${i}`} aria-hidden="true" />)}
+      </div>
+      {more && state === "ok" && <div className="lp-cta"><button type="button" className="lp-b2" onClick={() => setPage(page + 1)}>Show more</button></div>}
+    </section>
+  );
+}
+
 export default function Landing({ authed = false, invite }) {
+  const [tab, setTab] = useState("overview");
+  useEffect(() => { if (location.hash === "#discover") setTab("discover"); }, []);
+  const pick = (t) => { setTab(t); try { history.replaceState(null, "", t === "discover" ? "#discover" : location.pathname); } catch {} };
   return (
     <main className="lp">
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Bricolage+Grotesque:wght@600;800&display=swap" />
@@ -61,6 +109,13 @@ export default function Landing({ authed = false, invite }) {
         <div className="lp-cta"><a className="lp-b1" href={authed ? "/dashboard" : "/api/auth/login"}>{authed ? "Open dashboard" : "Sign up free"}</a><a className="lp-b2" href="#features">See features</a></div>
       </section>
 
+      <div className="lp-tabs" role="tablist" aria-label="Landing sections">
+        <button type="button" role="tab" aria-selected={tab === "overview"} className={tab === "overview" ? "on" : ""} onClick={() => pick("overview")}>Overview</button>
+        <button type="button" role="tab" aria-selected={tab === "discover"} className={tab === "discover" ? "on" : ""} onClick={() => pick("discover")}><Ico n="sparkles" size={14} /> Discover</button>
+      </div>
+
+      {tab === "discover" ? <Discover /> : (
+        <>
       <section className="lp-show" aria-label="Preview of the dashboard and profile pages">
         <DashMock />
         <div className="mk-phones" aria-hidden="true">
@@ -78,6 +133,9 @@ export default function Landing({ authed = false, invite }) {
         <p className="lp-sub">No setup, no code.</p>
         <div className="lp-steps">{STEPS.map(([t, d], i) => <article key={t}><b>{i + 1}</b><h3>{t}</h3><p>{d}</p></article>)}</div>
       </section>
+        </>
+      )}
+
       <section className="lp-final"><h2>Ready to claim your name?</h2><div className="lp-cta"><a className="lp-b1" href="/api/auth/login">Sign up free</a></div></section>
       <footer className="lp-foot">© Haven · havenshq.xyz</footer>
     </main>
