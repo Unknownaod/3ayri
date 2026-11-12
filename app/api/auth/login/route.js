@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 
-export function GET(req) {
-  const origin = new URL(req.url).origin;
+export function GET() {
   const p = new URLSearchParams({
     client_id: process.env.DISCORD_CLIENT_ID,
-    redirect_uri: `${origin}/api/auth/callback`,
+    redirect_uri: process.env.DISCORD_REDIRECT_URI,
     response_type: "code",
     scope: "identify",
   });
