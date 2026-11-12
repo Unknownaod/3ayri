@@ -1,37 +1,28 @@
 import { notFound } from "next/navigation";
 import { redis } from "@/lib/db";
+import ProfileCard from "../ProfileCard";
 import "../profiles.css";
 
 async function load(username) {
   const id = await redis.get(`username:${username.toLowerCase()}`);
-  return id ? redis.get(`profile:${id}`) : null;
+  return id ? { id, p: await redis.get(`profile:${id}`) } : null;
 }
 
 export async function generateMetadata({ params }) {
-  const { username } = await params;
-  const p = await load(username);
-  return p ? { title: `${p.displayName} (@${p.username}) · Haven`, description: p.bio } : {};
+  const f = await load((await params).username);
+  if (!f) return {};
+  const { p } = f, img = p.customAvatar || p.avatar;
+  return {
+    title: `${p.name || p.displayName} (@${p.username}) · Haven`,
+    description: p.bio,
+    themeColor: p.accent,
+    openGraph: { title: p.name || p.displayName, description: p.bio, images: img && !img.startsWith("data:") ? [img] : [] },
+  };
 }
 
 export default async function ProfilePage({ params }) {
-  const { username } = await params;
-  const p = await load(username);
-  if (!p) notFound();
-
-  return (
-    <main className="hp-page" style={{ "--accent": p.accent }}>
-      <article className="hp-card">
-        {p.avatar && <img className="hp-avatar" src={p.avatar} alt="" width={112} height={112} />}
-        <h1>{p.displayName}</h1>
-        <p className="hp-handle">@{p.username}</p>
-        {p.bio && <p className="hp-bio">{p.bio}</p>}
-        <ul className="hp-links">
-          {p.links.map((l) => (
-            <li key={l.url}><a href={l.url} target="_blank" rel="noopener noreferrer nofollow">{l.label}</a></li>
-          ))}
-        </ul>
-      </article>
-      <a className="hp-foot" href="/">havenshq.xyz</a>
-    </main>
-  );
+  const f = await load((await params).username);
+  if (!f) notFound();
+  const views = await redis.incr(`views:${f.id}`);
+  return <ProfileCard p={f.p} views={views} />;
 }
