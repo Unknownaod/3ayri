@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "/3ayri Home",
-  description: "The official home of the /3ayri community",
+  title: "/haven Home",
+  description: "The official home of the /haven community",
 };
 
 export default function RootLayout({ children }) {
