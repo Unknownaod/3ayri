@@ -61,6 +61,9 @@ const ART = {
   early: <path {...L} d="M5 16.5h14M7.6 16.5a4.4 4.4 0 0 1 8.8 0M12 6.5v3M6.6 9.6l2 2M17.4 9.6l-2 2" />,
   botdev: <><rect {...W} x="6.5" y="9.5" width="11" height="8.5" rx="2.2" /><path {...L} d="M12 9.5V6.3M10.2 6.3h3.6" /><circle cx="9.6" cy="13.6" r="1.2" fill="currentColor" /><circle cx="14.4" cy="13.6" r="1.2" fill="currentColor" /></>,
   dev: <path {...L} d="M9.6 8.4L6 12l3.6 3.6M14.4 8.4L18 12l-3.6 3.6M13 7.2l-2 9.6" />,
+  booster: <path {...W} d="M12 5.2c3 2 4.4 4.8 3.6 8.2l1.6 2.6-3 .6L12 19l-2.2-2.4-3-.6 1.6-2.6C7.6 10 9 7.200 12 5.200z" />,
+  legacy: <path {...L} d="M12 15.4a3.4 3.4 0 1 1 0-6.8 3.4 3.4 0 0 1 0 6.8zm3.4-6.8v5.2c0 1.2 1 1.8 1.8 1.4.8-.4 1.3-1.400 1.3-2.600A6.500 6.500 0 1 0 12 18.500" />,
+  quest: <path {...L} d="M12 5.2l2 5.600 5.600 2-5.600 2-2 5.600-2-5.600-5.600-2 5.600-2z" />,
   nitro: <><path {...W} d="M8 6.2h8l2.8 4L12 18.6 5.2 10.2z" /><path {...L} stroke="currentColor" strokeWidth="1.2" d="M5.2 10.2h13.6M10 6.2l-1.2 4 3.2 8.4M14 6.2l1.2 4-3.2 8.4" /></>,
 };
 
@@ -86,7 +89,7 @@ export function Presence({ pres, c, p }) {
   const acts = c.presenceActivity ? actsOf(pres) : [];
   const timed = c.presenceTimer && acts.some((a) => a.start);
   const now = useNow(timed);
-  const d = p.discord || {};
+  const d = { ...p.discord, extra: p.extraBadges };
   const dn = d.displayName || p.displayName, av = d.avatar || p.avatar;
   const inCard = c.badgePlacement === "card" || c.badgePlacement === "both";
   if (c.presenceHideOffline && pres.status === "offline") return null;

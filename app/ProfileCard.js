@@ -170,7 +170,7 @@ export default function ProfileCard({ p, views, preview, livePres, claim }) {
   const firstShown = sections.find((s) => s.on && has[s.k])?.k;
   // Badges don't depend on live status: if the status card isn't on the page, "card" falls back to showing them by the name.
   const cardShown = !!pres && c.presenceStyle !== "dot";
-  const dName = badgesOf(p.discord).length > 0 && (c.badgePlacement === "name" || c.badgePlacement === "both" || (c.badgePlacement === "card" && !cardShown));
+  const dName = badgesOf({ ...p.discord, extra: p.extraBadges }).length > 0 && (c.badgePlacement === "name" || c.badgePlacement === "both" || (c.badgePlacement === "card" && !cardShown));
 
   const body = {
     identity: (
@@ -182,7 +182,7 @@ export default function ProfileCard({ p, views, preview, livePres, claim }) {
           </div>
         )}
         <div className="pc-idtxt">
-          <div className="pc-nm"><h1 className={`pc-name nm-${c.nameEffect} ${c.nameUpper ? "up" : ""}`} data-text={name}>{name}</h1>{dName && <DBadges d={p.discord} />}</div>
+          <div className="pc-nm"><h1 className={`pc-name nm-${c.nameEffect} ${c.nameUpper ? "up" : ""}`} data-text={name}>{name}</h1>{dName && <DBadges d={{ ...p.discord, extra: p.extraBadges }} />}</div>
           {c.tagline && <p className="pc-tag">{c.tagline}</p>}
         </div>
       </div>

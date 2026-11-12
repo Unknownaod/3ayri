@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { PLATFORMS, BUILTIN_ICONS, BUILTIN_LABELS, PRESETS, SECTIONS, FONT_LABELS, FONTS, FIELDS, applyPreset, cfg, rid, sectionsOf, embedSrc } from "@/lib/schema";
-import { badgesOf } from "@/lib/badges";
+import { badgesOf, PICKABLE } from "@/lib/badges";
 import { Ico } from "@/lib/icons";
 import { Presence, DBadges } from "../profile-parts";
 
@@ -248,7 +248,10 @@ export function FontPicker({ value, onChange, opts }) {
 // ───────────── Discord ─────────────
 export function DiscordBlock({ me, patch, rd, setRd }) {
   const d = me.discord || {};
-  const b = badgesOf(d);
+  const b = badgesOf({ ...d, extra: me.extraBadges });
+  const auto = badgesOf(d).map((x) => x[3]);
+  const picked = me.extraBadges || [];
+  const toggle = (id) => patch({ extraBadges: picked.includes(id) ? picked.filter((x) => x !== id) : [...picked, id] });
   async function read() {
     setRd({ loading: true });
     try {
@@ -264,11 +267,23 @@ export function DiscordBlock({ me, patch, rd, setRd }) {
       <div className="did">
         {(d.avatar || me.avatar) && <img src={d.avatar || me.avatar} alt="" />}
         <div><b>{d.displayName || me.displayName || "Your Discord account"}</b><small>{d.username ? `@${d.username}` : "Not read yet"}</small>
-          <DBadges d={d} /></div>
+          <DBadges d={{ ...d, extra: me.extraBadges }} /></div>
       </div>
       {d.flags !== undefined && <p className="hint">Discord reports badge code {d.flags}{d.nitro ? " and Nitro" : ""}. {b.length ? `${b.length} badge${b.length === 1 ? "" : "s"} will show.` : "That means no public badges, so none will show."}</p>}
       {d.flags === undefined && !d.nitro && <p className="hint warn">Your badges haven't been loaded yet. Press the button below, or log out and back in.</p>}
       <p className="hint">This checks that you're in the same server as the bot, then reads your current status, game or song, and refreshes your name, avatar and badges.</p>
+      <div className="fld"><span>Badges to show <small>Discord only shares some badges, so pick the rest yourself</small></span>
+        <div className="bpick">
+          {PICKABLE.map((x) => {
+            const on = auto.includes(x.id) || picked.includes(x.id), locked = auto.includes(x.id);
+            return (
+              <button type="button" key={x.id} className={on ? "on" : ""} aria-pressed={on} disabled={locked} title={locked ? "Found on your Discord account" : x.label} onClick={() => toggle(x.id)}>
+                <DBadges d={{ extra: [x.id] }} /><span>{x.label}{locked && <small>found</small>}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
       <button type="button" className="hp-btn gold" disabled={rd?.loading} onClick={read}>{rd?.loading ? "Reading…" : "Read my Discord status"}</button>
       {rd && !rd.loading && (
         <div className={`rd ${rd.ok ? "ok" : "no"}`} role="status">
