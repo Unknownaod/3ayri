@@ -38,4 +38,4 @@ client.once("ready", async () => {
   console.log(`Presence bot online as ${client.user.tag}, watching ${guild.name}`);
 });
 client.on("presenceUpdate", (_, p) => { if (p.guild?.id === DISCORD_GUILD_ID) push(p).catch(console.error); });
-client.login(DISCORD_BOT_TOKEN);
+client.login(DISCORD_TOKEN);
