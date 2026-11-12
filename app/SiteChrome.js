@@ -68,6 +68,10 @@ export function Nav({ current }) {
          <Link href="/giveaways" aria-current={current === "giveaways" ? "page" : undefined}>
             Giveaways
           </Link>
+
+          <Link href="/dashboard" aria-current={current === "profiles" ? "page" : undefined}>
+            Profiles
+          </Link>
         </nav>
 
         <a
