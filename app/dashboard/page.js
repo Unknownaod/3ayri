@@ -289,7 +289,7 @@ export default function Dashboard() {
           </span>
           <button type="button" className="ib pv-x" aria-label="Close preview" onClick={() => setPv(false)}><Ico n="x" size={16} /></button>
         </div>
-        <div className={`pv-frame ${dev}`}><ProfileCard p={me} views={me.views} preview livePres={c.presence ? live : null} /></div>
+        <div className={`pv-frame ${dev}`}><ProfileCard p={me} views={me.views} preview claim livePres={c.presence ? live : null} /></div>
         {c.presence && !rd?.ok && <small className="hint">Sample status shown. Use “Read my Discord status” in the Discord tab to see yours.</small>}
       </aside>
     </main>

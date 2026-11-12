@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { PLATFORMS, iconKind, ytId } from "@/lib/schema";
-import { badgesOf } from "@/lib/badges";
+import { badgesOf, badgeUrl } from "@/lib/badges";
 import { Ico } from "@/lib/icons";
 
 // ───────────── icons ─────────────
@@ -46,9 +46,38 @@ export const DOT = { online: "#43b581", idle: "#faa61a", dnd: "#f04747", offline
 export const LBL = { online: "Online", idle: "Idle", dnd: "Do not disturb", offline: "Offline" };
 const KIND = { spotify: "Listening to Spotify", game: "Playing", stream: "Streaming", watch: "Watching", compete: "Competing in" };
 
+// Badge art is drawn here (simple original marks in each badge's colour), so it never depends on a CDN.
+const W = { fill: "#fff" }, L = { fill: "none", stroke: "#fff", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round" };
+const ART = {
+  staff: <path {...W} d="M12 5l6 2.4v4.8c0 3.8-2.5 6.4-6 7.8-3.5-1.4-6-4-6-7.8V7.4z" />,
+  mod: <><path {...W} d="M12 5l6 2.4v4.8c0 3.8-2.5 6.4-6 7.8-3.5-1.4-6-4-6-7.8V7.4z" /><path {...L} stroke="currentColor" d="M9.2 12.2l2 2 3.6-4" /></>,
+  partner: <><circle {...L} cx="9.3" cy="12" r="3.6" /><circle {...L} cx="14.7" cy="12" r="3.6" /></>,
+  events: <path {...W} d="M12 4.8l2 4.2 4.6.6-3.4 3.2.9 4.6-4.1-2.3-4.1 2.3.9-4.6L5.4 9.6 10 9z" />,
+  bug: <><ellipse {...W} cx="12" cy="13.5" rx="3.3" ry="4.4" /><circle {...W} cx="12" cy="7.8" r="1.8" /><path {...L} d="M8.6 11l-2.6-1.4M15.4 11l2.6-1.4M8.4 14.5H5.6M15.6 14.5h2.8M9 17.6l-2 1.6M15 17.6l2 1.6" /></>,
+  buggold: <><ellipse {...W} cx="12" cy="13.5" rx="3.3" ry="4.4" /><circle {...W} cx="12" cy="7.8" r="1.8" /><path {...L} d="M8.6 11l-2.6-1.4M15.4 11l2.6-1.4M8.4 14.5H5.6M15.6 14.5h2.8M9 17.6l-2 1.6M15 17.6l2 1.6" /></>,
+  bravery: <path {...W} d="M12 5.2l6.2 11.4H5.8z" />,
+  brilliance: <path {...W} d="M12 4.8l6.2 7.2-6.2 7.2L5.8 12z" />,
+  balance: <><path {...W} d="M12 5.2a6.8 6.8 0 0 0 0 13.6z" /><path {...L} d="M12 5.2a6.8 6.8 0 0 1 0 13.6" /></>,
+  early: <path {...L} d="M5 16.5h14M7.6 16.5a4.4 4.4 0 0 1 8.8 0M12 6.5v3M6.6 9.6l2 2M17.4 9.6l-2 2" />,
+  botdev: <><rect {...W} x="6.5" y="9.5" width="11" height="8.5" rx="2.2" /><path {...L} d="M12 9.5V6.3M10.2 6.3h3.6" /><circle cx="9.6" cy="13.6" r="1.2" fill="currentColor" /><circle cx="14.4" cy="13.6" r="1.2" fill="currentColor" /></>,
+  dev: <path {...L} d="M9.6 8.4L6 12l3.6 3.6M14.4 8.4L18 12l-3.6 3.6M13 7.2l-2 9.6" />,
+  nitro: <><path {...W} d="M8 6.2h8l2.8 4L12 18.6 5.2 10.2z" /><path {...L} stroke="currentColor" strokeWidth="1.2" d="M5.2 10.2h13.6M10 6.2l-1.2 4 3.2 8.4M14 6.2l1.2 4-3.2 8.4" /></>,
+};
+
+// Discord's own badge image; if it can't load (blocked, or Discord moved it) the drawn icon above takes over.
+function Badge({ t, e, col, id, hash }) {
+  const [bad, setBad] = useState(false);
+  const art = ART[id] ? <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="11.2" fill={col} />{ART[id]}</svg> : e;
+  return (
+    <i role="listitem" title={t} aria-label={t} style={{ "--bc": col, color: "#14100c" }}>
+      {hash && !bad ? <img src={badgeUrl(hash)} width={22} height={22} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setBad(true)} /> : art}
+    </i>
+  );
+}
+
 export function DBadges({ d }) {
   const b = badgesOf(d);
-  return b.length ? <span className="pc-dbadges">{b.map(([t, e, col], i) => <i key={i} title={t} style={{ "--bc": col }}>{e}</i>)}</span> : null;
+  return b.length ? <span className="pc-dbadges" role="list">{b.map(([t, e, col, id, hash]) => <Badge key={id || t} t={t} e={e} col={col} id={id} hash={hash} />)}</span> : null;
 }
 
 export function actsOf(pres) { return pres?.acts?.length ? pres.acts : pres?.act ? [pres.act] : []; }

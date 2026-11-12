@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PLATFORMS, FONTS, THEMES, cfg, itemsOf, sectionsOf, playlist, embedSrc, ink, fontsHref, iconKind } from "@/lib/schema";
 import { Ico } from "@/lib/icons";
+import { badgesOf } from "@/lib/badges";
 import { Particles, CursorFX } from "./profile-fx";
 import { Icon, Presence, DBadges, Player, useAudio, DOT, LBL, actsOf } from "./profile-parts";
 
@@ -72,7 +73,7 @@ function useTabTitle(title, mode, off) {
 // ───────────── component ─────────────
 // p: the saved profile. preview: inside the dashboard / landing (links inert, no tracking, no entry screen).
 // livePres: presence to show instead of fetching (dashboard + landing demo).
-export default function ProfileCard({ p, views, preview, livePres }) {
+export default function ProfileCard({ p, views, preview, livePres, claim }) {
   const c = useMemo(() => cfg(p), [p]);
   const it = useMemo(() => itemsOf(p), [p]);
   const list = useMemo(() => playlist(p), [p]);
@@ -167,7 +168,9 @@ export default function ProfileCard({ p, views, preview, livePres }) {
     music: c.musicPos === "inline" && c.musicPlayer !== "hidden" && a.has,
   };
   const firstShown = sections.find((s) => s.on && has[s.k])?.k;
-  const dName = pres && (c.badgePlacement === "name" || c.badgePlacement === "both");
+  // Badges don't depend on live status: if the status card isn't on the page, "card" falls back to showing them by the name.
+  const cardShown = !!pres && c.presenceStyle !== "dot";
+  const dName = badgesOf(p.discord).length > 0 && (c.badgePlacement === "name" || c.badgePlacement === "both" || (c.badgePlacement === "card" && !cardShown));
 
   const body = {
     identity: (
@@ -281,6 +284,7 @@ export default function ProfileCard({ p, views, preview, livePres }) {
           </div>
         </div>
       </div>
+      {(!preview || claim) && <a className="pc-claim" href={preview ? "#" : "/api/auth/login"} onClick={noop}><Ico n="sparkles" size={15} />Claim your username now!</a>}
       {!preview && !c.hideFooter && <a className="pc-foot" href="/">{c.footerText || "havenshq.xyz"}</a>}
       <CursorFX stage={stage} kind={c.cursor} trail={c.cursorTrail} color={curColor} />
     </div>

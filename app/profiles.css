@@ -113,7 +113,9 @@
 [data-lay=left] .pc-badges{justify-content:flex-start}[data-lay=right] .pc-badges{justify-content:flex-end}
 .pc-badges span{padding:.22rem .7rem;border-radius:999px;font-size:.78rem;font-weight:600;background:color-mix(in srgb,var(--accent) 18%,transparent);border:1px solid color-mix(in srgb,var(--accent) 42%,transparent)}
 .pc-dbadges{display:inline-flex;gap:3px;vertical-align:middle}
-.pc-dbadges i{font-style:normal;font-size:.8rem;line-height:1;padding:3px 5px;border-radius:6px;background:color-mix(in srgb,var(--bc,var(--accent)) 22%,transparent)}
+.pc-dbadges i{font-style:normal;font-size:.8rem;line-height:0;display:inline-grid;place-items:center}
+.pc-dbadges img{display:block;object-fit:contain}
+.pc-dbadges svg{display:block;filter:drop-shadow(0 1px 2px #0006)}
 
 /* discord status */
 .pc-pres{text-align:left;font-size:.88rem}
@@ -212,6 +214,10 @@
 
 .pc-views{margin:0;display:inline-flex;align-items:center;gap:.35rem;color:var(--muted);font-size:.8rem}
 .pc-views.corner{position:absolute;top:.7rem;right:.85rem;z-index:6;padding:.15rem .5rem;border-radius:999px;background:#0006;color:#fff;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.pc-claim{position:relative;z-index:1;display:inline-flex;align-items:center;gap:.45rem;padding:.55rem 1.1rem;border-radius:999px;border:1px solid color-mix(in srgb,var(--accent) 55%,transparent);
+  background:color-mix(in srgb,#000 55%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;font-size:.88rem;font-weight:700;text-decoration:none;
+  box-shadow:0 0 28px -8px var(--accent);transition:transform .15s,box-shadow .15s}
+.pc-claim:hover{transform:translateY(-2px);box-shadow:0 0 36px -4px var(--accent)}
 .pc-foot{position:relative;z-index:1;color:var(--text);opacity:.55;font-size:.8rem;text-decoration:none}
 .pc-foot:hover{opacity:.9}
 

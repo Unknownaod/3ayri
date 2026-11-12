@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { PLATFORMS, BUILTIN_ICONS, BUILTIN_LABELS, PRESETS, SECTIONS, FONT_LABELS, FONTS, FIELDS, applyPreset, cfg, rid, sectionsOf, embedSrc } from "@/lib/schema";
 import { badgesOf } from "@/lib/badges";
 import { Ico } from "@/lib/icons";
-import { Presence } from "../profile-parts";
+import { Presence, DBadges } from "../profile-parts";
 
 // ───────────── shared helpers ─────────────
 export const compress = (file, maxPx, maxChars) => new Promise((resolve, reject) => {
@@ -264,8 +264,9 @@ export function DiscordBlock({ me, patch, rd, setRd }) {
       <div className="did">
         {(d.avatar || me.avatar) && <img src={d.avatar || me.avatar} alt="" />}
         <div><b>{d.displayName || me.displayName || "Your Discord account"}</b><small>{d.username ? `@${d.username}` : "Not read yet"}</small>
-          {b.length > 0 && <span className="pc-dbadges">{b.map(([t, e, col], i) => <i key={i} title={t} style={{ "--bc": col }}>{e}</i>)}</span>}</div>
+          <DBadges d={d} /></div>
       </div>
+      {d.flags === undefined && !d.nitro && <p className="hint warn">Your badges haven't been loaded yet. Press the button below, or log out and back in.</p>}
       <p className="hint">This checks that you're in the same server as the bot, then reads your current status, game or song, and refreshes your name, avatar and badges.</p>
       <button type="button" className="hp-btn gold" disabled={rd?.loading} onClick={read}>{rd?.loading ? "Reading…" : "Read my Discord status"}</button>
       {rd && !rd.loading && (

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
-import { redis } from "@/lib/db";
+import { redis, dayKey } from "@/lib/db";
+import { guildMember } from "@/lib/discord";
 import { cfg } from "@/lib/schema";
 import ProfileCard from "../ProfileCard";
 import "../profiles.css";
@@ -31,9 +32,25 @@ export async function generateViewport({ params }) {
   return f?.p ? { themeColor: cfg(f.p).accent } : {};
 }
 
+// Pages saved before badges existed have no Discord flags. If the owner is in the bot's server, fetch them once (tried at most once a day) so their badges appear without a re-login.
+async function withBadges({ id, p }) {
+  if (p.discord?.flags !== undefined) return p;
+  const key = `flagsTry:${id}:${dayKey()}`;
+  if (await redis.get(key)) return p;
+  await redis.set(key, 1);
+  try {
+    const m = await guildMember(id);
+    const u = m.member?.user;
+    if (!u) return p;
+    const np = { ...p, discord: { ...p.discord, username: u.username, displayName: u.global_name || u.username, flags: u.public_flags ?? 0 } };
+    await redis.set(`profile:${id}`, np);
+    return np;
+  } catch { return p; }
+}
+
 export default async function ProfilePage({ params }) {
   const f = await load((await params).username);
   if (!f?.p) notFound();
   const views = (await redis.get(`views:${f.id}`)) ?? 0; // counted by the browser (POST /api/view), not on render
-  return <ProfileCard p={f.p} views={views} />;
+  return <ProfileCard p={await withBadges(f)} views={views} />;
 }
