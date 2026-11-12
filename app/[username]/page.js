@@ -13,7 +13,7 @@ export async function generateMetadata({ params }) {
   if (!f) return {};
   const { p } = f, img = p.customAvatar || p.avatar;
   return {
-    title: `${p.name || p.displayName} (@${p.username}) · Haven`,
+    title: p.tabTitle || `${p.name || p.displayName} (@${p.username}) · Haven`,
     description: p.bio,
     themeColor: p.accent,
     openGraph: { title: p.name || p.displayName, description: p.bio, images: img && !img.startsWith("data:") ? [img] : [] },

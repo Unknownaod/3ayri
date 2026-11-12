@@ -1,35 +1,37 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { PLATFORMS, FONTS, CHOICES, RANGES } from "@/lib/platforms";
+import { PLATFORMS, FONTS, cfg } from "@/lib/schema";
 
 const DOT = { online: "#43b581", idle: "#faa61a", dnd: "#f04747", offline: "#747f8d" };
+const LBL = { online: "Online", idle: "Idle", dnd: "Do not disturb", offline: "Offline" };
+const KIND = { spotify: "Listening to Spotify", game: "Playing", stream: "Streaming", watch: "Watching" };
+const lum = (h) => { const n = parseInt(h.slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
+const cur = (a, k) => ({ dot: `<circle cx='10' cy='10' r='5' fill='${a}' stroke='white' stroke-width='2'/>`, ring: `<circle cx='14' cy='14' r='9' fill='none' stroke='${a}' stroke-width='2.5'/>`, cross: `<path d='M14 3v22M3 14h22' stroke='${a}' stroke-width='2'/>` }[k]);
 
 function usePresence(id, on) {
   const [d, setD] = useState(null);
   useEffect(() => {
     if (!on || !id) { setD(null); return; }
     let dead = false;
-    const load = () => fetch(`https://api.lanyard.rest/v1/users/${id}`).then((r) => r.json())
-      .then((j) => !dead && setD(j.success ? j.data : null)).catch(() => {});
-    load();
-    const t = setInterval(load, 30000);
+    const load = () => !document.hidden && fetch(`/api/presence?u=${id}`).then((r) => r.json()).then((j) => !dead && setD(j)).catch(() => {});
+    load(); const t = setInterval(load, 15000);
     return () => { dead = true; clearInterval(t); };
   }, [id, on]);
   return d;
 }
 
-function useTyped(text, on) {
+function useTyped(text, on, ms) {
   const [n, setN] = useState(on ? 0 : text.length);
   useEffect(() => {
     if (!on) { setN(text.length); return; }
     let i = 0; setN(0);
-    const t = setInterval(() => { i++; setN(i); if (i >= text.length) clearInterval(t); }, 35);
+    const t = setInterval(() => { setN(++i); if (i >= text.length) clearInterval(t); }, ms);
     return () => clearInterval(t);
-  }, [text, on]);
+  }, [text, on, ms]);
   return text.slice(0, n);
 }
 
-function Particles({ kind, color }) {
+function Particles({ kind, count, speed, color }) {
   const ref = useRef(null);
   useEffect(() => {
     if (kind === "none" || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -37,109 +39,142 @@ function Particles({ kind, color }) {
     let w, h, id;
     const fit = () => { w = c.width = c.offsetWidth; h = c.height = c.offsetHeight; };
     fit();
-    const ps = Array.from({ length: kind === "stars" ? 70 : 45 }, () => ({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 2 + 0.6, v: Math.random() * 0.8 + 0.3, p: Math.random() * 6 }));
+    const sp = speed / 10, R = Math.random;
+    const ps = Array.from({ length: count }, () => ({ x: R() * w, y: R() * h, r: R() * 2 + 0.6, v: (R() * 0.8 + 0.3) * sp, p: R() * 6 }));
     const tick = () => {
       x.clearRect(0, 0, w, h);
       for (const p of ps) {
-        if (kind === "stars") { p.p += 0.03; x.globalAlpha = 0.4 + 0.6 * Math.abs(Math.sin(p.p)); }
+        x.globalAlpha = 0.8; x.fillStyle = x.strokeStyle = kind === "snow" || kind === "stars" ? "#fff" : color;
+        if (kind === "stars") { p.p += 0.03 * sp; x.globalAlpha = 0.4 + 0.6 * Math.abs(Math.sin(p.p)); }
         else {
-          p.y += kind === "embers" ? -p.v : p.v; p.p += 0.02; p.x += Math.sin(p.p) * 0.4; x.globalAlpha = 0.8;
-          if (p.y > h + 5) p.y = -5; if (p.y < -5) p.y = h + 5;
+          p.y += (kind === "embers" || kind === "bubbles" ? -1 : 1) * (kind === "rain" ? p.v * 9 : p.v); p.p += 0.02;
+          if (kind !== "rain") p.x += Math.sin(p.p) * 0.4;
+          if (p.y > h + 14) p.y = -14; if (p.y < -14) p.y = h + 14;
         }
-        x.fillStyle = kind === "embers" ? color : "#fff";
-        x.beginPath(); x.arc(p.x, p.y, p.r, 0, 7); x.fill();
+        x.beginPath();
+        if (kind === "rain") { x.globalAlpha = 0.5; x.moveTo(p.x, p.y); x.lineTo(p.x - 1, p.y + 12); x.stroke(); }
+        else if (kind === "bubbles") { x.globalAlpha = 0.5; x.arc(p.x, p.y, p.r * 3, 0, 7); x.stroke(); }
+        else { x.arc(p.x, p.y, p.r, 0, 7); x.fill(); }
       }
       id = requestAnimationFrame(tick);
     };
-    tick();
-    addEventListener("resize", fit);
+    tick(); addEventListener("resize", fit);
     return () => { cancelAnimationFrame(id); removeEventListener("resize", fit); };
-  }, [kind, color]);
+  }, [kind, count, speed, color]);
   return kind === "none" ? null : <canvas ref={ref} className="pc-fx" />;
 }
 
-export default function ProfileCard({ p, views, preview }) {
-  const g = (k) => p[k] ?? (CHOICES[k] ? CHOICES[k][0] : RANGES[k][2]);
-  const theme = g("theme");
-  const accent = p.accent || "#e0a243";
-  const iconHex = g("iconColor") === "accent" ? accent.slice(1) : theme === "light" ? "111111" : "ffffff";
-  const icon = (t, s) => `https://cdn.simpleicons.org/${PLATFORMS[t].slug}/${iconHex}`;
-  const avatar = p.customAvatar || p.avatar;
-  const [entered, setEntered] = useState(!p.entry || !!preview);
-  const [playing, setPlaying] = useState(false);
-  const audio = useRef(null);
-  const card = useRef(null);
-  const pres = usePresence(p.discordId, p.presence);
-  const bio = useTyped(p.bio || "", !!p.typewriter && !preview);
-  const bh = g("bannerHeight");
+function Presence({ pres, c }) {
+  const [, tick] = useState(0);
+  const a = pres.act;
+  useEffect(() => { if (a?.kind !== "spotify") return; const t = setInterval(() => tick((n) => n + 1), 1000); return () => clearInterval(t); }, [a?.kind]);
+  const prog = a?.kind === "spotify" && a.end ? Math.min(100, Math.max(0, ((Date.now() - a.start) / (a.end - a.start)) * 100)) : null;
+  const show = c.presenceActivity && a;
+  if (c.presenceStyle === "compact")
+    return <p className="pc-pres compact"><i style={{ background: DOT[pres.status] }} />{show ? `${KIND[a.kind]} ${a.title}` : c.presenceCustom && pres.custom ? pres.custom : LBL[pres.status]}</p>;
+  return (
+    <div className="pc-pres card">
+      <div className="pc-pres-top"><i style={{ background: DOT[pres.status] }} />{LBL[pres.status]}{c.presenceCustom && pres.custom && <span> · {pres.custom}</span>}</div>
+      {show && (
+        <div className="pc-act">
+          {a.art && <img src={a.art} alt="" />}
+          <div><small>{KIND[a.kind]}</small><b>{a.title}</b>{a.sub && <span>{a.sub}</span>}
+            {prog != null && <u><s style={{ width: `${prog}%` }} /></u>}</div>
+        </div>
+      )}
+    </div>
+  );
+}
 
+export default function ProfileCard({ p, views, preview, livePres }) {
+  const c = cfg(p);
+  const accent = c.accent, on = lum(accent) > 0.6 ? "#111" : "#fff";
+  const iconHex = c.iconColor === "accent" ? accent.slice(1) : c.theme === "light" ? "111111" : "ffffff";
+  const icon = (t) => `https://cdn.simpleicons.org/${PLATFORMS[t].slug}/${iconHex}`;
+  const avatar = p.customAvatar || p.avatar;
+  const [entered, setEntered] = useState(!c.entry || !!preview);
+  const [playing, setPlaying] = useState(false);
+  const audio = useRef(null), card = useRef(null);
+  const fetched = usePresence(p.discordId, c.presence && !livePres && !preview);
+  const pres = c.presence ? livePres || fetched : null;
+  const bio = useTyped(p.bio || "", c.typewriter && !preview, c.typeSpeed);
+  const bh = c.bannerHeight;
   const href = (t, i) => (preview ? "#" : `/api/go?u=${p.discordId}&t=${t}&i=${i}`);
   const noop = (e) => preview && e.preventDefault();
-  const enter = () => { setEntered(true); audio.current?.play().then(() => setPlaying(true)).catch(() => {}); };
-  const toggle = () => { const a = audio.current; if (!a) return; if (a.paused) { a.play(); setPlaying(true); } else { a.pause(); setPlaying(false); } };
+  const play = () => { const a = audio.current; if (!a) return; a.volume = c.musicVolume / 100; a.play().then(() => setPlaying(true)).catch(() => {}); };
+  const enter = () => { setEntered(true); if (c.musicAuto) play(); };
+  const toggle = () => { const a = audio.current; if (!a) return; if (a.paused) play(); else { a.pause(); setPlaying(false); } };
+  useEffect(() => { if (audio.current) audio.current.volume = c.musicVolume / 100; }, [c.musicVolume]);
   const tilt = (e) => {
-    if (!p.tilt || preview || !card.current) return;
-    const r = card.current.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
-    card.current.style.transform = `perspective(900px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg)`;
+    if (!c.tilt || preview || !card.current) return;
+    const r = card.current.getBoundingClientRect(), s = c.tiltStrength;
+    card.current.style.transform = `perspective(900px) rotateY(${((e.clientX - r.left) / r.width - 0.5) * s}deg) rotateX(${-((e.clientY - r.top) / r.height - 0.5) * s}deg)`;
   };
-  const act = pres?.spotify ? `Listening to ${pres.spotify.song}` : pres?.activities?.find((a) => a.type === 0) ? `Playing ${pres.activities.find((a) => a.type === 0).name}` : null;
 
-  const cls = ["pc", `pc-${theme}`, `lay-${g("layout")}`, `w-${g("width")}`, `bd-${g("border")}`, `ls-${g("linkStyle")}`,
-    `lsh-${g("linkShape")}`, `ll-${g("linkLayout")}`, `ic-${g("iconStyle")}`, `ab-${g("avatarBorder")}`, bh === 0 ? "nobanner" : ""].join(" ");
+  const socials = p.socials?.length > 0 && (
+    <div className="pc-socials">
+      {p.socials.map((s, i) => PLATFORMS[s.type] && (
+        <a key={i} href={href("s", i)} onClick={noop} target="_blank" rel="noopener noreferrer" aria-label={PLATFORMS[s.type].name}>
+          <img src={icon(s.type)} alt="" style={{ width: "var(--ic)", height: "var(--ic)" }} />
+        </a>
+      ))}
+    </div>
+  );
+  const cls = ["pc", `pc-${c.theme}`, `lay-${c.layout}`, `bd-${c.border}`, `ls-${c.linkStyle}`, `lsh-${c.linkShape}`, `ll-${c.linkLayout}`, `lh-${c.linkHover}`,
+    `ic-${c.iconStyle}`, `sh-${c.socialHover}`, `ab-${c.avatarBorder}`, `ea-${c.entryAnim}`, bh === 0 ? "nobanner" : ""].join(" ");
+  const style = {
+    "--accent": accent, "--accent2": c.accent2, "--on": on, "--ff": FONTS[c.font], "--op": c.cardOpacity, "--blur": `${c.blur}px`, "--rad": `${c.radius}px`,
+    "--av": `${c.avatarSize}px`, "--bh": `${bh}px`, "--ic": `${c.iconSize}px`, "--w": `${c.width}px`, "--pad": `${c.padding}px`, "--gap": `${c.gap}px`,
+    "--bw": `${c.borderWidth}px`, "--sh": c.shadow / 100, "--ts": `${c.nameSize}px`, "--lh": `${c.linkSize}px`,
+    ...(c.cursor !== "default" && { cursor: `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28'>${cur(accent, c.cursor)}</svg>`)}") 14 14, auto` }),
+  };
+  const bgImg = p.background ? `url("${p.background}")` : "";
+  const bgGrad = c.bgGradient ? `linear-gradient(${c.bgAngle}deg,${c.bgColor || "#0d0a08"},${c.bgColor2})` : "";
 
   return (
-    <div className={`pc-stage ${preview ? "" : "pc-full"}`}
-      style={{ "--accent": accent, "--accent2": p.accent2 || "#ffffff", "--ff": FONTS[g("font")], "--op": g("cardOpacity"), "--blur": g("blur"),
-        "--rad": `${g("radius")}px`, "--av": `${g("avatarSize")}px`, "--bh": `${bh}px`, "--ic": `${g("iconSize")}px` }}>
-      <div className="pc-bg" style={{ backgroundColor: p.bgColor || undefined, backgroundImage: p.background ? `url(${p.background})` : undefined, filter: `blur(${g("bgBlur")}px)` }} />
+    <div className={`pc-stage ${preview ? "" : "pc-full"} vp-${c.vpos}`} style={style}>
+      <div className={`pc-bg ${c.bgZoom ? "zoom" : ""}`} style={{ backgroundColor: c.bgColor || undefined, backgroundImage: [bgImg, bgGrad].filter(Boolean).join(",") || undefined, filter: `blur(${c.bgBlur}px)` }} />
       {p.bgVideo && <video className="pc-vid" src={p.bgVideo} autoPlay loop muted playsInline />}
-      <div className="pc-ov" style={{ opacity: g("overlay") / 100 }} />
-      <Particles kind={g("particles")} color={accent} />
+      <div className="pc-ov" style={{ opacity: c.overlay / 100 }} />
+      {c.screenFx !== "none" && <div className={`pc-sfx fx-${c.screenFx}`} />}
+      <Particles kind={c.particles} count={c.particleCount} speed={c.particleSpeed} color={accent} />
 
-      {!entered && <button className="pc-splash" onClick={enter}>{p.entryText || "click to enter"}</button>}
-      {p.music?.url && <audio ref={audio} src={p.music.url} loop preload="none" />}
-      {p.music?.url && entered && (
+      {!entered && <button className="pc-splash" onClick={enter}>{c.entryText || "click to enter"}</button>}
+      {c.musicUrl && <audio ref={audio} src={c.musicUrl} loop preload="none" onPause={() => setPlaying(false)} onPlay={() => setPlaying(true)} />}
+      {c.musicUrl && entered && c.musicPlayer === "pill" && (
         <button className="pc-music" onClick={toggle} aria-label={playing ? "Pause music" : "Play music"}>
-          {playing ? "❚❚" : "▶"} <span>{p.music.title || "music"}</span>
+          <b>{playing ? "❚❚" : "▶"}</b><span>{c.musicTitle || "music"}</span>{playing && <em><i /><i /><i /></em>}
         </button>
       )}
 
-      <div ref={card} className={cls} style={p.textColor ? { "--pc-text": p.textColor } : undefined}
-        onMouseMove={tilt} onMouseLeave={() => card.current && (card.current.style.transform = "")}>
-        {bh > 0 && <div className="pc-banner" style={p.banner ? { backgroundImage: `url(${p.banner})` } : undefined} />}
-        <div className="pc-body">
-          <div className="pc-avwrap">
-            {avatar && <img className={`pc-avatar av-${g("avatarShape")}`} src={avatar} alt="" />}
-            {pres && <span className="pc-dot" style={{ background: DOT[pres.discord_status] || DOT.offline }} title={pres.discord_status} />}
-          </div>
-          <h1 className={`nm-${g("nameEffect")}`}>{p.name || p.displayName}</h1>
-          <p className="pc-handle"><span>@{p.username || "username"}</span>{p.location && <span>{p.location}</span>}</p>
-          {act && <p className="pc-act">{act}</p>}
-          {p.bio && <p className="pc-bio">{bio}</p>}
-
-          {p.socials?.length > 0 && (
-            <div className="pc-socials">
-              {p.socials.map((s, i) => PLATFORMS[s.type] && (
-                <a key={i} href={href("s", i)} onClick={noop} target="_blank" rel="noopener noreferrer" aria-label={PLATFORMS[s.type].name}>
-                  <img src={icon(s.type)} alt="" style={{ width: "var(--ic)", height: "var(--ic)" }} />
-                </a>
-              ))}
+      {entered && (
+        <div ref={card} className={cls} style={{ ...(c.cardColor && { "--pc-bg": c.cardColor }), ...(c.textColor && { "--pc-text": c.textColor }) }} onMouseMove={tilt} onMouseLeave={() => card.current && (card.current.style.transform = "")}>
+          {views != null && c.showViews && <span className="pc-views">👁 {views.toLocaleString()}</span>}
+          {bh > 0 && <div className="pc-banner" style={p.banner ? { backgroundImage: `url("${p.banner}")` } : undefined} />}
+          <div className="pc-body">
+            <div className={`pc-avwrap av-${c.avatarShape} aa-${c.avatarAnim}`}>
+              {avatar && <img className="pc-avatar" src={avatar} alt="" />}
+              {pres && <span className="pc-dot" style={{ background: DOT[pres.status] }} title={LBL[pres.status]} />}
             </div>
-          )}
-
-          {p.links?.length > 0 && (
-            <ul className="pc-links">
-              {p.links.map((l, i) => (
-                <li key={i}><a href={href("l", i)} onClick={noop} target="_blank" rel="noopener noreferrer">
-                  {PLATFORMS[l.icon] && <img src={icon(l.icon)} alt="" width={18} height={18} />}{l.label}
-                </a></li>
-              ))}
-            </ul>
-          )}
-          {views != null && p.showViews !== false && <p className="pc-views">{views.toLocaleString()} views</p>}
+            <h1 className={`nm-${c.nameEffect}`}>{p.name || p.displayName}</h1>
+            {p.badges?.length > 0 && <div className="pc-badges">{p.badges.map((b, i) => <span key={i}>{b}</span>)}</div>}
+            <p className="pc-handle"><span>@{p.username || "username"}</span>{p.location && <span>📍 {p.location}</span>}</p>
+            {pres && c.presenceStyle !== "dot" && <Presence pres={pres} c={c} />}
+            {p.bio && <p className="pc-bio">{bio}</p>}
+            {c.socialsPos === "top" && socials}
+            {p.links?.length > 0 && (
+              <ul className="pc-links">
+                {p.links.map((l, i) => (
+                  <li key={i}><a href={href("l", i)} onClick={noop} target="_blank" rel="noopener noreferrer">
+                    {PLATFORMS[l.icon] && <img src={icon(l.icon)} alt="" width={18} height={18} />}{l.label}
+                  </a></li>
+                ))}
+              </ul>
+            )}
+            {c.socialsPos === "bottom" && socials}
+          </div>
         </div>
-      </div>
+      )}
       {!preview && <a className="pc-foot" href="/">havenshq.xyz</a>}
     </div>
   );
