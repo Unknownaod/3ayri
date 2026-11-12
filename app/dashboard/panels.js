@@ -162,18 +162,18 @@ export function TracksEditor({ me, set }) {
   const setList = (n) => set("tracks", n);
   const upd = (i, k, v) => setList(list.map((x, j) => (j === i ? { ...x, [k]: v } : x)));
   return (
-    <div className="fld"><span>More tracks <small>they play after track 1, in this order</small></span>
+    <div className="fld"><span>More tracks <small>YouTube or audio links, played after track 1 in this order</small></span>
       {list.map((t, i) => (
         <div className="item col" key={t.id}>
           <div className="irow">
-            <input value={t.url || ""} onChange={(e) => upd(i, "url", e.target.value)} placeholder="https://…/song.mp3" aria-label="Audio link" />
+            <input value={t.url || ""} onChange={(e) => upd(i, "url", e.target.value)} placeholder="YouTube link or https://…/song.mp3" aria-label="YouTube or audio link" />
             <Mv i={i} n={list.length} go={(a, b) => setList(mv(list, a, b))} />
             <button type="button" className="ib" aria-label="Remove track" onClick={() => setList(list.filter((_, j) => j !== i))}><Ico n="trash" size={15} /></button>
           </div>
           <div className="adv two">
-            <input value={t.title || ""} maxLength={60} onChange={(e) => upd(i, "title", e.target.value)} placeholder="Title" />
+            <input value={t.title || ""} maxLength={60} onChange={(e) => upd(i, "title", e.target.value)} placeholder="Title (YouTube: filled in automatically)" />
             <input value={t.artist || ""} maxLength={60} onChange={(e) => upd(i, "artist", e.target.value)} placeholder="Artist" />
-            <input value={t.cover || ""} onChange={(e) => upd(i, "cover", e.target.value)} placeholder="Cover image link" />
+            <input value={t.cover || ""} onChange={(e) => upd(i, "cover", e.target.value)} placeholder="Cover image link (YouTube: thumbnail by default)" />
           </div>
         </div>
       ))}

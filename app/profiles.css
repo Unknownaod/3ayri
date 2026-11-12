@@ -302,3 +302,7 @@
   .pl-info b,.pl-info span{max-width:110px}
   [data-ll=grid] .pc-links{grid-template-columns:1fr}
 }
+
+/* hidden YouTube audio player (kept in the page, not display:none, so browsers still play it) */
+.pc-yt{position:fixed;left:-9999px;bottom:0;width:200px;height:200px;overflow:hidden;opacity:0;pointer-events:none}
+.pc-yt iframe{width:200px;height:200px}

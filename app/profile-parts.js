@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { PLATFORMS, iconKind } from "@/lib/schema";
+import { PLATFORMS, iconKind, ytId } from "@/lib/schema";
 import { badgesOf } from "@/lib/badges";
 import { Ico } from "@/lib/icons";
 
@@ -106,45 +106,110 @@ export function Presence({ pres, c, p }) {
   );
 }
 
-// ───────────── audio (playlist) ─────────────
+// ───────────── audio (playlist: direct files and YouTube) ─────────────
+let ytReady;
+const loadYT = () => ytReady || (ytReady = new Promise((res) => {
+  if (window.YT?.Player) return res(window.YT);
+  const prev = window.onYouTubeIframeAPIReady;
+  window.onYouTubeIframeAPIReady = () => { prev?.(); res(window.YT); };
+  const s = document.createElement("script"); s.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(s);
+}));
+
 export function useAudio(list, c, preview) {
-  const el = useRef(null), want = useRef(false);
+  const el = useRef(null), yt = useRef(null), ytBox = useRef(null), want = useRef(false), vols = useRef({ v: c.musicVolume, m: false });
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [cur, setCur] = useState(0);
   const [dur, setDur] = useState(0);
   const [vol, setVol] = useState(c.musicVolume);
   const [muted, setMuted] = useState(false);
-  const n = list.length, i = Math.min(idx, Math.max(0, n - 1)), trk = list[i];
+  const [ytTitle, setYtTitle] = useState("");
+  const n = list.length, i = Math.min(idx, Math.max(0, n - 1)), raw = list[i];
+  const vid = raw ? ytId(raw.url) : null;
+  const trk = raw && { ...raw, title: raw.title || (vid ? ytTitle : ""), cover: raw.cover || (vid ? `https://i.ytimg.com/vi/${vid}/hqdefault.jpg` : "") };
+  const cb = useRef({});
 
   useEffect(() => { setVol(c.musicVolume); }, [c.musicVolume]);
-  useEffect(() => { if (el.current) el.current.volume = muted ? 0 : vol / 100; }, [vol, muted, trk?.url]);
-  useEffect(() => { if (want.current && el.current) el.current.play().catch(() => {}); }, [i, trk?.url]);
+  useEffect(() => {
+    vols.current = { v: vol, m: muted };
+    if (el.current) el.current.volume = muted ? 0 : vol / 100;
+    try { yt.current?.setVolume?.(muted ? 0 : vol); } catch {}
+  }, [vol, muted, raw?.url]);
+  useEffect(() => { if (!vid && want.current && el.current) el.current.play().catch(() => {}); }, [i, raw?.url]);
 
-  const play = () => { want.current = true; return el.current?.play().then(() => true).catch(() => false); };
-  const pause = () => { want.current = false; el.current?.pause(); };
-  const toggle = () => (el.current?.paused ? play() : pause());
+  // YouTube: one hidden player, re-used for every YouTube track
+  useEffect(() => {
+    setCur(0); setDur(0);
+    if (!vid) { try { yt.current?.pauseVideo?.(); } catch {} return; }
+    let dead = false;
+    loadYT().then((YT) => {
+      if (dead) return;
+      if (yt.current?.loadVideoById) {
+        want.current ? yt.current.loadVideoById(vid) : yt.current.cueVideoById(vid);
+        return;
+      }
+      yt.current = new YT.Player(ytBox.current, {
+        width: 200, height: 200, videoId: vid, playerVars: { playsinline: 1, controls: 0, disablekb: 1, rel: 0, modestbranding: 1 },
+        events: {
+          onReady: (e) => { e.target.setVolume(vols.current.m ? 0 : vols.current.v); setYtTitle(e.target.getVideoData?.().title || ""); if (want.current) e.target.playVideo(); },
+          onStateChange: (e) => {
+            const st = e.data;
+            if (st === 1) { setPlaying(true); setYtTitle(e.target.getVideoData?.().title || ""); }
+            else if (st === 2 || st === 5) setPlaying(false);
+            else if (st === 0) { setPlaying(false); cb.current.ended?.(); }
+          },
+          onError: () => { setPlaying(false); if (want.current) cb.current.next?.(); },
+        },
+      });
+    });
+    return () => { dead = true; };
+  }, [vid]);
+  useEffect(() => { // YouTube has no timeupdate event
+    if (!vid) return;
+    const t = setInterval(() => { const p = yt.current; if (p?.getCurrentTime) { setCur(p.getCurrentTime() || 0); setDur(p.getDuration?.() || 0); } }, 500);
+    return () => clearInterval(t);
+  }, [vid]);
+  useEffect(() => () => { try { yt.current?.destroy?.(); } catch {} yt.current = null; }, []);
+
+  const isPlaying = () => (vid ? yt.current?.getPlayerState?.() === 1 : el.current && !el.current.paused);
+  const play = () => {
+    want.current = true;
+    if (vid) { try { yt.current?.playVideo?.(); } catch {} return Promise.resolve(true); } // if the player isn't ready yet, onReady starts it
+    return el.current?.play().then(() => true).catch(() => false);
+  };
+  const pause = () => { want.current = false; if (vid) { try { yt.current?.pauseVideo?.(); } catch {} } else el.current?.pause(); };
+  const toggle = () => (isPlaying() ? pause() : play());
   const jump = (to) => { want.current = true; setIdx(to); setCur(0); };
   const next = () => {
-    if (n < 2) { if (el.current) { el.current.currentTime = 0; play(); } return; }
+    if (n < 2) { seek(0); play(); return; }
     jump(c.musicShuffle ? (i + 1 + Math.floor(Math.random() * (n - 1))) % n : (i + 1) % n);
   };
-  const prev = () => { if (cur > 3 || n < 2) { if (el.current) el.current.currentTime = 0; } else jump((i - 1 + n) % n); };
-  const seek = (t) => { if (el.current) el.current.currentTime = t; setCur(t); };
-  const ended = () => { if (c.musicLoop === "off" && i === n - 1) { setPlaying(false); want.current = false; return; } next(); };
+  const prev = () => { if (cur > 3 || n < 2) seek(0); else jump((i - 1 + n) % n); };
+  const seek = (t) => { if (vid) { try { yt.current?.seekTo?.(t, true); } catch {} } else if (el.current) el.current.currentTime = t; setCur(t); };
+  const ended = () => {
+    if (c.musicLoop === "one") { seek(0); play(); return; }
+    if (c.musicLoop === "off" && i === n - 1) { setPlaying(false); want.current = false; return; }
+    next();
+  };
+  cb.current = { ended, next };
 
   // Browsers need a gesture to start audio: if the first attempt is blocked, retry on the first tap / key press.
   const start = () => {
     if (!n || preview) return;
-    play().then((ok) => {
-      if (ok) return;
+    const retry = () => {
       const once = () => { play(); ["pointerdown", "keydown", "touchstart"].forEach((e) => removeEventListener(e, once)); };
       ["pointerdown", "keydown", "touchstart"].forEach((e) => addEventListener(e, once, { once: true }));
+    };
+    play().then((ok) => {
+      if (!ok) return retry();
+      if (vid) setTimeout(() => { if (want.current && !isPlaying()) retry(); }, 2000);
     });
   };
   const audio = trk ? (
-    <audio ref={el} src={trk.url} loop={c.musicLoop === "one"} preload="metadata" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={ended}
-      onTimeUpdate={(e) => setCur(e.currentTarget.currentTime)} onLoadedMetadata={(e) => setDur(e.currentTarget.duration || 0)} />
+    vid ? <div className="pc-yt" aria-hidden="true"><div ref={ytBox} /></div> : (
+      <audio ref={el} src={trk.url} loop={c.musicLoop === "one"} preload="metadata" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={ended}
+        onTimeUpdate={(e) => setCur(e.currentTarget.currentTime)} onLoadedMetadata={(e) => setDur(e.currentTarget.duration || 0)} />
+    )
   ) : null;
   return { has: n > 0, n, trk, playing, cur, dur, vol, setVol, muted, setMuted, toggle, next, prev, seek, start, audio };
 }
