@@ -48,7 +48,7 @@ export async function POST() {
   }
 
   const u = m.member.user, prof = await redis.get(`profile:${id}`);
-  const discord = { ...prof?.discord, username: u.username, displayName: u.global_name || u.username, flags: u.public_flags ?? prof?.discord?.flags ?? 0,
+  const discord = { ...prof?.discord, username: u.username, displayName: u.global_name || u.username, flags: u.public_flags ?? prof?.discord?.flags ?? 0, nitro: !!(prof?.discord?.nitro || u.banner || (u.avatar || "").startsWith("a_")),
     avatar: u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=256` : prof?.discord?.avatar };
   if (prof) await redis.set(`profile:${id}`, { ...prof, discord });
   return NextResponse.json({

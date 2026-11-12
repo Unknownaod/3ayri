@@ -266,6 +266,7 @@ export function DiscordBlock({ me, patch, rd, setRd }) {
         <div><b>{d.displayName || me.displayName || "Your Discord account"}</b><small>{d.username ? `@${d.username}` : "Not read yet"}</small>
           <DBadges d={d} /></div>
       </div>
+      {d.flags !== undefined && <p className="hint">Discord reports badge code {d.flags}{d.nitro ? " and Nitro" : ""}. {b.length ? `${b.length} badge${b.length === 1 ? "" : "s"} will show.` : "That means no public badges, so none will show."}</p>}
       {d.flags === undefined && !d.nitro && <p className="hint warn">Your badges haven't been loaded yet. Press the button below, or log out and back in.</p>}
       <p className="hint">This checks that you're in the same server as the bot, then reads your current status, game or song, and refreshes your name, avatar and badges.</p>
       <button type="button" className="hp-btn gold" disabled={rd?.loading} onClick={read}>{rd?.loading ? "Reading…" : "Read my Discord status"}</button>

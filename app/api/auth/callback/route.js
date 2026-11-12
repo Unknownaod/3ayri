@@ -38,7 +38,7 @@ export async function GET(req) {
     await redis.set(`profile:${u.id}`, {
       username: null, bio: "", links: [], socials: [], accent: "#e0a243",
       ...existing, discordId: u.id, displayName: u.global_name || u.username, avatar,
-      discord: { username: u.username, displayName: u.global_name || u.username, avatar, flags: u.public_flags || 0, nitro: (u.premium_type || 0) > 0 },
+      discord: { username: u.username, displayName: u.global_name || u.username, avatar, flags: u.public_flags || 0, nitro: (u.premium_type || 0) > 0 || !!u.banner || (u.avatar || "").startsWith("a_") },
     });
 
     step = "session cookie";

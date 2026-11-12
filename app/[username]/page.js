@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { redis, dayKey } from "@/lib/db";
-import { guildMember } from "@/lib/discord";
+import { discordUser } from "@/lib/discord";
 import { cfg } from "@/lib/schema";
 import ProfileCard from "../ProfileCard";
 import "../profiles.css";
@@ -32,17 +32,16 @@ export async function generateViewport({ params }) {
   return f?.p ? { themeColor: cfg(f.p).accent } : {};
 }
 
-// Pages saved before badges existed have no Discord flags. If the owner is in the bot's server, fetch them once (tried at most once a day) so their badges appear without a re-login.
+// If a page has no badge flags stored (older pages, or flags saved as 0), ask Discord once a day and save what it says.
 async function withBadges({ id, p }) {
-  if (p.discord?.flags !== undefined) return p;
+  if (p.discord?.flags) return p;
   const key = `flagsTry:${id}:${dayKey()}`;
   if (await redis.get(key)) return p;
   await redis.set(key, 1);
   try {
-    const m = await guildMember(id);
-    const u = m.member?.user;
-    if (!u) return p;
-    const np = { ...p, discord: { ...p.discord, username: u.username, displayName: u.global_name || u.username, flags: u.public_flags ?? 0 } };
+    const u = await discordUser(id);
+    if (!u || (!u.flags && !u.nitro)) return p;
+    const np = { ...p, discord: { ...p.discord, ...u, nitro: u.nitro || p.discord?.nitro } };
     await redis.set(`profile:${id}`, np);
     return np;
   } catch { return p; }
