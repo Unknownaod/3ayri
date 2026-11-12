@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionId } from "@/lib/session";
 import { redis, validUsername, dayKey } from "@/lib/db";
+import { isStaff } from "@/lib/staff";
 import { sanitize, itemsOf, cfg } from "@/lib/schema";
 
 const bad = (error, status = 400) => NextResponse.json({ error }, { status });
@@ -24,7 +25,7 @@ export async function GET() {
   if (!id) return bad("unauthenticated", 401);
   const p = await redis.get(`profile:${id}`);
   if (!p) return bad("unauthenticated", 401);
-  return NextResponse.json({ ...shape(p), ...(await extras(id, p)) });
+  return NextResponse.json({ ...shape(p), ...(await extras(id, p)), staff: await isStaff(id) });
 }
 
 export async function PUT(req) {
@@ -43,10 +44,10 @@ export async function PUT(req) {
     if (!(await redis.set(`username:${username}`, id, { nx: true }))) return bad("That username is taken.", 409);
     if (profile.username) await redis.del(`username:${profile.username}`);
   }
-  const { views, clicks, days, music, ...rest } = profile;
+  const { views, clicks, days, music, extraBadges, staff, ...rest } = profile;
   const next = { ...rest, username, ...sanitize(b) };
   await redis.set(`profile:${id}`, next);
-  return NextResponse.json({ ...shape(next), ...(await extras(id, next)) });
+  return NextResponse.json({ ...shape(next), ...(await extras(id, next)), staff: await isStaff(id) });
 }
 
 // "Delete my page": frees the username and removes the profile. (Signing in again starts a fresh one.)

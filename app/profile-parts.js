@@ -83,13 +83,27 @@ export function DBadges({ d }) {
   return b.length ? <span className="pc-dbadges" role="list">{b.map(([t, e, col, id, hash]) => <Badge key={id || t} t={t} e={e} col={col} id={id} hash={hash} />)}</span> : null;
 }
 
+// Shown only when the server says this person holds a STAFF_ROLE_IDS role. It's a prop, never saved profile data.
+export function StaffBadge() {
+  return (
+    <span className="pc-staff" title="Haven Staff" role="img" aria-label="Haven Staff">
+      <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+        <path d="M12 2.2 4 5.4v5.7c0 5 3.3 9.2 8 10.7 4.7-1.5 8-5.7 8-10.7V5.4l-8-3.2Z" fill="currentColor" opacity=".22" />
+        <path d="M12 2.2 4 5.4v5.7c0 5 3.3 9.2 8 10.7 4.7-1.5 8-5.7 8-10.7V5.4l-8-3.2Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+        <path d="m12 7.3 1.4 2.9 3.1.4-2.3 2.2.6 3.1-2.8-1.5-2.8 1.5.6-3.1-2.3-2.2 3.1-.4L12 7.3Z" fill="currentColor" />
+      </svg>
+      <b>Staff</b>
+    </span>
+  );
+}
+
 export function actsOf(pres) { return pres?.acts?.length ? pres.acts : pres?.act ? [pres.act] : []; }
 
 export function Presence({ pres, c, p }) {
   const acts = c.presenceActivity ? actsOf(pres) : [];
   const timed = c.presenceTimer && acts.some((a) => a.start);
   const now = useNow(timed);
-  const d = { ...p.discord, extra: p.extraBadges };
+  const d = p.discord || {};
   const dn = d.displayName || p.displayName, av = d.avatar || p.avatar;
   const inCard = c.badgePlacement === "card" || c.badgePlacement === "both";
   if (c.presenceHideOffline && pres.status === "offline") return null;

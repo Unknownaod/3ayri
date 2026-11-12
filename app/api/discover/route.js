@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { redis } from "@/lib/db";
+import { staffSet } from "@/lib/staff";
 
 const PAGE = 24;
 const BIG = 120000;   // inline images bigger than this are left out of the list (the full page still has them)
@@ -26,8 +27,10 @@ export async function GET(req) {
   if (q) list = list.filter(({ p }) => `${p.username} ${p.name || ""} ${p.displayName || ""}`.toLowerCase().includes(q));
   list.sort((a, b) => b.v - a.v);
   const slice = list.slice(page * PAGE, page * PAGE + PAGE);
+  const staff = await staffSet(rows.filter(([, p]) => slice.some((s) => s.p === p)).map(([k]) => k.slice(8)));
+  const idOf = new Map(rows.map(([k, p]) => [p, k.slice(8)]));
   return NextResponse.json(
-    { total: list.length, more: (page + 1) * PAGE < list.length, profiles: slice.map(({ p, v }) => ({ ...pub(p), views: v })) },
+    { total: list.length, more: (page + 1) * PAGE < list.length, profiles: slice.map(({ p, v }) => ({ ...pub(p), views: v, staff: staff.has(idOf.get(p)) })) },
     { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
   );
 }

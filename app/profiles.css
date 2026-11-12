@@ -312,3 +312,14 @@
 /* hidden YouTube audio player (kept in the page, not display:none, so browsers still play it) */
 .pc-yt{position:fixed;left:-9999px;bottom:0;width:200px;height:200px;overflow:hidden;opacity:0;pointer-events:none}
 .pc-yt iframe{width:200px;height:200px}
+
+/* Staff badge: a gold plate with a slow light sweep. Colours are fixed (not the page accent) so it always reads the same. */
+.pc-staff{position:relative;display:inline-flex;align-items:center;gap:.3rem;padding:.16rem .55rem .16rem .42rem;border-radius:999px;overflow:hidden;isolation:isolate;
+  color:#2b1a00;background:linear-gradient(135deg,#ffe9a3 0%,#f6c453 45%,#e0952b 100%);
+  box-shadow:0 0 0 1px #fff6 inset,0 -2px 4px #9a5a0033 inset,0 0 0 1px #8a5200aa,0 4px 14px -3px #f6b73c99;
+  font-size:.66rem;font-weight:800;line-height:1;letter-spacing:.07em;text-transform:uppercase;vertical-align:middle;cursor:default;user-select:none;white-space:nowrap}
+.pc-staff svg{display:block;filter:drop-shadow(0 1px 0 #fff7)}
+.pc-staff b{font-weight:800}
+.pc-staff::after{content:"";position:absolute;inset:0;z-index:-1;width:45%;left:-60%;background:linear-gradient(100deg,transparent,#fffb,transparent);transform:skewX(-18deg);animation:pcStaff 4.5s ease-in-out infinite 1.2s}
+@keyframes pcStaff{0%,55%{left:-60%}100%{left:130%}}
+@media (prefers-reduced-motion:reduce){.pc-staff::after{animation:none;display:none}}

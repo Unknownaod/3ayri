@@ -190,7 +190,3 @@
 @keyframes dc-sh{to{background-position:-300% 0}}
 @media(prefers-reduced-motion:reduce){.dc-skel{animation:none}.dc-card,.dc-link{transition:none}}
 
-.bpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px}
-.bpick button{display:flex;align-items:center;gap:.55rem;padding:.45rem .6rem;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--muted);font:inherit;font-size:.82rem;text-align:left;cursor:pointer}
-.bpick button:hover:not(:disabled){border-color:var(--muted);color:var(--text)}.bpick button.on{border-color:var(--accent);color:var(--text);background:#e0a2431a}.bpick button:disabled{cursor:default}
-.bpick .pc-dbadges{line-height:0;flex:none}.bpick span{display:grid}.bpick small{color:var(--accent)}

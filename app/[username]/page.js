@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { redis, dayKey } from "@/lib/db";
 import { discordUser } from "@/lib/discord";
+import { isStaff } from "@/lib/staff";
 import { cfg } from "@/lib/schema";
 import ProfileCard from "../ProfileCard";
 import "../profiles.css";
@@ -51,5 +52,6 @@ export default async function ProfilePage({ params }) {
   const f = await load((await params).username);
   if (!f?.p) notFound();
   const views = (await redis.get(`views:${f.id}`)) ?? 0; // counted by the browser (POST /api/view), not on render
-  return <ProfileCard p={await withBadges(f)} views={views} />;
+  const [p, staff] = await Promise.all([withBadges(f), isStaff(f.id)]);
+  return <ProfileCard p={p} views={views} staff={staff} />;
 }
