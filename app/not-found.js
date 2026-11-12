@@ -1,6 +1,3 @@
-// app/not-found.js: drop this file in your app/ folder. Self-contained (no other imports or CSS files).
-// Next shows it for any unknown URL, and whenever a page calls notFound().
-
 export const metadata = { title: "Page not found · Haven", robots: { index: false } };
 
 const LINKS = [
@@ -60,7 +57,7 @@ export default function NotFound() {
           <h1>Wrong door?</h1>
           <p className="nf-lead">We couldn't find that page. The link may be broken, or the username you're looking for isn't taken yet. If it's the name you want, you can claim it.</p>
           <div className="nf-cta">
-            <a className="nf-btn" href="/api/auth/login">Claim your username</a>
+            <a className="nf-btn" href="/dashboard">Claim your username</a>
             <a className="nf-btn ghost" href="/">Back to home</a>
           </div>
           <p className="nf-h">Or try one of these</p>
