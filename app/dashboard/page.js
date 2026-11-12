@@ -238,6 +238,7 @@ export default function Dashboard() {
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Bricolage+Grotesque:wght@600;800&display=swap" />
       <link rel="stylesheet" href={fontsHref(Object.keys(FONTS))} />
       <nav className="dash-nav" aria-label="Dashboard sections">
+        <a className="hp-ghost dn-home" href="/"><Ico n="back" size={13} />Return to home page</a>
         <h1 className="dn-logo">Haven</h1>
         <div className="dn-me">{(me.customAvatar || me.avatar) && <img src={me.customAvatar || me.avatar} alt="" />}<div><b>{me.name || me.displayName}</b><small>{me.username ? `/${me.username}` : "Pick a username"}</small></div></div>
         <label className="dn-search"><Ico n="wand" size={14} /><input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search settings" aria-label="Search settings" /></label>
