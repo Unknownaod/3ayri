@@ -190,3 +190,9 @@
 @keyframes dc-sh{to{background-position:-300% 0}}
 @media(prefers-reduced-motion:reduce){.dc-skel{animation:none}.dc-card,.dc-link{transition:none}}
 
+.dn-home{align-self:flex-start;margin-bottom:.25rem;font-size:.8rem;text-decoration:none}
+.panel.wide{max-width:none;padding:1.4rem 1rem;background:none;border:0}
+.dc-embed .dc-search{margin:0 0 1.4rem}.dc-embed .dc-grid{justify-content:start}
+.lp-logo{display:inline-flex;align-items:center;gap:.55rem}.lp-logo img{display:block;width:28px;height:28px;object-fit:contain;-webkit-text-fill-color:initial}
+.lp-logo span{background:linear-gradient(135deg,var(--ac2),var(--ac));-webkit-background-clip:text;background-clip:text;color:transparent}
+@media(max-width:700px){.lp-logo img{width:24px;height:24px}}
