@@ -53,7 +53,7 @@ function DashMock() {
 // Cards on Discover are static snapshots: no particles, music, cursor effects or entry screen, so a grid of them stays light.
 const calm = (p) => ({ ...p, particles: "none", cursor: "default", cursorTrail: "none", entry: false, tilt: false, cardFloat: false, typewriter: false, tabTitle: "" });
 
-function Discover() {
+export function Discover({ embed = false }) {
   const [items, setItems] = useState([]);
   const [q, setQ] = useState("");
   const [page, setPage] = useState(0);
@@ -72,17 +72,17 @@ function Discover() {
   }, [q, page]);
 
   return (
-    <section id="discover" className="lp-sec dc" aria-label="Discover profiles">
-      <h2>Discover pages</h2>
-      <p className="lp-sub">Browse pages made with Haven. Click one to open it.</p>
-      <label className="dc-search"><Ico n="wand" size={15} /><input type="search" value={q} onChange={(e) => { setPage(0); setQ(e.target.value); }} placeholder="Search by name or username" aria-label="Search pages" /></label>
+    <section id="discover" className={embed ? "dc dc-embed" : "lp-sec dc"} aria-label="Discover profiles">
+      {!embed && <h2>Discover pages</h2>}
+      {!embed && <p className="lp-sub">Browse pages made with Haven. Click one to open it.</p>}
+      <label className="dc-search"><Ico n="wand" size={15} /><input type="search" value={q} onKeyDown={(e) => e.key === "Enter" && e.preventDefault()} onChange={(e) => { setPage(0); setQ(e.target.value); }} placeholder="Search by name or username" aria-label="Search pages" /></label>
       {state === "error" && <p className="empty dc-msg">Couldn't load pages. Check your connection and try again.</p>}
       {state === "ok" && items.length === 0 && <p className="empty dc-msg">{q ? `No pages match "${q}".` : "No pages here yet. Be the first one."}</p>}
       <div className="dc-grid">
         {items.map((p) => (
           <div className="dc-card" key={p.username}>
             <div className="dc-view" aria-hidden="true"><ProfileCard p={calm(p)} views={p.views} staff={p.staff} preview /></div>
-            <a className="dc-link" href={`/${p.username}`} aria-label={`Open ${p.name || p.displayName || p.username}'s page`}><span>View page</span></a>
+            <a className="dc-link" href={`/${p.username}`} {...(embed && { target: "_blank", rel: "noopener noreferrer" })} aria-label={`Open ${p.name || p.displayName || p.username}'s page`}><span>View page</span></a>
             <footer><b>{p.name || p.displayName || p.username}</b><small>@{p.username}{p.views ? ` · ${p.views.toLocaleString()} views` : ""}</small></footer>
           </div>
         ))}
