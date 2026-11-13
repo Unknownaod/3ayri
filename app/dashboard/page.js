@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ProfileCard from "../ProfileCard";
-import Landing from "./Landing";
+import Landing, { Discover } from "./Landing";
 import { SCHEMA, FIELDS, FONTS, cfg, fontsHref } from "@/lib/schema";
 import { Ico } from "@/lib/icons";
 import { BadgesEditor, LinksEditor, SocialsEditor, TracksEditor, SectionsEditor, PresetsBlock, FontPicker, DiscordBlock, compress } from "./panels";
@@ -11,7 +11,7 @@ import "../profiles.css";
 const NAV = [
   ["Content", [["Profile", "user"], ["Discord", "discord"], ["Links", "link"], ["Socials", "share"], ["Music", "music"]]],
   ["Design", [["Theme", "palette"], ["Card", "card"], ["Avatar", "image"], ["Background", "globe2"], ["Effects", "sparkles"], ["Layout", "layout"]]],
-  ["Site", [["Page", "globe"], ["Stats", "chart"], ["Account", "sliders"]]],
+  ["Site", [["Discover", "globe2"], ["Page", "globe"], ["Stats", "chart"], ["Account", "sliders"]]],
 ];
 const EXTRAS = ["views", "days", "clicks"];
 const clean = (m) => Object.fromEntries(Object.entries(m).filter(([k]) => !EXTRAS.includes(k)));
@@ -263,10 +263,11 @@ export default function Dashboard() {
           <button type="submit" className="hp-btn gold sm" disabled={saving || !dirty}>{saving ? "Saving…" : "Save"}</button>
         </div>
 
-        <div className="panel">
+        <div className={`panel ${tab === "Discover" && !term ? "wide" : ""}`}>
           {term ? (
             hits.length ? hits : <p className="empty">No settings match “{q}”. Some options only appear when a related switch is on.</p>
-          ) : tab === "Stats" ? <StatsTab me={me} />
+          ) : tab === "Discover" ? <Discover embed />
+            : tab === "Stats" ? <StatsTab me={me} />
             : tab === "Account" ? <AccountTab me={me} patch={patch} flash={flash} logout={logout} />
             : (
               <>
