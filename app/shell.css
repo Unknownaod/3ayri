@@ -381,3 +381,5 @@ html:has(.dash)::-webkit-scrollbar-thumb{background:var(--dash-sb,#ffffff30);bor
 .lp-login{border-radius:999px;padding:.5rem 1.05rem;font-weight:700;background:var(--ac);border-color:var(--ac);color:#1a1204}.lp-login:hover{background:var(--ac2)}
 .lp-tabs{border-radius:999px}.lp-tabs button{border-radius:999px}
 @media(max-width:560px){.lp-nav{width:calc(100% - 20px);padding-inline:.7rem;gap:.5rem}.lp-nav nav{gap:.7rem;font-size:.8rem;margin-left:auto}.lp-logo span{display:none}.lp-login{padding:.45rem .8rem}}
+
+.adv-toggle{margin:6px 0 28px;align-self:flex-start}

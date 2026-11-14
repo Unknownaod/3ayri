@@ -16,10 +16,17 @@ import "../profiles.css";
 const NAV_BASE = [
   ["Account", [["Overview", "home"], ["Stats", "chart"], ["Settings", "sliders"]]],
   ["Content", [["Profile", "user"], ["Discord", "discord"], ["Links", "link"], ["Socials", "share"], ["Music", "music"]]],
-  ["Design", [["Templates", "grid"], ["Theme", "palette"], ["Card", "card"], ["Avatar", "image"], ["Background", "globe2"], ["Effects", "sparkles"], ["Layout", "layout"]]],
+  ["Design", [["Templates", "grid"], ["Look", "palette"], ["Background", "globe2"], ["Effects & layout", "sparkles"]]],
   ["Site", [["Discover", "globe2"], ["Page", "globe"], ["Appearance", "palette"]]],
 ];
 const NAV_MOD = ["Staff", [["Moderation", "shield"]]];
+// The six old design tabs are shown as three; each tab's rarely used controls sit under "Advanced" (search still finds everything).
+const MERGED = { Look: ["Theme", "Card", "Avatar"], Background: ["Background"], "Effects & layout": ["Effects", "Layout"] };
+const ADV = new Set(("accent3 gradAngle textColor mutedColor cardColor nameColor nameFont textScale nameWeight nameSpacing nameUpper nameEffect entryAnim " +
+  "cardX vpos cardShape width cardScale padding gap cardOpacity blur shadow borderStyle borderWidth borderColor glowAmt cardHover cardFloat tilt tiltStrength header " +
+  "avatarBorderWidth avatarGlow avatarAnim avatarOverlap avatarHide bannerFade bannerBlur " +
+  "bgFit bgPosition bgAngle bgAnimate overlayColor bgBlur bgBrightness bgSaturate vignette grain bgZoom bgParallax screenFx " +
+  "particleCount particleSpeed particleSize particleColor cursorColor cursorTrail entryText entryStyle entryBlur").split(" "));
 const EXTRAS = ["views", "days", "clicks"];
 const clean = (m) => Object.fromEntries(Object.entries(m).filter(([k]) => !EXTRAS.includes(k)));
 const NO_SHARE = ["img", "media", "text", "area"];
@@ -153,6 +160,7 @@ export default function Dashboard() {
   const [me, setMe] = useState(undefined);
   const [tab, setTab] = useState("Overview");
   const [shut, setShut] = useState({});
+  const [adv, setAdv] = useState({});
   const search = useRef(null);
   const [q, setQ] = useState("");
   const [msg, setMsg] = useState("");
@@ -268,12 +276,17 @@ export default function Dashboard() {
   const groups = (() => {
     if (term || ["Overview", "Discover", "Templates", "Appearance", "Stats", "Settings", "Moderation"].includes(tab)) return [];
     const out = []; let cur = { title: "", items: [] };
-    for (const [k, f] of Object.entries(SCHEMA[tab] || {})) {
-      if (f.t === "head") { if (cur.items.length || out.length === 0 && tab === "Profile") out.push(cur); cur = { title: f.label, items: [] }; continue; }
-      const n = render(k, f);
-      if (n) cur.items.push([k, f, n]);
+    for (const src of MERGED[tab] || [tab]) {
+      if (src === "Layout") cur.title = "Page layout";
+      for (const [k, f] of Object.entries(SCHEMA[src] || {})) {
+        if (f.t === "head") { if (cur.items.length || out.length === 0 && tab === "Profile") out.push(cur); cur = { title: f.label, items: [] }; continue; }
+        if (MERGED[tab] && ADV.has(k) && !adv[tab]) continue;
+        const n = render(k, f);
+        if (n) cur.items.push([k, f, n]);
+      }
+      if (cur.items.length) out.push(cur);
+      cur = { title: "", items: [] };
     }
-    if (cur.items.length) out.push(cur);
     return out;
   })();
 
@@ -344,6 +357,11 @@ export default function Dashboard() {
                     </div></div>
                   </section>
                 ))}
+                {MERGED[tab] && (
+                  <button type="button" className="hp-ghost adv-toggle" aria-expanded={!!adv[tab]} onClick={() => setAdv((o) => ({ ...o, [tab]: !o[tab] }))}>
+                    {adv[tab] ? "Hide advanced options" : "Show advanced options"}
+                  </button>
+                )}
               </>
             )}
         </div>

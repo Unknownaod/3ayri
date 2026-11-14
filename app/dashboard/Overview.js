@@ -10,7 +10,7 @@ export function Overview({ me, go }) {
 
   const todo = [
     ["Pick a username", !!me.username, "Profile"],
-    ["Upload an avatar", !!me.customAvatar, "Avatar"],
+    ["Upload an avatar", !!me.customAvatar, "Look"],
     ["Add a bio", !!(me.bio || "").trim(), "Profile"],
     ["Link your Discord account", !!me.discord?.username, "Discord"],
     ["Add socials", nSocials > 0, "Socials"],
