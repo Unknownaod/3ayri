@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ProfileCard from "../ProfileCard";
 import { Ico } from "@/lib/icons";
 import { applyPreset } from "@/lib/schema";
 import SiteNav from "../SiteNav";
+import { calm, TemplatesGallery } from "./Templates";
 import "../shell.css";
 import "../profiles.css";
 
@@ -50,32 +51,49 @@ function DashMock() {
 }
 
 
-// Cards on Discover are static snapshots: no particles, music, cursor effects or entry screen, so a grid of them stays light.
-const calm = (p) => ({ ...p, particles: "none", cursor: "default", cursorTrail: "none", entry: false, tilt: false, cardFloat: false, typewriter: false, tabTitle: "" });
 
 export function Discover({ embed = false }) {
   const [items, setItems] = useState([]);
   const [q, setQ] = useState("");
+  const [sort, setSort] = useState("popular");   // popular | new | updated
   const [page, setPage] = useState(0);
   const [more, setMore] = useState(false);
   const [state, setState] = useState("loading");   // loading | ok | error
+  const [stamp, setStamp] = useState(0);
+  const alive = useRef(true);
+  useEffect(() => () => { alive.current = false; }, []);
+
+  const get = (pg) => fetch(`/api/discover?q=${encodeURIComponent(q)}&sort=${sort}&page=${pg}`, { cache: "no-store" }).then((r) => r.json());
 
   useEffect(() => {
     let dead = false;
     setState("loading");
     const t = setTimeout(() => {
-      fetch(`/api/discover?q=${encodeURIComponent(q)}&page=${page}`).then((r) => r.json())
-        .then((j) => { if (dead) return; setItems((old) => (page ? [...old, ...j.profiles] : j.profiles)); setMore(!!j.more); setState("ok"); })
+      get(page).then((j) => { if (dead) return; setItems((old) => (page ? [...old, ...j.profiles] : j.profiles)); setMore(!!j.more); setState("ok"); setStamp(Date.now()); })
         .catch(() => !dead && setState("error"));
     }, q && page === 0 ? 250 : 0);
     return () => { dead = true; clearTimeout(t); };
-  }, [q, page]);
+  }, [q, sort, page]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Keep the first page current: refresh quietly every 30 s and whenever the tab is shown again (only while viewing the first page).
+  useEffect(() => {
+    const tick = () => { if (page === 0 && document.visibilityState === "visible") get(0).then((j) => { if (alive.current) { setItems(j.profiles); setMore(!!j.more); setStamp(Date.now()); } }).catch(() => {}); };
+    const id = setInterval(tick, 30000); document.addEventListener("visibilitychange", tick);
+    return () => { clearInterval(id); document.removeEventListener("visibilitychange", tick); };
+  }, [q, sort, page]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const SORTS = [["popular", "Popular"], ["new", "Newest"], ["updated", "Recently updated"]];
   return (
     <section id="discover" className={embed ? "dc dc-embed" : "lp-sec dc"} aria-label="Discover profiles">
       {!embed && <h2>Discover pages</h2>}
       {!embed && <p className="lp-sub">Browse pages made with Haven. Click one to open it.</p>}
-      <label className="dc-search"><Ico n="wand" size={15} /><input type="search" value={q} onKeyDown={(e) => e.key === "Enter" && e.preventDefault()} onChange={(e) => { setPage(0); setQ(e.target.value); }} placeholder="Search by name or username" aria-label="Search pages" /></label>
+      <div className="tp-bar">
+        <label className="dc-search"><Ico n="wand" size={15} /><input type="search" value={q} onKeyDown={(e) => e.key === "Enter" && e.preventDefault()} onChange={(e) => { setPage(0); setQ(e.target.value); }} placeholder="Search by name or username" aria-label="Search pages" /></label>
+        <div className="seg" role="group" aria-label="Sort">
+          {SORTS.map(([k, n]) => <button type="button" key={k} className={sort === k ? "on" : ""} aria-pressed={sort === k} onClick={() => { setPage(0); setSort(k); }}>{n}</button>)}
+        </div>
+        <span className="dc-live" title={stamp ? `Updated ${new Date(stamp).toLocaleTimeString()}` : ""}><i />Live</span>
+      </div>
       {state === "error" && <p className="empty dc-msg">Couldn't load pages. Check your connection and try again.</p>}
       {state === "ok" && items.length === 0 && <p className="empty dc-msg">{q ? `No pages match "${q}".` : "No pages here yet. Be the first one."}</p>}
       <div className="dc-grid">
@@ -96,8 +114,8 @@ export function Discover({ embed = false }) {
 export default function Landing({ user = null, invite }) {
   const authed = !!user;
   const [tab, setTab] = useState("overview");
-  useEffect(() => { if (location.hash === "#discover") setTab("discover"); }, []);
-  const pick = (t) => { setTab(t); try { history.replaceState(null, "", t === "discover" ? "#discover" : location.pathname); } catch {} };
+  useEffect(() => { if (location.hash === "#discover") setTab("discover"); else if (location.hash === "#templates") setTab("templates"); }, []);
+  const pick = (t) => { setTab(t); try { history.replaceState(null, "", t === "overview" ? location.pathname : `#${t}`); } catch {} };
   return (
     <main className="lp">
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Bricolage+Grotesque:wght@600;800&display=swap" />
@@ -113,9 +131,12 @@ export default function Landing({ user = null, invite }) {
       <div className="lp-tabs" role="tablist" aria-label="Landing sections">
         <button type="button" role="tab" aria-selected={tab === "overview"} className={tab === "overview" ? "on" : ""} onClick={() => pick("overview")}>Overview</button>
         <button type="button" role="tab" aria-selected={tab === "discover"} className={tab === "discover" ? "on" : ""} onClick={() => pick("discover")}><Ico n="sparkles" size={14} /> Discover</button>
+        <button type="button" role="tab" aria-selected={tab === "templates"} className={tab === "templates" ? "on" : ""} onClick={() => pick("templates")}><Ico n="grid" size={14} /> Templates</button>
       </div>
 
-      {tab === "discover" ? <Discover /> : (
+      {tab === "discover" ? <Discover /> : tab === "templates" ? (
+        <section className="lp-sec dc" aria-label="Templates"><h2>Templates</h2><p className="lp-sub">Start from a look someone else made. Your name, links and text stay yours.</p><TemplatesGallery mode="public" user={user} /></section>
+      ) : (
         <>
       <section className="lp-show" aria-label="Preview of the dashboard and profile pages">
         <DashMock />

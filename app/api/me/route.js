@@ -45,7 +45,7 @@ export async function PUT(req) {
     if (profile.username) await redis.del(`username:${profile.username}`);
   }
   const { views, clicks, days, music, extraBadges, staff, ...rest } = profile;
-  const next = { ...rest, username, ...sanitize(b) };
+  const next = { ...rest, username, ...sanitize(b), createdAt: profile.createdAt ?? Date.now(), updatedAt: Date.now() };
   await redis.set(`profile:${id}`, next);
   return NextResponse.json({ ...shape(next), ...(await extras(id, next)), staff: await isStaff(id) });
 }

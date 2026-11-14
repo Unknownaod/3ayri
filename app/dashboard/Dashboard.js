@@ -2,6 +2,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ProfileCard from "../ProfileCard";
 import { Discover } from "./Landing";
+import { TemplatesGallery } from "./Templates";
+import { AppearanceTab } from "./Appearance";
+import { dashStyle } from "@/lib/dashtheme";
 import { SCHEMA, FIELDS, FONTS, cfg, fontsHref } from "@/lib/schema";
 import { Ico } from "@/lib/icons";
 import { BadgesEditor, LinksEditor, SocialsEditor, TracksEditor, SectionsEditor, PresetsBlock, FontPicker, DiscordBlock, compress } from "./panels";
@@ -10,8 +13,8 @@ import "../profiles.css";
 
 const NAV = [
   ["Content", [["Profile", "user"], ["Discord", "discord"], ["Links", "link"], ["Socials", "share"], ["Music", "music"]]],
-  ["Design", [["Theme", "palette"], ["Card", "card"], ["Avatar", "image"], ["Background", "globe2"], ["Effects", "sparkles"], ["Layout", "layout"]]],
-  ["Site", [["Discover", "globe2"], ["Page", "globe"], ["Stats", "chart"], ["Account", "sliders"]]],
+  ["Design", [["Templates", "grid"], ["Theme", "palette"], ["Card", "card"], ["Avatar", "image"], ["Background", "globe2"], ["Effects", "sparkles"], ["Layout", "layout"]]],
+  ["Site", [["Discover", "globe2"], ["Page", "globe"], ["Appearance", "palette"], ["Stats", "chart"], ["Account", "sliders"]]],
 ];
 const EXTRAS = ["views", "days", "clicks"];
 const clean = (m) => Object.fromEntries(Object.entries(m).filter(([k]) => !EXTRAS.includes(k)));
@@ -164,6 +167,17 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => { if (me === null) location.replace("/dashboard"); }, [me]); // signed out: back to the landing page
+  useEffect(() => { // arrived from the public Templates page: /dashboard/<you>?template=<id>
+    if (!me) return;
+    const id = new URLSearchParams(location.search).get("template");
+    if (!id) return;
+    history.replaceState(null, "", location.pathname);
+    fetch(`/api/templates/${id}`).then((r) => (r.ok ? r.json() : null)).then((t) => {
+      if (!t) return flash("That template doesn't exist any more.");
+      applyTemplate(t.cfg, t);
+      fetch(`/api/templates/${id}`, { method: "POST" }).catch(() => {});
+    }).catch(() => {});
+  }, [!!me]); // eslint-disable-line react-hooks/exhaustive-deps
   const flash = useCallback((t) => { setMsg(t); clearTimeout(flash.t); flash.t = setTimeout(() => setMsg(""), 3500); }, []);
   const commit = useCallback((next, key) => {
     const h = hist.current, now = Date.now();
@@ -173,6 +187,7 @@ export default function Dashboard() {
   }, []);
   const set = useCallback((k, v) => commit({ ...meRef.current, [k]: v }, k), [commit]);
   const patch = useCallback((o) => commit({ ...meRef.current, ...o }, `*${Math.random()}`), [commit]);
+  const applyTemplate = useCallback((cfg, t) => { patch(cfg); flash(`Applied “${t?.name || "template"}”. Look it over, then press Save.`); }, [patch, flash]);
   const undo = () => { const h = hist.current; if (!h.past.length) return; h.future.push(meRef.current); h.key = ""; setMe(h.past.pop()); bump((x) => x + 1); };
   const redo = () => { const h = hist.current; if (!h.future.length) return; h.past.push(meRef.current); h.key = ""; setMe(h.future.pop()); bump((x) => x + 1); };
 
@@ -235,7 +250,7 @@ export default function Dashboard() {
   const title = NAV.flatMap(([, x]) => x).find(([n]) => n === tab);
 
   return (
-    <main className="dash">
+    <main className={`dash ${me.dashTheme?.compact ? "compact" : ""}`} style={dashStyle(me.dashTheme, FONTS[me.dashTheme?.font])}>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Bricolage+Grotesque:wght@600;800&display=swap" />
       <link rel="stylesheet" href={fontsHref(Object.keys(FONTS))} />
       <nav className="dash-nav" aria-label="Dashboard sections">
@@ -264,10 +279,12 @@ export default function Dashboard() {
           <button type="submit" className="hp-btn gold sm" disabled={saving || !dirty}>{saving ? "Saving…" : "Save"}</button>
         </div>
 
-        <div className={`panel ${tab === "Discover" && !term ? "wide" : ""}`}>
+        <div className={`panel ${(tab === "Discover" || tab === "Templates") && !term ? "wide" : ""}`}>
           {term ? (
             hits.length ? hits : <p className="empty">No settings match “{q}”. Some options only appear when a related switch is on.</p>
           ) : tab === "Discover" ? <Discover embed />
+            : tab === "Templates" ? <TemplatesGallery mode="dash" me={me} flash={flash} onApply={applyTemplate} />
+            : tab === "Appearance" ? <AppearanceTab me={me} set={set} />
             : tab === "Stats" ? <StatsTab me={me} />
             : tab === "Account" ? <AccountTab me={me} patch={patch} flash={flash} logout={logout} />
             : (
