@@ -57,7 +57,7 @@ export function Discover({ embed = false }) {
       <div className="dc-grid">
         {items.map((p) => (
           <div className="dc-card" key={p.username}>
-            <div className="dc-view" aria-hidden="true"><ProfileCard p={calm(p)} views={p.views} staff={p.staff} preview /></div>
+            <div className="dc-view" aria-hidden="true"><ProfileCard p={calm(p)} views={p.views} earned={p.staff ? ["staff"] : []} preview /></div>
             <a className="dc-link" href={`/${p.username}`} {...(embed && { target: "_blank", rel: "noopener noreferrer" })} aria-label={`Open ${p.name || p.displayName || p.username}'s page`}><span>View page</span></a>
             <footer><b>{p.name || p.displayName || p.username}</b><small>@{p.username}{p.views ? ` · ${p.views.toLocaleString()} views` : ""}</small></footer>
           </div>
@@ -105,7 +105,7 @@ function Showcase({ onAll }) {
       <div className="hv-rail">
         {(rows || Array.from({ length: 5 })).map((p, i) => p ? (
           <div className="dc-card" key={p.username}>
-            <div className="dc-view" aria-hidden="true"><ProfileCard p={calm(p)} views={p.views} staff={p.staff} preview /></div>
+            <div className="dc-view" aria-hidden="true"><ProfileCard p={calm(p)} views={p.views} earned={p.staff ? ["staff"] : []} preview /></div>
             <a className="dc-link" href={`/${p.username}`} aria-label={`Open ${p.name || p.displayName || p.username}'s page`}><span>View page</span></a>
             <footer><b>{p.name || p.displayName || p.username}</b><small>@{p.username}{p.views ? ` · ${p.views.toLocaleString()} views` : ""}</small></footer>
           </div>

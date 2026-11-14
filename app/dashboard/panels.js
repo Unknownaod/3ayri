@@ -1,9 +1,9 @@
 "use client";
 import { useRef, useState } from "react";
 import { PLATFORMS, BUILTIN_ICONS, BUILTIN_LABELS, PRESETS, SECTIONS, FONT_LABELS, FONTS, FIELDS, applyPreset, cfg, rid, sectionsOf, embedSrc } from "@/lib/schema";
-import { badgesOf } from "@/lib/badges";
+import { badgesOf, HAVEN_BADGES } from "@/lib/badges";
 import { Ico } from "@/lib/icons";
-import { Presence, DBadges } from "../profile-parts";
+import { Presence, DBadges, Badge } from "../profile-parts";
 
 // ───────────── shared helpers ─────────────
 export const compress = (file, maxPx, maxChars) => new Promise((resolve, reject) => {
@@ -43,6 +43,33 @@ function Mv({ i, n, go }) {
       <button type="button" aria-label="Move up" disabled={i === 0} onClick={() => go(i, i - 1)}><Ico n="up" size={14} /></button>
       <button type="button" aria-label="Move down" disabled={i === n - 1} onClick={() => go(i, i + 1)}><Ico n="down" size={14} /></button>
     </span>
+  );
+}
+
+// ───────────── badge picker: choose which earned badges appear on your page ─────────────
+// Earned automatically (never typed in): Haven badges come from your roles in the server, the rest from your Discord account.
+export function BadgePicker({ me, set }) {
+  const hide = me.hideBadges || [], earned = me.earned || [];
+  const flip = (id) => set("hideBadges", hide.includes(id) ? hide.filter((x) => x !== id) : [...hide, id]);
+  const haven = Object.entries(HAVEN_BADGES).map(([id, b]) => ({ id, label: b.label, how: b.how, own: earned.includes(id), icon: <img src={b.img} alt="" width={26} height={26} /> })).filter((b) => b.own || b.id !== "staff");
+  const disc = badgesOf(me.discord).map(([t, e, col, id, hash]) => ({ id, label: t, own: true, icon: <Badge t={t} e={e} col={col} id={id} hash={hash} /> }));
+  const all = [...haven, ...disc];
+  return (
+    <div className="fld"><span>Your badges <small>tap to show or hide on your page</small></span>
+      <div className="bp">
+        {all.map((b) => {
+          const on = b.own && !hide.includes(b.id);
+          return (
+            <button type="button" key={b.id} className={`bp-i ${on ? "on" : ""} ${b.own ? "" : "lock"}`} disabled={!b.own} aria-pressed={on} onClick={() => flip(b.id)} title={b.own ? (on ? "Shown. Click to hide" : "Hidden. Click to show") : b.how}>
+              <i className="bp-ic">{b.icon}</i>
+              <b>{b.label}</b>
+              <small>{b.own ? (on ? "Showing" : "Hidden") : b.how}</small>
+            </button>
+          );
+        })}
+      </div>
+      {!disc.length && <small className="hint">Discord badges and Nitro appear here once they're loaded. Use “Read my Discord status” in the Discord tab.</small>}
+    </div>
   );
 }
 

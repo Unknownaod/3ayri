@@ -343,3 +343,4 @@
 .rp-go{background:#e0a243;border-color:#e0a243;color:#1a1204}.rp-go:disabled{opacity:.6;cursor:default}
 .tp-rep{position:absolute;top:8px;left:8px;z-index:3;opacity:0}
 .dc-card:hover .tp-rep,.dc-card:focus-within .tp-rep{opacity:1}
+.pc-boost{height:22px;width:22px;margin-left:2px;filter:drop-shadow(0 1px 3px #0007)}

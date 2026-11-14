@@ -68,7 +68,7 @@ const ART = {
 };
 
 // Discord's own badge image; if it can't load (blocked, or Discord moved it) the drawn icon above takes over.
-function Badge({ t, e, col, id, hash }) {
+export function Badge({ t, e, col, id, hash }) {
   const [bad, setBad] = useState(false);
   const art = ART[id] ? <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="11.2" fill={col} />{ART[id]}</svg> : e;
   return (
@@ -78,8 +78,8 @@ function Badge({ t, e, col, id, hash }) {
   );
 }
 
-export function DBadges({ d }) {
-  const b = badgesOf(d);
+export function DBadges({ d, hide }) {
+  const b = badgesOf(d, hide);
   return b.length ? <span className="pc-dbadges" role="list">{b.map(([t, e, col, id, hash]) => <Badge key={id || t} t={t} e={e} col={col} id={id} hash={hash} />)}</span> : null;
 }
 
@@ -87,6 +87,10 @@ export function DBadges({ d }) {
 // The image is public/staff.gif.
 export function StaffBadge() {
   return <img className="pc-staff-img" src="/staff.gif" alt="Haven Staff" title="Haven Staff" height="20" />;
+}
+
+export function BoosterBadge() {
+  return <img className="pc-staff-img pc-boost" src="/booster.png" alt="Server Booster" title="Server Booster" height="22" width="22" />;
 }
 
 export function actsOf(pres) { return pres?.acts?.length ? pres.acts : pres?.act ? [pres.act] : []; }
@@ -107,7 +111,7 @@ export function Presence({ pres, c, p }) {
     const a = acts[0];
     return (
       <p className="pc-pres compact">{dot}{c.presenceName && dn ? `${dn} · ` : ""}
-        {a ? `${KIND[a.kind]?.replace(" Spotify", "")} ${a.title}` : custom || LBL[pres.status]}{inCard && <DBadges d={d} />}
+        {a ? `${KIND[a.kind]?.replace(" Spotify", "")} ${a.title}` : custom || LBL[pres.status]}{inCard && <DBadges d={d} hide={p.hideBadges} />}
       </p>
     );
   }
@@ -116,7 +120,7 @@ export function Presence({ pres, c, p }) {
       {(c.presenceAvatar || c.presenceName) && (
         <div className="pc-did">
           {c.presenceAvatar && av && <span className="pc-davw"><img src={av} alt="" /><i style={{ background: DOT[pres.status] || DOT.offline }} /></span>}
-          {c.presenceName && <div><b>{dn}</b>{d.username && <small>@{d.username}</small>}{inCard && <DBadges d={d} />}</div>}
+          {c.presenceName && <div><b>{dn}</b>{d.username && <small>@{d.username}</small>}{inCard && <DBadges d={d} hide={p.hideBadges} />}</div>}
         </div>
       )}
       <div className="pc-pres-top">{dot}{LBL[pres.status] || "Offline"}

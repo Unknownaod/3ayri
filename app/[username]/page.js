@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { redis, dayKey } from "@/lib/db";
 import { discordUser } from "@/lib/discord";
-import { isStaff } from "@/lib/staff";
+import { earnedHaven } from "@/lib/hbadges";
 import { cfg } from "@/lib/schema";
 import ProfileCard from "../ProfileCard";
 import ReportButton from "../ReportButton";
@@ -53,9 +53,9 @@ export default async function ProfilePage({ params }) {
   const f = await load((await params).username);
   if (!f?.p || f.p.hidden) notFound(); // hidden by staff: looks like it doesn't exist
   const views = (await redis.get(`views:${f.id}`)) ?? 0; // counted by the browser (POST /api/view), not on render
-  const [p, staff] = await Promise.all([withBadges(f), isStaff(f.id)]);
+  const [p, earned] = await Promise.all([withBadges(f), earnedHaven(f.id)]);
   return (<>
-    <ProfileCard p={p} views={views} staff={staff} />
+    <ProfileCard p={p} views={views} earned={earned} />
     <div className="rp-fix"><ReportButton type="profile" target={f.p.username} /></div>
   </>);
 }

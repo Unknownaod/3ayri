@@ -9,7 +9,7 @@ import { Moderation } from "./Moderation";
 import { dashStyle, dashColors } from "@/lib/dashtheme";
 import { SCHEMA, FIELDS, FONTS, cfg, fontsHref } from "@/lib/schema";
 import { Ico } from "@/lib/icons";
-import { BadgesEditor, LinksEditor, SocialsEditor, TracksEditor, SectionsEditor, PresetsBlock, FontPicker, DiscordBlock, compress } from "./panels";
+import { BadgesEditor, BadgePicker, LinksEditor, SocialsEditor, TracksEditor, SectionsEditor, PresetsBlock, FontPicker, DiscordBlock, compress } from "./panels";
 import "../shell.css";
 import "../profiles.css";
 
@@ -258,6 +258,7 @@ export default function Dashboard() {
 
   // field list for the current tab (or search results)
   const render = (k, f, key = k) => {
+    if (f.t === "hbadges") return <BadgePicker key={key} me={me} set={set} />;
     if (f.t === "badges") return <BadgesEditor key={key} me={me} set={set} />;
     if (f.t === "links") return <LinksEditor key={key} me={me} set={set} stats={me.clicks} />;
     if (f.t === "socials") return <SocialsEditor key={key} me={me} set={set} stats={me.clicks} />;
@@ -271,7 +272,7 @@ export default function Dashboard() {
   const results = term ? Object.entries(SCHEMA).flatMap(([t, g]) => Object.entries(g).filter(([k, f]) => FIELDS[k] && f.t !== "head" && `${f.label} ${k}`.toLowerCase().includes(term)).map(([k, f]) => [t, k, f])) : [];
   const hits = results.map(([t, k, f]) => [t, k, render(k, f, `r-${k}`)]).filter(([, , n]) => n).map(([t, k, n]) => <div className="res" key={k}><small className="rt">{t}</small>{n}</div>);
   // Editor tabs are split into titled sections (each "head" in the schema starts one). Short controls sit side by side, wide ones take the full row.
-  const FULL = ["area", "img", "media", "badges", "links", "socials", "tracks", "sections", "presets", "discord"];
+  const FULL = ["area", "img", "media", "hbadges", "badges", "links", "socials", "tracks", "sections", "presets", "discord"];
   const wide = (f) => FULL.includes(f.t) || (f.t === "seg" && (f.kind === "font" || f.opts.length > 4));
   const groups = (() => {
     if (term || ["Overview", "Discover", "Templates", "Appearance", "Stats", "Settings", "Moderation"].includes(tab)) return [];
@@ -376,7 +377,7 @@ export default function Dashboard() {
           </span>
           <button type="button" className="ib pv-x" aria-label="Close preview" onClick={() => setPv(false)}><Ico n="x" size={16} /></button>
         </div>
-        <div className={`pv-frame ${dev}`}><ProfileCard p={me} views={me.views} staff={me.staff} preview claim livePres={c.presence ? live : null} /></div>
+        <div className={`pv-frame ${dev}`}><ProfileCard p={me} views={me.views} earned={me.earned} preview claim livePres={c.presence ? live : null} /></div>
         {c.presence && !rd?.ok && <small className="hint">Sample status shown. Use “Read my Discord status” in the Discord tab to see yours.</small>}
       </aside>
     </main>

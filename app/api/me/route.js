@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionId } from "@/lib/session";
 import { redis, validUsername, dayKey } from "@/lib/db";
 import { isStaff } from "@/lib/staff";
+import { earnedHaven } from "@/lib/hbadges";
 import { sanitize, itemsOf, cfg } from "@/lib/schema";
 import { bad, safe, sameOrigin } from "@/lib/api";
 import { limit, tooMany } from "@/lib/ratelimit";
@@ -27,7 +28,7 @@ export const GET = safe("me.get", async () => {
   if (!id) return bad("unauthenticated", 401);
   const p = await redis.get(`profile:${id}`);
   if (!p) return bad("unauthenticated", 401);
-  return NextResponse.json({ ...shape(p), ...(await extras(id, p)), staff: await isStaff(id), restricted: !!(await redis.get(`ban:${id}`)) });
+  return NextResponse.json({ ...shape(p), ...(await extras(id, p)), staff: await isStaff(id), earned: await earnedHaven(id), restricted: !!(await redis.get(`ban:${id}`)) });
 });
 
 export const PUT = safe("me.put", async (req) => {
@@ -55,10 +56,10 @@ export const PUT = safe("me.put", async (req) => {
     if (!(await redis.set(`username:${username}`, id, { nx: true }))) return bad("That username is taken.", 409);
     if (profile.username) await redis.del(`username:${profile.username}`);
   }
-  const { views, clicks, days, music, extraBadges, staff, ...rest } = profile;
+  const { views, clicks, days, music, extraBadges, staff, earned, ...rest } = profile;
   const next = { ...rest, username, ...sanitize(b), createdAt: profile.createdAt ?? Date.now(), updatedAt: Date.now(), ...(changed && profile.username ? { usernameChangedAt: Date.now() } : {}) };
   await redis.set(`profile:${id}`, next);
-  return NextResponse.json({ ...shape(next), ...(await extras(id, next)), staff: await isStaff(id) });
+  return NextResponse.json({ ...shape(next), ...(await extras(id, next)), staff: await isStaff(id), earned: await earnedHaven(id) });
 });
 
 // "Delete my page": frees the username and removes the profile. (Signing in again starts a fresh one.)

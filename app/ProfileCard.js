@@ -4,7 +4,7 @@ import { PLATFORMS, FONTS, THEMES, cfg, itemsOf, sectionsOf, playlist, embedSrc,
 import { Ico } from "@/lib/icons";
 import { badgesOf } from "@/lib/badges";
 import { Particles, CursorFX } from "./profile-fx";
-import { Icon, Presence, DBadges, StaffBadge, Player, useAudio, DOT, LBL, actsOf } from "./profile-parts";
+import { Icon, Presence, DBadges, StaffBadge, BoosterBadge, Player, useAudio, DOT, LBL, actsOf } from "./profile-parts";
 
 const hexOf = (x) => String(x || "").replace("#", "").slice(0, 6);
 const cssUrl = (u) => `url("${String(u).replace(/["\\\n\r]/g, "")}")`;
@@ -73,8 +73,9 @@ function useTabTitle(title, mode, off) {
 // ───────────── component ─────────────
 // p: the saved profile. preview: inside the dashboard / landing (links inert, no tracking, no entry screen).
 // livePres: presence to show instead of fetching (dashboard + landing demo).
-export default function ProfileCard({ p, views, preview, livePres, claim, staff }) {
+export default function ProfileCard({ p, views, preview, livePres, claim, earned = [] }) {
   const c = useMemo(() => cfg(p), [p]);
+  const hide = p.hideBadges || [];
   const it = useMemo(() => itemsOf(p), [p]);
   const list = useMemo(() => playlist(p), [p]);
   const sections = useMemo(() => sectionsOf(p), [p]);
@@ -170,7 +171,7 @@ export default function ProfileCard({ p, views, preview, livePres, claim, staff 
   const firstShown = sections.find((s) => s.on && has[s.k])?.k;
   // Badges don't depend on live status: if the status card isn't on the page, "card" falls back to showing them by the name.
   const cardShown = !!pres && c.presenceStyle !== "dot";
-  const dName = badgesOf(p.discord).length > 0 && (c.badgePlacement === "name" || c.badgePlacement === "both" || (c.badgePlacement === "card" && !cardShown));
+  const dName = badgesOf(p.discord, p.hideBadges).length > 0 && (c.badgePlacement === "name" || c.badgePlacement === "both" || (c.badgePlacement === "card" && !cardShown));
 
   const body = {
     identity: (
@@ -182,7 +183,7 @@ export default function ProfileCard({ p, views, preview, livePres, claim, staff 
           </div>
         )}
         <div className="pc-idtxt">
-          <div className="pc-nm"><h1 className={`pc-name nm-${c.nameEffect} ${c.nameUpper ? "up" : ""}`} data-text={name}>{name}</h1>{staff && <StaffBadge />}{dName && <DBadges d={p.discord} />}</div>
+          <div className="pc-nm"><h1 className={`pc-name nm-${c.nameEffect} ${c.nameUpper ? "up" : ""}`} data-text={name}>{name}</h1>{earned.includes("staff") && !hide.includes("staff") && <StaffBadge />}{earned.includes("booster") && !hide.includes("booster") && <BoosterBadge />}{dName && <DBadges d={p.discord} hide={hide} />}</div>
           {c.tagline && <p className="pc-tag">{c.tagline}</p>}
         </div>
       </div>
