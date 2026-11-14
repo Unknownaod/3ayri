@@ -61,11 +61,11 @@ export function Moderation({ flash }) {
         <div className={s.errors ? "hot" : ""}><b>{s.errors ?? 0}</b><span>Errors this week</span></div>
       </div>
 
-      <form className="mx-find" onSubmit={(e) => { e.preventDefault(); lookup(); }}>
+      <div className="mx-find" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); lookup(); } }}>
         <Ico n="wand" size={16} />
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Find a user by username or Discord ID" aria-label="Find a user" />
-        <button type="submit" className="hp-btn gold sm">Look up</button>
-      </form>
+        <button type="button" className="hp-btn gold sm" onClick={() => lookup()}>Look up</button>
+      </div>
 
       {user?.missing && <p className="mx-none">No account matches “{user.missing}”.</p>}
 
