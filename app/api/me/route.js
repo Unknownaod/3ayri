@@ -3,8 +3,10 @@ import { getSessionId } from "@/lib/session";
 import { redis, validUsername, dayKey } from "@/lib/db";
 import { isStaff } from "@/lib/staff";
 import { sanitize, itemsOf, cfg } from "@/lib/schema";
+import { bad, safe, sameOrigin } from "@/lib/api";
+import { limit, tooMany } from "@/lib/ratelimit";
 
-const bad = (error, status = 400) => NextResponse.json({ error }, { status });
+const COOLDOWN = 7 * 864e5; // how long to wait between username changes
 
 // Views (total + last 30 days) and click counts per item id, for the Stats tab.
 async function extras(id, p) {
@@ -20,17 +22,21 @@ async function extras(id, p) {
 // What the dashboard receives: the saved profile, with legacy shapes (music:{url}, items without ids) upgraded.
 const shape = (p) => ({ ...p, ...itemsOf(p), musicUrl: cfg(p).musicUrl, musicTitle: cfg(p).musicTitle });
 
-export async function GET() {
+export const GET = safe("me.get", async () => {
   const id = await getSessionId();
   if (!id) return bad("unauthenticated", 401);
   const p = await redis.get(`profile:${id}`);
   if (!p) return bad("unauthenticated", 401);
-  return NextResponse.json({ ...shape(p), ...(await extras(id, p)), staff: await isStaff(id) });
-}
+  return NextResponse.json({ ...shape(p), ...(await extras(id, p)), staff: await isStaff(id), restricted: !!(await redis.get(`ban:${id}`)) });
+});
 
-export async function PUT(req) {
+export const PUT = safe("me.put", async (req) => {
+  if (!sameOrigin(req)) return bad("Blocked: this request came from another site.", 403);
   const id = await getSessionId();
   if (!id) return bad("unauthenticated", 401);
+  const rl = await limit(`save:${id}`, 40, 60);
+  if (!rl.ok) return bad(tooMany(rl), 429);
+  if (await redis.get(`ban:${id}`)) return bad("Your account has been restricted by staff, so changes can't be saved.", 403);
   const text = await req.text();
   if (text.length > 4_000_000) return bad("That's too much data to save at once. Try a smaller image.", 413);
   let b;
@@ -40,25 +46,35 @@ export async function PUT(req) {
 
   const username = String(b.username || "").slice(0, 40).toLowerCase();
   if (!validUsername(username)) return bad("Usernames are 3–20 characters: letters, numbers, underscores.");
-  if (username !== profile.username) {
+  const changed = username !== profile.username;
+  if (changed && profile.username && Date.now() - (profile.usernameChangedAt || 0) < COOLDOWN && !(await isStaff(id))) {
+    const when = new Date((profile.usernameChangedAt || 0) + COOLDOWN).toLocaleDateString("en-CA", { month: "long", day: "numeric" });
+    return bad(`You can change your username again on ${when}.`, 429);
+  }
+  if (changed) {
     if (!(await redis.set(`username:${username}`, id, { nx: true }))) return bad("That username is taken.", 409);
     if (profile.username) await redis.del(`username:${profile.username}`);
   }
   const { views, clicks, days, music, extraBadges, staff, ...rest } = profile;
-  const next = { ...rest, username, ...sanitize(b), createdAt: profile.createdAt ?? Date.now(), updatedAt: Date.now() };
+  const next = { ...rest, username, ...sanitize(b), createdAt: profile.createdAt ?? Date.now(), updatedAt: Date.now(), ...(changed && profile.username ? { usernameChangedAt: Date.now() } : {}) };
   await redis.set(`profile:${id}`, next);
   return NextResponse.json({ ...shape(next), ...(await extras(id, next)), staff: await isStaff(id) });
-}
+});
 
 // "Delete my page": frees the username and removes the profile. (Signing in again starts a fresh one.)
-export async function DELETE() {
+export const DELETE = safe("me.delete", async (req) => {
+  if (!sameOrigin(req)) return bad("Blocked: this request came from another site.", 403);
   const id = await getSessionId();
   if (!id) return bad("unauthenticated", 401);
   const p = await redis.get(`profile:${id}`);
   if (p?.username) await redis.del(`username:${p.username}`);
   await redis.del(`profile:${id}`);
   await redis.del(`presence:${id}`);
+  for (const [k, t] of await redis.list("template:", 1000)) { // their templates go too
+    if (t?.by?.id !== id) continue;
+    await redis.del(k); await redis.del(`templateUses:${t.id}`); await redis.del(`templateImg:${t.id}:background`); await redis.del(`templateImg:${t.id}:banner`);
+  }
   const res = NextResponse.json({ ok: true });
   res.cookies.set("haven_session", "", { path: "/", maxAge: 0 });
   return res;
-}
+});

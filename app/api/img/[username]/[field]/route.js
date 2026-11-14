@@ -13,7 +13,7 @@ export async function GET(_req, { params }) {
   if (!FIELDS.includes(field) || !/^[a-z0-9_]{3,20}$/i.test(username)) return new Response("Not found", { status: 404 });
   const id = await redis.get(`username:${username.toLowerCase()}`);
   const p = id && (await redis.get(`profile:${id}`));
-  if (!p || p.discover === false) return new Response("Not found", { status: 404 });
+  if (!p || p.discover === false || p.hidden) return new Response("Not found", { status: 404 });
   const m = TYPES.exec(p[field] || "");
   if (!m) return new Response("Not found", { status: 404 });
   return new Response(Buffer.from(m[2], "base64"), {

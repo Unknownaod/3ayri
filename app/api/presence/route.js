@@ -3,6 +3,8 @@ import { getSessionId } from "@/lib/session";
 import { redis } from "@/lib/db";
 import { guildMember } from "@/lib/discord";
 import { cfg } from "@/lib/schema";
+import { sameOrigin } from "@/lib/api";
+import { limit, tooMany } from "@/lib/ratelimit";
 
 export const maxDuration = 15;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -25,9 +27,12 @@ export async function GET(req) {
 //  1. confirms you share a server with the bot (Discord REST, using the bot token)
 //  2. asks the worker to look you up right now (presence_want), and waits a few seconds for its answer
 //  3. refreshes your Discord name, avatar and badges, and returns what the bot sees
-export async function POST() {
+export async function POST(req) {
+  if (!sameOrigin(req)) return NextResponse.json({ error: "Blocked: this request came from another site." }, { status: 403 });
   const id = await getSessionId();
   if (!id) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+  const rl = await limit(`presence:${id}`, 10, 60);
+  if (!rl.ok) return NextResponse.json({ ok: false, message: tooMany(rl) }, { status: 429 });
   const m = await guildMember(id);
   if (m.error) return NextResponse.json({ ok: false, reason: "config", message: m.error });
   if (!m.inGuild) return NextResponse.json({ ok: false, reason: "not_in_server", message: "You're not in the server the bot is in. Join it, then try again.", invite: process.env.DISCORD_INVITE || null });

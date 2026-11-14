@@ -4,6 +4,8 @@ import { redis, validUsername } from "@/lib/db";
 import { rid } from "@/lib/schema";
 import { designOf, imgUrl, MAX_PER_PERSON } from "@/lib/templates";
 import { isStaff } from "@/lib/staff";
+import { safe, sameOrigin, ipOf } from "@/lib/api";
+import { limit, tooMany } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 const bad = (error, status = 400) => NextResponse.json({ error }, { status });
@@ -12,7 +14,9 @@ const withImgs = (t) => ({ ...t.cfg, ...Object.fromEntries((t.imgs || []).map((f
 const str = (v, n) => String(v ?? "").replace(/[\u0000-\u001f]/g, " ").trim().slice(0, n);
 
 // GET /api/templates?q=&sort=popular|new&mine=1  (public; "mine" needs a login)
-export async function GET(req) {
+export const GET = safe("templates.get", async (req) => {
+  const rl = await limit(`tpl:${ipOf(req)}`, 120, 60);
+  if (!rl.ok) return bad(tooMany(rl), 429);
   const sp = new URL(req.url).searchParams;
   const q = str(sp.get("q"), 40).toLowerCase(), sort = sp.get("sort") === "new" ? "new" : "popular", mine = sp.get("mine") === "1";
   let sid = null; try { sid = await getSessionId(); } catch {}
@@ -30,12 +34,16 @@ export async function GET(req) {
       mine: !!sid && t.by?.id === sid, canDelete: !!sid && (t.by?.id === sid || staff),
     })),
   }, { headers: { "Cache-Control": "no-store" } });
-}
+});
 
 // POST /api/templates { name, desc, cfg }  publishes the sender's current design
-export async function POST(req) {
+export const POST = safe("templates.post", async (req) => {
+  if (!sameOrigin(req)) return bad("Blocked: this request came from another site.", 403);
   const sid = await getSessionId();
   if (!sid) return bad("Log in to publish a template.", 401);
+  const rl = await limit(`tplpub:${sid}`, 6, 3600);
+  if (!rl.ok) return bad("You've published a lot of templates just now. Try again later.", 429);
+  if (await redis.get(`ban:${sid}`)) return bad("Your account has been restricted by staff.", 403);
   const p = await redis.get(`profile:${sid}`);
   if (!p) return bad("Log in to publish a template.", 401);
   if (!p.username || !validUsername(p.username)) return bad("Pick a username and save before publishing a template.");
@@ -55,4 +63,4 @@ export async function POST(req) {
   for (const [f, v] of Object.entries(d.images)) await redis.set(`templateImg:${t.id}:${f}`, v);
   await redis.set(`template:${t.id}`, t);
   return NextResponse.json({ ok: true, id: t.id });
-}
+});

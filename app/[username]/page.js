@@ -4,6 +4,7 @@ import { discordUser } from "@/lib/discord";
 import { isStaff } from "@/lib/staff";
 import { cfg } from "@/lib/schema";
 import ProfileCard from "../ProfileCard";
+import ReportButton from "../ReportButton";
 import "../profiles.css";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +17,7 @@ const fill = (t, p) => String(t).replace("{name}", p.name || p.displayName || p.
 
 export async function generateMetadata({ params }) {
   const f = await load((await params).username);
-  if (!f?.p) return {};
+  if (!f?.p || f.p.hidden) return { robots: { index: false } };
   const { p } = f, c = cfg(p), img = p.customAvatar || p.avatar, remote = (u) => u && !u.startsWith("data:");
   let base; try { base = new URL(process.env.DISCORD_REDIRECT_URI).origin; } catch {}
   return {
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }) {
 }
 export async function generateViewport({ params }) {
   const f = await load((await params).username);
-  return f?.p ? { themeColor: cfg(f.p).accent } : {};
+  return f?.p && !f.p.hidden ? { themeColor: cfg(f.p).accent } : {};
 }
 
 // If a page has no badge flags stored (older pages, or flags saved as 0), ask Discord once a day and save what it says.
@@ -50,8 +51,11 @@ async function withBadges({ id, p }) {
 
 export default async function ProfilePage({ params }) {
   const f = await load((await params).username);
-  if (!f?.p) notFound();
+  if (!f?.p || f.p.hidden) notFound(); // hidden by staff: looks like it doesn't exist
   const views = (await redis.get(`views:${f.id}`)) ?? 0; // counted by the browser (POST /api/view), not on render
   const [p, staff] = await Promise.all([withBadges(f), isStaff(f.id)]);
-  return <ProfileCard p={p} views={views} staff={staff} />;
+  return (<>
+    <ProfileCard p={p} views={views} staff={staff} />
+    <div className="rp-fix"><ReportButton type="profile" target={f.p.username} /></div>
+  </>);
 }

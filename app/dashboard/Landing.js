@@ -63,7 +63,7 @@ export function Discover({ embed = false }) {
   const alive = useRef(true);
   useEffect(() => () => { alive.current = false; }, []);
 
-  const get = (pg) => fetch(`/api/discover?q=${encodeURIComponent(q)}&sort=${sort}&page=${pg}`, { cache: "no-store" }).then((r) => r.json());
+  const get = (pg) => fetch(`/api/discover?q=${encodeURIComponent(q)}&sort=${sort}&page=${pg}`, { cache: "no-store" }).then(async (r) => { const j = await r.json().catch(() => null); if (!r.ok || !Array.isArray(j?.profiles)) throw new Error("discover"); return j; });
 
   useEffect(() => {
     let dead = false;
@@ -159,7 +159,7 @@ export default function Landing({ user = null, invite }) {
       )}
 
       <section className="lp-final"><h2>Ready to claim your name?</h2><div className="lp-cta"><a className="lp-b1" href="/api/auth/login">Sign up free</a></div></section>
-      <footer className="lp-foot">© Haven · havenshq.xyz</footer>
+      <footer className="lp-foot">© Haven · havenshq.xyz · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></footer>
     </main>
   );
 }

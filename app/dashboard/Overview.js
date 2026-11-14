@@ -28,6 +28,8 @@ export function Overview({ me, go }) {
 
   return (
     <div className="ov">
+      {me.restricted ? <p className="ov-warn" role="alert"><b>Your account is restricted.</b> Your page is hidden and changes can't be saved{me.hiddenReason ? ` (${me.hiddenReason})` : ""}. Contact staff in the Discord server if you think this is a mistake.</p>
+        : me.hidden ? <p className="ov-warn" role="alert"><b>Your page is hidden by staff.</b>{me.hiddenReason ? ` Reason: ${me.hiddenReason}.` : ""} Contact staff in the Discord server if you think this is a mistake.</p> : null}
       <div className="ov-tiles">
         {tiles.map(([t, v, s, ic, tab]) => (
           <button type="button" className="ov-tile" key={t} onClick={() => go(tab)}>

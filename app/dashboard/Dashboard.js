@@ -5,6 +5,7 @@ import { Discover } from "./Landing";
 import { TemplatesGallery } from "./Templates";
 import { AppearanceTab } from "./Appearance";
 import { Overview } from "./Overview";
+import { Moderation } from "./Moderation";
 import { dashStyle, dashColors } from "@/lib/dashtheme";
 import { SCHEMA, FIELDS, FONTS, cfg, fontsHref } from "@/lib/schema";
 import { Ico } from "@/lib/icons";
@@ -12,12 +13,13 @@ import { BadgesEditor, LinksEditor, SocialsEditor, TracksEditor, SectionsEditor,
 import "../shell.css";
 import "../profiles.css";
 
-const NAV = [
+const NAV_BASE = [
   ["Account", [["Overview", "home"], ["Stats", "chart"], ["Settings", "sliders"]]],
   ["Content", [["Profile", "user"], ["Discord", "discord"], ["Links", "link"], ["Socials", "share"], ["Music", "music"]]],
   ["Design", [["Templates", "grid"], ["Theme", "palette"], ["Card", "card"], ["Avatar", "image"], ["Background", "globe2"], ["Effects", "sparkles"], ["Layout", "layout"]]],
   ["Site", [["Discover", "globe2"], ["Page", "globe"], ["Appearance", "palette"]]],
 ];
+const NAV_MOD = ["Staff", [["Moderation", "shield"]]];
 const EXTRAS = ["views", "days", "clicks"];
 const clean = (m) => Object.fromEntries(Object.entries(m).filter(([k]) => !EXTRAS.includes(k)));
 const NO_SHARE = ["img", "media", "text", "area"];
@@ -264,7 +266,7 @@ export default function Dashboard() {
   const FULL = ["area", "img", "media", "badges", "links", "socials", "tracks", "sections", "presets", "discord"];
   const wide = (f) => FULL.includes(f.t) || (f.t === "seg" && (f.kind === "font" || f.opts.length > 4));
   const groups = (() => {
-    if (term || ["Overview", "Discover", "Templates", "Appearance", "Stats", "Settings"].includes(tab)) return [];
+    if (term || ["Overview", "Discover", "Templates", "Appearance", "Stats", "Settings", "Moderation"].includes(tab)) return [];
     const out = []; let cur = { title: "", items: [] };
     for (const [k, f] of Object.entries(SCHEMA[tab] || {})) {
       if (f.t === "head") { if (cur.items.length || out.length === 0 && tab === "Profile") out.push(cur); cur = { title: f.label, items: [] }; continue; }
@@ -285,7 +287,7 @@ export default function Dashboard() {
         </div>
         <label className="dn-search"><Ico n="wand" size={14} /><input ref={search} type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search…" aria-label="Search settings" /><kbd>Ctrl K</kbd></label>
         <div className="dn-scroll">
-          {NAV.map(([g, items]) => {
+          {(me.staff ? [...NAV_BASE, NAV_MOD] : NAV_BASE).map(([g, items]) => {
             const open = !shut[g] || items.some(([n]) => n === tab && !term);
             return (
               <div className="dn-g" key={g}>
@@ -319,11 +321,12 @@ export default function Dashboard() {
           <button type="submit" className="hp-btn gold sm" disabled={saving || !dirty}>{saving ? "Saving…" : "Save"}</button>
         </div>
 
-        <div className={`panel ${!term && ["Discover", "Templates", "Overview"].includes(tab) ? "wide" : !term && !["Appearance", "Stats", "Settings"].includes(tab) ? "grp" : "solo"}`}>
+        <div className={`panel ${!term && ["Discover", "Templates", "Overview", "Moderation"].includes(tab) ? "wide" : !term && !["Appearance", "Stats", "Settings"].includes(tab) ? "grp" : "solo"}`}>
           {term ? (
             hits.length ? hits : <p className="empty">No settings match “{q}”. Some options only appear when a related switch is on.</p>
           ) : tab === "Overview" ? <Overview me={me} go={go} />
             : tab === "Discover" ? <Discover embed />
+            : tab === "Moderation" && me.staff ? <Moderation flash={flash} />
             : tab === "Templates" ? <TemplatesGallery mode="dash" me={me} flash={flash} onApply={applyTemplate} />
             : tab === "Appearance" ? <AppearanceTab me={me} set={set} />
             : tab === "Stats" ? <StatsTab me={me} />

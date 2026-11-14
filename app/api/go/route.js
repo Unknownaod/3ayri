@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { redis } from "@/lib/db";
 import { itemsOf } from "@/lib/schema";
+import { ipOf } from "@/lib/api";
+import { limit } from "@/lib/ratelimit";
 
 // Counts a click, then sends the visitor to the stored link.
 //   /api/go?u=<discord id or username>&k=<item id>
@@ -10,7 +12,7 @@ export async function GET(req) {
   const u = (q.get("u") || "").toLowerCase(), k = q.get("k");
   const id = /^\d{5,25}$/.test(u) ? u : u ? await redis.get(`username:${u}`) : null;
   const raw = id ? await redis.get(`profile:${id}`) : null;
-  if (!raw) return NextResponse.redirect(new URL("/", req.url));
+  if (!raw || raw.hidden) return NextResponse.redirect(new URL("/", req.url));
   const it = itemsOf(raw);
 
   let item, key;
@@ -19,6 +21,6 @@ export async function GET(req) {
 
   const dest = item?.url;
   if (!dest || !/^https?:\/\//i.test(dest)) return NextResponse.redirect(new URL("/", req.url));
-  await redis.incr(`clicks:${id}:${key}`);
+  if ((await limit(`go:${ipOf(req)}`, 120, 60)).ok) await redis.incr(`clicks:${id}:${key}`);
   return NextResponse.redirect(dest);
 }

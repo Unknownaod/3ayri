@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ProfileCard from "../ProfileCard";
+import ReportButton from "../ReportButton";
 import SiteNav from "../SiteNav";
 import { Ico } from "@/lib/icons";
 import { applyPreset, DESIGN_KEYS } from "@/lib/schema";
@@ -107,6 +108,7 @@ export function TemplatesGallery({ mode = "public", me, user, flash = () => {}, 
           <div className="dc-card" key={t.id}>
             <div className="dc-view" aria-hidden="true"><ProfileCard p={preview(t)} views={0} preview /></div>
             <button type="button" className="dc-link" onClick={() => use(t)} aria-label={`${label}: ${t.name}`}><span>{label}</span></button>
+            {!t.canDelete && <span className="tp-rep"><ReportButton type="template" target={t.id} label="" /></span>}
             {t.canDelete && <button type="button" className="tp-del" onClick={() => remove(t)} aria-label={`Delete ${t.name}`} title="Delete"><Ico n="x" size={14} /></button>}
             <footer><b>{t.name}</b><small>{t.desc ? `${t.desc} · ` : ""}by @{t.by?.username || "unknown"} · {t.uses.toLocaleString()} use{t.uses === 1 ? "" : "s"}</small></footer>
           </div>
