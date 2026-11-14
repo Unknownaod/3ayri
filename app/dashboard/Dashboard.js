@@ -5,7 +5,7 @@ import { Discover } from "./Landing";
 import { TemplatesGallery } from "./Templates";
 import { AppearanceTab } from "./Appearance";
 import { Overview } from "./Overview";
-import { dashStyle } from "@/lib/dashtheme";
+import { dashStyle, dashColors } from "@/lib/dashtheme";
 import { SCHEMA, FIELDS, FONTS, cfg, fontsHref } from "@/lib/schema";
 import { Ico } from "@/lib/icons";
 import { BadgesEditor, LinksEditor, SocialsEditor, TracksEditor, SectionsEditor, PresetsBlock, FontPicker, DiscordBlock, compress } from "./panels";
@@ -182,6 +182,11 @@ export default function Dashboard() {
       fetch(`/api/templates/${id}`, { method: "POST" }).catch(() => {});
     }).catch(() => {});
   }, [!!me]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { // scrollbar + page edge follow the dashboard colours
+    const r = document.documentElement, col = dashColors(me?.dashTheme);
+    r.style.setProperty("--dash-sb", `color-mix(in srgb, ${col.text} 24%, transparent)`); r.style.setProperty("--dash-bg", col.bg);
+    return () => { r.style.removeProperty("--dash-sb"); r.style.removeProperty("--dash-bg"); };
+  }, [me?.dashTheme]);
   const flash = useCallback((t) => { setMsg(t); clearTimeout(flash.t); flash.t = setTimeout(() => setMsg(""), 3500); }, []);
   const commit = useCallback((next, key) => {
     const h = hist.current, now = Date.now();
@@ -255,34 +260,51 @@ export default function Dashboard() {
   const term = q.trim().toLowerCase();
   const results = term ? Object.entries(SCHEMA).flatMap(([t, g]) => Object.entries(g).filter(([k, f]) => FIELDS[k] && f.t !== "head" && `${f.label} ${k}`.toLowerCase().includes(term)).map(([k, f]) => [t, k, f])) : [];
   const hits = results.map(([t, k, f]) => [t, k, render(k, f, `r-${k}`)]).filter(([, , n]) => n).map(([t, k, n]) => <div className="res" key={k}><small className="rt">{t}</small>{n}</div>);
-  const title = NAV.flatMap(([, x]) => x).find(([n]) => n === tab);
+  // Editor tabs are split into titled sections (each "head" in the schema starts one). Short controls sit side by side, wide ones take the full row.
+  const FULL = ["area", "img", "media", "badges", "links", "socials", "tracks", "sections", "presets", "discord"];
+  const wide = (f) => FULL.includes(f.t) || (f.t === "seg" && (f.kind === "font" || f.opts.length > 4));
+  const groups = (() => {
+    if (term || ["Overview", "Discover", "Templates", "Appearance", "Stats", "Settings"].includes(tab)) return [];
+    const out = []; let cur = { title: "", items: [] };
+    for (const [k, f] of Object.entries(SCHEMA[tab] || {})) {
+      if (f.t === "head") { if (cur.items.length || out.length === 0 && tab === "Profile") out.push(cur); cur = { title: f.label, items: [] }; continue; }
+      const n = render(k, f);
+      if (n) cur.items.push([k, f, n]);
+    }
+    if (cur.items.length) out.push(cur);
+    return out;
+  })();
 
   return (
     <main className={`dash ${me.dashTheme?.compact ? "compact" : ""} ${tab === "Overview" && !term ? "is-ov" : ""}`} style={dashStyle(me.dashTheme, FONTS[me.dashTheme?.font])}>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Bricolage+Grotesque:wght@600;800&display=swap" />
       <link rel="stylesheet" href={fontsHref(Object.keys(FONTS))} />
       <nav className="dash-nav" aria-label="Dashboard sections">
-        <a className="hp-ghost dn-home" href="/"><Ico n="back" size={13} />Return to home page</a>
-        <h1 className="dn-logo">Haven</h1>
-        <div className="dn-me">{(me.customAvatar || me.avatar) && <img src={me.customAvatar || me.avatar} alt="" />}<div><b>{me.name || me.displayName}</b><small>{me.username ? `/${me.username}` : "Pick a username"}</small></div></div>
+        <div className="dn-top">
+          <button type="button" className="dn-brand" onClick={() => go("Overview")} aria-label="Haven overview"><span className="dn-mark" aria-hidden="true" /><b>Haven</b></button>
+        </div>
         <label className="dn-search"><Ico n="wand" size={14} /><input ref={search} type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search…" aria-label="Search settings" /><kbd>Ctrl K</kbd></label>
-        {NAV.map(([g, items]) => {
-          const open = !shut[g] || items.some(([n]) => n === tab && !term);
-          return (
-            <div className="dn-g" key={g}>
-              <button type="button" className="dn-gh" aria-expanded={open} onClick={() => setShut((o) => ({ ...o, [g]: !o[g] }))}>{g}<Ico n="chevron" size={14} /></button>
-              {open && items.map(([n, ic]) => <button type="button" key={n} className={tab === n && !term ? "on" : ""} aria-current={tab === n && !term ? "page" : undefined} onClick={() => go(n)}><Ico n={ic} size={16} />{n}</button>)}
+        <div className="dn-scroll">
+          {NAV.map(([g, items]) => {
+            const open = !shut[g] || items.some(([n]) => n === tab && !term);
+            return (
+              <div className="dn-g" key={g}>
+                <button type="button" className="dn-gh" aria-expanded={open} onClick={() => setShut((o) => ({ ...o, [g]: !o[g] }))}>{g}<Ico n="chevron" size={13} /></button>
+                {open && items.map(([n, ic]) => <button type="button" key={n} className={tab === n && !term ? "on" : ""} aria-current={tab === n && !term ? "page" : undefined} onClick={() => go(n)}><Ico n={ic} size={16} />{n}</button>)}
+              </div>
+            );
+          })}
+        </div>
+        <div className="dn-foot">
+          {me.username && (
+            <div className="dn-acts">
+              <a className="hp-ghost" href={`/${me.username}`} target="_blank" rel="noopener noreferrer"><Ico n="external" size={14} /> My page</a>
+              <button type="button" className="hp-ghost" onClick={() => { try { navigator.clipboard.writeText(`${location.origin}/${me.username}`); flash("Link copied"); } catch { flash(`${location.origin}/${me.username}`); } }}><Ico n="share" size={14} /> Share</button>
             </div>
-          );
-        })}
-        <span className="sp" />
-        {me.username && (
-          <div className="dn-foot">
-            <small>Check out your page</small>
-            <a className="hp-ghost" href={`/${me.username}`} target="_blank" rel="noopener noreferrer"><Ico n="external" size={14} /> My page</a>
-            <button type="button" className="hp-btn gold sm" onClick={() => { try { navigator.clipboard.writeText(`${location.origin}/${me.username}`); flash("Link copied"); } catch { flash(`${location.origin}/${me.username}`); } }}><Ico n="share" size={14} /> Share your profile</button>
-          </div>
-        )}
+          )}
+          <a className="dn-home" href="/"><Ico n="back" size={13} /> Return to home page</a>
+          <div className="dn-me">{(me.customAvatar || me.avatar) && <img src={me.customAvatar || me.avatar} alt="" />}<div><b>{me.name || me.displayName}</b><small>{me.username ? `/${me.username}` : "Pick a username"}</small></div></div>
+        </div>
       </nav>
 
       <form className="dash-main" onSubmit={(e) => { e.preventDefault(); save(); }}>
@@ -297,7 +319,7 @@ export default function Dashboard() {
           <button type="submit" className="hp-btn gold sm" disabled={saving || !dirty}>{saving ? "Saving…" : "Save"}</button>
         </div>
 
-        <div className={`panel ${(tab === "Discover" || tab === "Templates" || tab === "Overview") && !term ? "wide" : ""}`}>
+        <div className={`panel ${!term && ["Discover", "Templates", "Overview"].includes(tab) ? "wide" : !term && !["Appearance", "Stats", "Settings"].includes(tab) ? "grp" : "solo"}`}>
           {term ? (
             hits.length ? hits : <p className="empty">No settings match “{q}”. Some options only appear when a related switch is on.</p>
           ) : tab === "Overview" ? <Overview me={me} go={go} />
@@ -308,12 +330,17 @@ export default function Dashboard() {
             : tab === "Settings" ? <AccountTab me={me} patch={patch} flash={flash} logout={logout} />
             : (
               <>
-                {tab === "Profile" && (
-                  <label className="fld"><span>Your page address</span>
+                {groups.map((g, gi) => (
+                  <section className="sg" key={`${tab}-${gi}`}>
+                    <h3 className="sg-t">{g.title || (tab === "Profile" ? "Page address" : tab)}</h3>
+                    <div className="sg-card"><div className="sg-grid">
+                      {gi === 0 && tab === "Profile" && <div className="fc full"><label className="fld"><span>Your page address</span>
                     <span className="hp-prefix">havenshq.xyz/<input value={me.username || ""} onChange={(e) => set("username", e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))} placeholder="yourname" minLength={3} maxLength={20} required /></span>
-                    <small className="hint">3–20 characters: letters, numbers, underscores.</small></label>
-                )}
-                {Object.entries(SCHEMA[tab] || {}).map(([k, f]) => render(k, f))}
+                    <small className="hint">3–20 characters: letters, numbers, underscores.</small></label></div>}
+                      {g.items.map(([k, f, n]) => <div className={`fc ${wide(f) ? "full" : ""}`} key={k}>{n}</div>)}
+                    </div></div>
+                  </section>
+                ))}
               </>
             )}
         </div>
