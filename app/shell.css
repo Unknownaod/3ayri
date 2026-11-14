@@ -196,3 +196,14 @@
 .lp-logo{display:inline-flex;align-items:center;gap:.55rem}.lp-logo img{display:block;width:28px;height:28px;object-fit:contain;-webkit-text-fill-color:initial}
 .lp-logo span{background:linear-gradient(135deg,var(--ac2),var(--ac));-webkit-background-clip:text;background-clip:text;color:transparent}
 @media(max-width:700px){.lp-logo img{width:24px;height:24px}}
+
+/* Signed-in menu in the top bar */
+.lp-user{position:relative}.lp-user summary{list-style:none;display:inline-flex;align-items:center;gap:.5rem;padding:.3rem .65rem .3rem .3rem;border-radius:999px;border:1px solid #e0a24366;background:#e0a24322;color:#fff;cursor:pointer;font-size:.9rem;font-weight:600;white-space:nowrap}
+.lp-user summary::-webkit-details-marker{display:none}.lp-user summary:hover,.lp-user[open] summary{background:#e0a24338}
+.lp-user summary img,.lu-ini{width:26px;height:26px;border-radius:50%;object-fit:cover;flex:none}.lu-ini{display:grid;place-items:center;background:#e0a24355;font-size:.8rem;text-transform:uppercase}
+.lp-user summary b{max-width:9rem;overflow:hidden;text-overflow:ellipsis;font-weight:600}.lp-user[open] summary svg{transform:rotate(180deg)}
+.lp-menu{position:absolute;right:0;top:calc(100% + 10px);min-width:230px;display:grid;gap:2px;padding:.5rem;border:1px solid #ffffff14;border-radius:16px;background:#14100cf2;backdrop-filter:blur(14px);box-shadow:0 24px 50px -20px #000}
+.lm-who{display:flex;align-items:center;gap:.65rem;padding:.55rem .6rem .7rem;border-bottom:1px solid #ffffff10;margin-bottom:.3rem}.lm-who img{width:36px;height:36px;border-radius:50%;object-fit:cover}.lm-who div{display:grid;min-width:0}.lm-who b{overflow:hidden;text-overflow:ellipsis}.lm-who small{color:#9a8f80}
+.lp-menu a,.lp-menu button{display:flex;align-items:center;gap:.6rem;padding:.55rem .6rem;border:0;border-radius:10px;background:none;color:#e8dfd2;font:inherit;font-size:.88rem;text-decoration:none;cursor:pointer;text-align:left}
+.lp-menu a:hover,.lp-menu button:hover{background:#ffffff0d}.lp-menu .lm-go{background:#e0a243;color:#1a1208;font-weight:700;margin-bottom:.2rem}.lp-menu .lm-go:hover{background:#ecb355}
+@media(max-width:700px){.lp-user summary b{display:none}.lp-user summary{padding-right:.5rem}}

@@ -93,7 +93,8 @@ export function Discover({ embed = false }) {
   );
 }
 
-export default function Landing({ authed = false, invite }) {
+export default function Landing({ user = null, invite }) {
+  const authed = !!user;
   const [tab, setTab] = useState("overview");
   useEffect(() => { if (location.hash === "#discover") setTab("discover"); }, []);
   const pick = (t) => { setTab(t); try { history.replaceState(null, "", t === "discover" ? "#discover" : location.pathname); } catch {} };
@@ -101,12 +102,12 @@ export default function Landing({ authed = false, invite }) {
     <main className="lp">
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Bricolage+Grotesque:wght@600;800&display=swap" />
       <div className="lp-deco" aria-hidden="true">{DECO.map(([n, x, y, s, r]) => <span key={n} style={{ position: "absolute", left: x, top: y, transform: `rotate(${r}deg)` }}><Ico n={n} size={s} style={{ color: "#e0a243", opacity: 0.07, strokeWidth: 1.2 }} /></span>)}</div>
-      <SiteNav active="/" authed={authed} invite={invite} />
+      <SiteNav active="/" user={user} invite={invite} />
 
       <section className="lp-hero">
         <h1>Everything your page needs, right here.</h1>
         <p>Haven is a link-in-bio page with live Discord status, badges, music and control over every pixel. Free, fast, and yours in under a minute.</p>
-        <div className="lp-cta"><a className="lp-b1" href={authed ? "/dashboard" : "/api/auth/login"}>{authed ? "Open dashboard" : "Sign up free"}</a><a className="lp-b2" href="#features">See features</a></div>
+        <div className="lp-cta"><a className="lp-b1" href={authed ? `/dashboard/${user.username || "me"}` : "/api/auth/login"}>{authed ? "Open dashboard" : "Sign up free"}</a><a className="lp-b2" href="#features">See features</a></div>
       </section>
 
       <div className="lp-tabs" role="tablist" aria-label="Landing sections">
