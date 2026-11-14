@@ -373,3 +373,11 @@ html:has(.dash)::-webkit-scrollbar-thumb{background:var(--dash-sb,#ffffff30);bor
 .mx-tabs>button.on{opacity:1;border-bottom-color:var(--accent)}.mx-tabs .mx-lnk{margin-left:auto}
 .mx-ev li b{flex:none;min-width:96px}.mx-ev time{flex:none;opacity:.55;font-size:12.5px}
 @media(max-width:560px){.mx-user{padding:14px}.mx-facts{grid-template-columns:1fr 1fr}}
+
+/* v5: rounder buttons, nav login and tab switch shared by every page that uses the top bar */
+.lp-b1,.lp-b2{border-radius:999px;padding:.7rem 1.3rem;font-weight:700}
+.lp-b1{background:var(--ac);border-color:var(--ac);color:#1a1204;box-shadow:0 10px 30px -10px var(--glow),inset 0 1px 0 #ffffff55}.lp-b1:hover{background:var(--ac2);transform:translateY(-1px)}
+.lp-b2{border-color:#ffffff26}
+.lp-login{border-radius:999px;padding:.5rem 1.05rem;font-weight:700;background:var(--ac);border-color:var(--ac);color:#1a1204}.lp-login:hover{background:var(--ac2)}
+.lp-tabs{border-radius:999px}.lp-tabs button{border-radius:999px}
+@media(max-width:560px){.lp-nav{width:calc(100% - 20px);padding-inline:.7rem;gap:.5rem}.lp-nav nav{gap:.7rem;font-size:.8rem;margin-left:auto}.lp-logo span{display:none}.lp-login{padding:.45rem .8rem}}

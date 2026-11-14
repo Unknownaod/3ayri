@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ProfileCard from "../ProfileCard";
 import { Ico } from "@/lib/icons";
 import { applyPreset } from "@/lib/schema";
@@ -7,51 +7,9 @@ import SiteNav from "../SiteNav";
 import { calm, TemplatesGallery } from "./Templates";
 import "../shell.css";
 import "../profiles.css";
+import "../landing.css";
 
-const mk = (name, user, preset, extra) => ({
-  name, username: user, discordId: "demo", tagline: "", bio: "", badges: [], presence: false, bannerHeight: 0, ...applyPreset(preset), ...extra,
-  socials: [{ id: "a", type: "discord", url: "#" }, { id: "b", type: "spotify", url: "#" }, { id: "c", type: "github", url: "#" }],
-  links: [{ id: "x", label: "Portfolio", url: "#", icon: "globe" }, { id: "y", label: "Twitch", url: "#", icon: "twitch" }, { id: "z", label: "Shop", url: "#", icon: "bag" }],
-});
-const PH = [
-  mk("Ember", "ember", "Ember", { bio: "late nights, loud music", location: "Toronto", links: [{ id: "x", label: "Latest drop", url: "#", icon: "music" }, { id: "y", label: "Commissions", url: "#", icon: "bag" }] }),
-  mk("Nova", "nova", "Neon", { bio: "designer · night owl", avatarShape: "squircle", presence: true }),
-  mk("Mika", "mika", "Sakura", { bio: "soft things on the internet", typewriter: false }),
-];
 const LIVE = { status: "online", custom: "shipping tonight", plat: ["desktop"], acts: [{ kind: "spotify", title: "Midnight City", sub: "M83", start: Date.now() - 70000, end: Date.now() + 130000 }] };
-const FEATURES = [
-  ["palette", "Change every detail", "Over 140 settings: themes, 23 fonts, gradients, borders, glow, animation, particles, cursors, even your own CSS."],
-  ["discord", "Live Discord status", "Show your name, avatar, badges and what you're playing or listening to, updated as it happens."],
-  ["music", "Music and media", "A playlist player that takes YouTube links or audio files, video backgrounds, GIFs and Spotify embeds."],
-  ["layout", "Arrange it your way", "Drag sections and links into any order. Stack, grid, inline header, banner or none."],
-  ["chart", "See what works", "Daily views and clicks on each link, for the last 30 days."],
-  ["wand", "Presets to start from", "Eleven finished looks. Pick one, then change anything."],
-];
-const STEPS = [["Sign in", "One click with Discord. No password."], ["Make it yours", "Pick a preset, then edit with a live preview beside you."], ["Share your link", "havenshq.xyz/yourname goes in every bio."]];
-const DECO = [["sparkles", "6%", "12%", 90, -12], ["heart", "88%", "8%", 110, 14], ["star", "22%", "52%", 70, 8], ["music", "74%", "46%", 100, -10], ["bolt", "52%", "6%", 80, 18], ["camera", "93%", "58%", 90, -8]];
-
-function DashMock() {
-  return (
-    <div className="mk-dash" aria-hidden="true">
-      <div className="mk-side"><b><i />Welcome back</b><span className="on">Profile</span><span>Links</span><span>Theme</span><span>Music</span><span>Stats</span></div>
-      <div className="mk-main">
-        <span>Account overview</span>
-        <div className="mk-tiles"><div>Username<b>nova</b></div><div>Views<b>12,847</b></div><div>Clicks<b>3,204</b></div><div>Links<b>9</b></div></div>
-        <div className="mk-chart">
-          <span>Profile views, last 30 days</span>
-          <svg viewBox="0 0 400 150" preserveAspectRatio="none">
-            <defs><linearGradient id="lpg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#e0a243" stopOpacity=".55" /><stop offset="1" stopColor="#e0a243" stopOpacity="0" /></linearGradient></defs>
-            <path d="M0 120 C30 110 50 40 80 40 S130 120 160 100 S210 30 240 50 S290 130 320 90 S370 30 400 60 V150 H0Z" fill="url(#lpg)" />
-            <path d="M0 120 C30 110 50 40 80 40 S130 120 160 100 S210 30 240 50 S290 130 320 90 S370 30 400 60" fill="none" stroke="#e0a243" strokeWidth="2" />
-          </svg>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-
 export function Discover({ embed = false }) {
   const [items, setItems] = useState([]);
   const [q, setQ] = useState("");
@@ -111,24 +69,101 @@ export function Discover({ embed = false }) {
   );
 }
 
+
+const LOOKS = ["Haven", "Ember", "Neon", "Sakura", "Ocean", "Mono"];
+const lum = (hex) => { const h = String(hex || "#e0a243").replace("#", ""); const f = h.length === 3 ? h.replace(/./g, "$&$&") : h; const [r, g, b] = [0, 2, 4].map((i) => parseInt(f.slice(i, i + 2), 16) / 255); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+
+// Counts up to a number once it's known (jumps straight there if the person prefers reduced motion).
+function Count({ to }) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (to == null) return;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches || to < 2) { setN(to); return; }
+    let raf, t0;
+    const step = (t) => { t0 ??= t; const k = Math.min(1, (t - t0) / 1100); setN(Math.round(to * (1 - Math.pow(1 - k, 3)))); if (k < 1) raf = requestAnimationFrame(step); };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [to]);
+  return <>{to == null ? "–" : n.toLocaleString()}</>;
+}
+const compact = (n) => (n == null ? null : n);
+
+function Showcase({ onAll }) {
+  const [rows, setRows] = useState(null);
+  useEffect(() => {
+    let dead = false;
+    fetch("/api/discover?sort=popular&page=0", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => !dead && setRows(Array.isArray(j?.profiles) ? j.profiles.slice(0, 8) : [])).catch(() => !dead && setRows([]));
+    return () => { dead = true; };
+  }, []);
+  if (rows && rows.length === 0) return null;
+  return (
+    <section className="hv-sec" aria-label="Pages made on Haven">
+      <header className="hv-head">
+        <div><h2>Made on Haven</h2><p>Real pages from people who signed up. Open one, or browse them all.</p></div>
+        <button type="button" className="hv-btn ghost" onClick={onAll}>Browse all pages</button>
+      </header>
+      <div className="hv-rail">
+        {(rows || Array.from({ length: 5 })).map((p, i) => p ? (
+          <div className="dc-card" key={p.username}>
+            <div className="dc-view" aria-hidden="true"><ProfileCard p={calm(p)} views={p.views} staff={p.staff} preview /></div>
+            <a className="dc-link" href={`/${p.username}`} aria-label={`Open ${p.name || p.displayName || p.username}'s page`}><span>View page</span></a>
+            <footer><b>{p.name || p.displayName || p.username}</b><small>@{p.username}{p.views ? ` · ${p.views.toLocaleString()} views` : ""}</small></footer>
+          </div>
+        ) : <div className="dc-card dc-skel" key={i} aria-hidden="true" />)}
+      </div>
+    </section>
+  );
+}
+
+const STEPS = [["Sign in with Discord", "One click. No password, no email form."], ["Make it yours", "Pick a look, then change anything with a live preview next to you."], ["Share your link", "havenshq.xyz/you goes in every bio."]];
+
 export default function Landing({ user = null, invite }) {
   const authed = !!user;
   const [tab, setTab] = useState("overview");
+  const [look, setLook] = useState("Haven");
+  const [stats, setStats] = useState(null);
   useEffect(() => { if (location.hash === "#discover") setTab("discover"); else if (location.hash === "#templates") setTab("templates"); }, []);
+  useEffect(() => { let dead = false; fetch("/api/stats").then((r) => (r.ok ? r.json() : null)).then((j) => !dead && j && setStats(j)).catch(() => {}); return () => { dead = true; }; }, []);
   const pick = (t) => { setTab(t); try { history.replaceState(null, "", t === "overview" ? location.pathname : `#${t}`); } catch {} };
+
+  const demo = useMemo(() => ({ name: "yourname", username: "you", discordId: "demo", tagline: "", bio: "late nights, loud music", location: "Toronto", badges: [], bannerHeight: 0, presence: true, ...applyPreset(look), socials: [{ id: "a", type: "discord", url: "#" }, { id: "b", type: "spotify", url: "#" }, { id: "c", type: "github", url: "#" }], links: [{ id: "x", label: "Latest drop", url: "#", icon: "music" }, { id: "y", label: "Commissions", url: "#", icon: "bag" }, { id: "z", label: "Shop", url: "#", icon: "bag" }] }), [look]);
+  const ac = demo.accent || "#e0a243";
+  const style = { "--ac": ac, "--ac2": `color-mix(in srgb, ${ac} 55%, #fff)`, "--glow": `color-mix(in srgb, ${ac} 28%, transparent)`, "--on": lum(ac) > 0.5 ? "#15100a" : "#fff" };
+  const go = authed ? `/dashboard/${user.username || "me"}` : "/api/auth/login";
+  const TILES = [["Pages created", stats?.pages], ["Views served", stats?.views], ["Link clicks", stats?.clicks], ["Joined today", stats?.today]];
+
   return (
-    <main className="lp">
+    <main className="lp hv" style={style}>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Bricolage+Grotesque:wght@600;800&display=swap" />
-      <div className="lp-deco" aria-hidden="true">{DECO.map(([n, x, y, s, r]) => <span key={n} style={{ position: "absolute", left: x, top: y, transform: `rotate(${r}deg)` }}><Ico n={n} size={s} style={{ color: "#e0a243", opacity: 0.07, strokeWidth: 1.2 }} /></span>)}</div>
       <SiteNav active="/" user={user} invite={invite} />
 
-      <section className="lp-hero">
-        <h1>Everything your page needs, right here.</h1>
-        <p>Haven is a link-in-bio page with live Discord status, badges, music and control over every pixel. Free, fast, and yours in under a minute.</p>
-        <div className="lp-cta"><a className="lp-b1" href={authed ? `/dashboard/${user.username || "me"}` : "/api/auth/login"}>{authed ? "Open dashboard" : "Sign up free"}</a><a className="lp-b2" href="#features">See features</a></div>
+      <section className="hv-hero">
+        <div className="hv-copy">
+          <h1>Your corner of the internet, built in a minute.</h1>
+          <p>Haven is a link-in-bio page with live Discord status, music, and control over how every pixel looks. Free, and it lives at <b>havenshq.xyz/you</b>.</p>
+          <div className="hv-cta">
+            <a className="hv-btn solid" href={go}>{authed ? "Open dashboard" : <><Ico n="discord" size={17} /> Create your page</>}</a>
+            <button type="button" className="hv-btn ghost" onClick={() => pick("discover")}>Browse pages</button>
+          </div>
+          <div className="hv-looks" role="group" aria-label="Try a look on the sample page">
+            <span>Try a look</span>
+            {LOOKS.map((k) => <button type="button" key={k} className={look === k ? "on" : ""} aria-pressed={look === k} onClick={() => setLook(k)}><i style={{ background: applyPreset(k).accent }} />{k}</button>)}
+          </div>
+        </div>
+        <div className="hv-stage" aria-label="Sample Haven page">
+          <div className="hv-phone"><div><ProfileCard p={demo} views={12847} preview livePres={LIVE} /></div></div>
+        </div>
       </section>
 
-      <div className="lp-tabs" role="tablist" aria-label="Landing sections">
+      <section className="hv-stats" aria-label="Haven right now">
+        <h2 className="sr">Haven right now</h2>
+        <dl>
+          {TILES.map(([k, v]) => <div key={k}><dd aria-live="polite"><Count to={compact(v)} /></dd><dt>{k}</dt></div>)}
+        </dl>
+        <p className="hv-live"><i />Live numbers, updated every minute</p>
+      </section>
+
+      <div className="lp-tabs hv-tabs" role="tablist" aria-label="Landing sections">
         <button type="button" role="tab" aria-selected={tab === "overview"} className={tab === "overview" ? "on" : ""} onClick={() => pick("overview")}>Overview</button>
         <button type="button" role="tab" aria-selected={tab === "discover"} className={tab === "discover" ? "on" : ""} onClick={() => pick("discover")}><Ico n="sparkles" size={14} /> Discover</button>
         <button type="button" role="tab" aria-selected={tab === "templates"} className={tab === "templates" ? "on" : ""} onClick={() => pick("templates")}><Ico n="grid" size={14} /> Templates</button>
@@ -138,27 +173,48 @@ export default function Landing({ user = null, invite }) {
         <section className="lp-sec dc" aria-label="Templates"><h2>Templates</h2><p className="lp-sub">Start from a look someone else made. Your name, links and text stay yours.</p><TemplatesGallery mode="public" user={user} /></section>
       ) : (
         <>
-      <section className="lp-show" aria-label="Preview of the dashboard and profile pages">
-        <DashMock />
-        <div className="mk-phones" aria-hidden="true">
-          {PH.map((p, i) => <div key={p.name} className={`mk-phone mk-p${i + 1}`}><div><ProfileCard p={p} views={4000 + i * 700} preview livePres={p.presence ? LIVE : null} /></div></div>)}
-        </div>
-      </section>
+          <Showcase onAll={() => pick("discover")} />
 
-      <section id="features" className="lp-sec">
-        <h2>Everything you need. Nothing locked.</h2>
-        <p className="lp-sub">Every part of your page is an option you can change.</p>
-        <div className="lp-grid">{FEATURES.map(([i, t, d]) => <article key={t}><span><Ico n={i} size={20} /></span><h3>{t}</h3><p>{d}</p></article>)}</div>
-      </section>
-      <section id="how" className="lp-sec">
-        <h2>Live in three steps</h2>
-        <p className="lp-sub">No setup, no code.</p>
-        <div className="lp-steps">{STEPS.map(([t, d], i) => <article key={t}><b>{i + 1}</b><h3>{t}</h3><p>{d}</p></article>)}</div>
-      </section>
+          <section id="features" className="hv-sec">
+            <header className="hv-head"><div><h2>Everything is an option</h2><p>Nothing is locked behind a plan. Change it, or leave the defaults.</p></div></header>
+            <div className="hv-bento">
+              <article className="b-live">
+                <h3>Live Discord status</h3>
+                <p>Your avatar, badges and what you're playing or listening to, updated as it happens.</p>
+                <div className="v-status" aria-hidden="true"><span className="dot" /><div><b>Listening to Midnight City</b><small>M83 · 1:12 / 4:03</small><u><s /></u></div></div>
+              </article>
+              <article className="b-ctl">
+                <h3>Over 140 settings</h3>
+                <p>Themes, 23 fonts, gradients, glow, borders, particles, cursors, and your own CSS if you want it.</p>
+                <div className="v-sw" aria-hidden="true">{["#e0a243", "#ff5d8f", "#46d7c6", "#7c8cff", "#b6ff6a", "#f2f2f2"].map((c) => <i key={c} style={{ background: c }} />)}<em>Aa</em><em className="s">Aa</em><em className="m">Aa</em></div>
+              </article>
+              <article className="b-mus"><h3>Music and media</h3><p>YouTube links or audio files, video backgrounds, GIFs, Spotify embeds.</p><div className="v-play" aria-hidden="true"><div className="eq"><i /><i /><i /><i /><i /></div><div><b>Midnight City</b><small>M83</small></div><Ico n="play" size={16} /></div></article>
+              <article className="b-lay">
+                <h3>Arrange it your way</h3><p>Drag links and sections into any order.</p>
+                <div className="v-rows" aria-hidden="true"><span><Ico n="grip" size={13} />Portfolio</span><span><Ico n="grip" size={13} />Twitch</span><span><Ico n="grip" size={13} />Shop</span></div>
+              </article>
+              <article className="b-sta">
+                <h3>See what works</h3><p>Views and clicks for each link, last 30 days.</p>
+                <div className="v-bars" aria-hidden="true">{[30, 55, 40, 72, 50, 88, 64, 95].map((h, i) => <i key={i} style={{ height: `${h}%` }} />)}</div>
+              </article>
+              <article className="b-tpl">
+                <div><h3>Templates from the community</h3><p>Publish your look so others can start from it, or use one someone else made. Only the design is shared, never your name, links or text.</p></div>
+                <button type="button" className="hv-btn ghost" onClick={() => pick("templates")}>Browse templates</button>
+              </article>
+            </div>
+          </section>
+
+          <section id="how" className="hv-sec">
+            <header className="hv-head"><div><h2>Live in three steps</h2><p>No setup and no code.</p></div></header>
+            <ol className="hv-steps">{STEPS.map(([t, d], i) => <li key={t}><b>{i + 1}</b><h3>{t}</h3><p>{d}</p></li>)}</ol>
+          </section>
         </>
       )}
 
-      <section className="lp-final"><h2>Ready to claim your name?</h2><div className="lp-cta"><a className="lp-b1" href="/api/auth/login">Sign up free</a></div></section>
+      <section className="hv-final">
+        <h2>Pick your name before someone else does.</h2>
+        <div className="hv-cta"><a className="hv-btn solid lg" href={go}>{authed ? "Open dashboard" : <><Ico n="discord" size={18} /> Create your page</>}</a></div>
+      </section>
       <footer className="lp-foot">© Haven · havenshq.xyz · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></footer>
     </main>
   );
