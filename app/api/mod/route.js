@@ -2,27 +2,57 @@ import { NextResponse } from "next/server";
 import { getSessionId } from "@/lib/session";
 import { redis } from "@/lib/db";
 import { isStaff } from "@/lib/staff";
+import { cfg } from "@/lib/schema";
 import { bad, safe, sameOrigin } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 const str = (v, n) => String(v ?? "").replace(/[\u0000-\u001f]/g, " ").trim().slice(0, n);
 
 async function staffId() { const id = await getSessionId().catch(() => null); return id && (await isStaff(id)) ? id : null; }
-const lookup = async (username) => {
-  const id = await redis.get(`username:${String(username).toLowerCase()}`), p = id && (await redis.get(`profile:${id}`));
+const lookup = async (who) => {
+  const q = String(who || "").replace(/^@/, "").trim().toLowerCase();
+  let id = /^\d{15,25}$/.test(q) ? q : await redis.get(`username:${q}`);
+  const p = id && (await redis.get(`profile:${id}`));
   return p ? { id, p } : null;
 };
+
+// Everything staff may want to know about one account, without the heavy parts (uploaded pictures, music, custom CSS).
+async function dossier(who) {
+  const f = await lookup(who);
+  if (!f) return { missing: String(who).slice(0, 40) };
+  const { id, p } = f, c = cfg(p);
+  const [views, ban, staff, tpls, reps] = await Promise.all([
+    redis.get(`views:${id}`), redis.get(`ban:${id}`), isStaff(id),
+    redis.list("template:", 1000), redis.list("report:", 2000),
+  ]);
+  const mine = reps.map(([, r]) => r).filter((r) => r?.type === "profile" && r.target === p.username).sort((a, b) => b.at - a.at);
+  const remote = (x) => (x && !String(x).startsWith("data:") ? x : "");
+  const cuts = (x) => (x && String(x).length > 120000 ? "big" : x ? "yes" : "");
+  const links = [...(p.links || []), ...(p.socials || [])].filter((x) => x.type !== "header" && x.type !== "divider");
+  return {
+    id, username: p.username, name: p.name || p.displayName || p.username,
+    avatar: remote(p.avatar) || (p.customAvatar ? `/api/img/${p.username}/customAvatar` : ""),
+    discord: { username: p.discord?.username || "", nitro: !!p.discord?.nitro },
+    bio: String(p.bio || "").slice(0, 300), tagline: String(p.tagline || "").slice(0, 120),
+    createdAt: p.createdAt || 0, updatedAt: p.updatedAt || 0, usernameChangedAt: p.usernameChangedAt || 0,
+    views: views || 0, linkCount: links.length,
+    links: links.slice(0, 12).map((x) => ({ label: String(x.label || x.platform || x.type || "").slice(0, 40), url: String(x.url || x.href || "").slice(0, 160) })),
+    hasBackground: !!cuts(p.background), hasVideo: !!p.bgVideo, hasMusic: !!(c.musicUrl || (p.tracks || []).length),
+    discover: p.discover !== false, noindex: !!c.noindex,
+    hidden: !!p.hidden, hiddenReason: p.hiddenReason || "",
+    banned: !!ban, ban: ban ? { at: ban.at, by: ban.by, reason: ban.reason || "" } : null,
+    staff: !!staff,
+    templates: tpls.map(([, t]) => t).filter((t) => t?.by?.id === id).map((t) => ({ id: t.id, name: t.name, at: t.at })),
+    reports: { open: mine.filter((r) => r.status === "open").length, total: mine.length, recent: mine.slice(0, 6).map((r) => ({ reason: r.reason, details: r.details, status: r.status, at: r.at, by: r.by })) },
+  };
+}
 
 // Staff only. GET: open reports (grouped by target), recent errors, recent staff actions. ?user=<username> looks one page up.
 export const GET = safe("mod.get", async (req) => {
   const me = await staffId();
   if (!me) return bad("Staff only.", 403);
   const u = new URL(req.url).searchParams.get("user");
-  if (u) {
-    const f = await lookup(u);
-    if (!f) return bad("No page with that username.", 404);
-    return NextResponse.json({ username: f.p.username, name: f.p.name || f.p.displayName, hidden: !!f.p.hidden, hiddenReason: f.p.hiddenReason || "", banned: !!(await redis.get(`ban:${f.id}`)) });
-  }
+  if (u) return NextResponse.json(await dossier(u));
   const reports = (await redis.list("report:", 2000)).map(([, r]) => r).filter((r) => r?.status === "open");
   const groups = new Map();
   for (const r of reports) {
@@ -38,7 +68,8 @@ export const GET = safe("mod.get", async (req) => {
   }
   const errors = (await redis.list("err:", 100)).map(([, e]) => e).sort((a, b) => b.at - a.at).slice(0, 30);
   const log = (await redis.list("modlog:", 200)).map(([, e]) => e).sort((a, b) => b.at - a.at).slice(0, 20);
-  return NextResponse.json({ reports: list, errors, log });
+  const restricted = (await redis.list("ban:", 1000)).length;
+  return NextResponse.json({ reports: list, errors, log, stats: { open: reports.length, targets: list.length, restricted, errors: errors.length } });
 });
 
 // POST { action: hide | unhide | ban | unban | delete-template | dismiss, username?, id?, key?, reason? }
