@@ -260,7 +260,9 @@ export default function ProfileCard({ p, views, preview, livePres, claim, staff 
       <div ref={bg} className="pc-bgwrap">
         <div className="pc-bgz">
           <div className="pc-bg" style={bgStyle} />
-          {p.bgVideo && <video className="pc-vid" src={p.bgVideo} autoPlay loop muted playsInline style={{ filter: bgFilter }} />}
+          {p.bgVideo && (p.bgStill
+            ? <video className="pc-vid" src={`${p.bgVideo}#t=0.5`} preload="metadata" muted playsInline style={{ filter: bgFilter }} />
+            : <video className="pc-vid" src={p.bgVideo} autoPlay loop muted playsInline style={{ filter: bgFilter }} />)}
         </div>
       </div>
       <div className="pc-ov" />

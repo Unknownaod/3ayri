@@ -8,7 +8,7 @@ import "../shell.css";
 import "../profiles.css";
 
 // Cards in grids are still pictures: no particles, music, cursor effects or entry screen, so a grid stays light.
-export const calm = (p) => ({ ...p, particles: "none", cursor: "default", cursorTrail: "none", entry: false, tilt: false, cardFloat: false, typewriter: false, tabTitle: "" });
+export const calm = (p) => ({ ...p, particles: "none", cursor: "default", cursorTrail: "none", entry: false, tilt: false, cardFloat: false, typewriter: false, tabTitle: "", bgStill: true });
 
 const SAMPLE = {
   name: "Your name", username: "you", discordId: "demo", tagline: "your tagline", bio: "This is how your page will look with this template.",

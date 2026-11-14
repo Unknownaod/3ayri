@@ -3,14 +3,16 @@ import { redis } from "@/lib/db";
 import { isStaff } from "@/lib/staff";
 
 const PAGE = 24;
-const BIG = 120000;   // inline images bigger than this are left out of the list (the full page still has them)
+const BIG = 120000;   // bigger uploaded images are served from /api/img instead of inside the list
 
 // Public list of profile cards for the Discover tab: GET /api/discover?q=<search>&page=<n>
 // Only profiles that picked a username and didn't turn "Show my page on the Discover tab" off.
 const pub = (p) => {
   const o = { ...p };
-  for (const k of ["discordId", "tracks", "musicUrl", "musicTitle", "musicArtist", "musicCover", "bgVideo", "music", "views", "clicks", "days", "customCss", "ogDesc", "createdAt", "updatedAt", "dashTheme"]) delete o[k];
-  for (const k of ["background", "banner", "customAvatar", "thumb"]) if (typeof o[k] === "string" && o[k].startsWith("data:") && o[k].length > BIG) o[k] = "";
+  for (const k of ["discordId", "tracks", "musicUrl", "musicTitle", "musicArtist", "musicCover", "music", "views", "clicks", "days", "customCss", "ogDesc", "createdAt", "updatedAt", "dashTheme"]) delete o[k];
+  // Big uploaded pictures are served from /api/img instead of being sent inside the list. ?v changes whenever the page is saved.
+  for (const k of ["background", "banner", "customAvatar"]) if (typeof o[k] === "string" && o[k].startsWith("data:") && o[k].length > BIG) o[k] = `/api/img/${p.username}/${k}?v=${p.updatedAt ?? 0}`;
+  if (typeof o.thumb === "string" && o.thumb.startsWith("data:") && o.thumb.length > BIG) o.thumb = "";
   o.socials = (p.socials || []).map(({ id, type, label }) => ({ id, type, label, url: "#" }));
   o.links = (p.links || []).filter((l) => !l.hidden && l.type !== "embed").map(({ id, type, label, icon, desc, badge, color, featured }) => ({ id, type, label, icon, desc, badge, color, featured, url: "#" }));
   o.discord = p.discord ? { username: p.discord.username, displayName: p.discord.displayName, avatar: p.discord.avatar, flags: p.discord.flags, nitro: p.discord.nitro } : undefined;
