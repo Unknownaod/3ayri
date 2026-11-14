@@ -1,4 +1,3 @@
-import "../globals.css";
 import "./affiliates.css";
 
 import { Background, Nav, Footer } from "../SiteChrome";
@@ -17,7 +16,7 @@ export default async function AffiliatesPage() {
   const affiliates = await getAffiliates();
 
   return (
-    <main className="site">
+    <main className="hx">
       <Background />
 
       <Nav current="affiliates" />

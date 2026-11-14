@@ -2,7 +2,8 @@
 
 import { notFound } from "next/navigation";
 
-import { Nav, Footer } from "../../SiteChrome";
+import "../affiliates.css";
+import { Background, Nav, Footer } from "../../SiteChrome";
 import AffiliatesView from "../AffiliatesView";
 import { getAffiliate, getAffiliates } from "../data";
 import { BRAND } from "../../site";
@@ -52,7 +53,8 @@ export default async function AffiliatePage({ params }) {
 
   // Match whatever wrapper your existing /affiliates page uses.
   return (
-    <main className="site">
+    <main className="hx">
+      <Background />
       <Nav current="affiliates" />
       <AffiliatesView affiliates={affiliates} initialSlug={key} />
       <Footer />

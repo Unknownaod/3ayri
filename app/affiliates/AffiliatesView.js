@@ -953,7 +953,7 @@ export default function AffiliatesView({ affiliates = [], initialSlug = "" }) {
         <div className="directory-heading-copy">
           <span className="directory-eyebrow">
             <span className="directory-eyebrow-dot" />
-            THE {BRAND.toUpperCase()} NETWORK
+            The {BRAND} network
           </span>
 
           <h1>
@@ -1044,7 +1044,7 @@ export default function AffiliatesView({ affiliates = [], initialSlug = "" }) {
           <section className="directory-section">
             <div className="directory-section-heading">
               <div>
-                <span className="directory-section-kicker">HAND PICKED</span>
+                <span className="directory-section-kicker">Hand picked</span>
                 <h2>
                   <Icon name="sparkle" size={19} />
                   Featured communities
@@ -1070,7 +1070,7 @@ export default function AffiliatesView({ affiliates = [], initialSlug = "" }) {
       <section className="directory-section">
         <div className="directory-section-heading">
           <div>
-            <span className="directory-section-kicker">EXPLORE</span>
+            <span className="directory-section-kicker">Explore</span>
             <h2>
               <Icon name="grid" size={18} />
               {search || activeTag !== "All"
@@ -1124,7 +1124,7 @@ export default function AffiliatesView({ affiliates = [], initialSlug = "" }) {
           <Icon name="discord" size={25} />
         </div>
         <div className="directory-join-copy">
-          <span>YOUR COMMUNITY STARTS HERE</span>
+          <span>Your community starts here</span>
           <h2>Looking for a place to belong?</h2>
           <p>
             Join the {BRAND} community and meet people, make connections, and

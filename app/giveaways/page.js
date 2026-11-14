@@ -1,7 +1,6 @@
-import "../globals.css";
 import "./giveaways.css";
 
-import { Nav, Footer } from "../SiteChrome";
+import { Background, Nav, Footer } from "../SiteChrome";
 import { BRAND, DISCORD_INVITE } from "../site";
 import GiveawaysClient from "./GiveawaysClient";
 
@@ -12,7 +11,8 @@ export const metadata = {
 
 export default function GiveawaysPage() {
   return (
-    <main className="site">
+    <main className="hx">
+      <Background />
       <Nav current="giveaways" />
       <GiveawaysClient brand={BRAND} inviteUrl={DISCORD_INVITE} />
       <Footer />

@@ -13,13 +13,8 @@ export default function Avatar({ name, logo, size = 48, accent = "#8b3cff" }) {
 
   return (
     <span
-      className="avatar"
-      style={{
-        width: size,
-        height: size,
-        fontSize: Math.round(size * 0.36),
-        "--accent": accent,
-      }}
+      className="hx-avatar"
+      style={{ width: size, height: size, fontSize: Math.round(size * 0.36), "--accent": accent }}
     >
       {logo ? <img src={logo} alt="" /> : initials}
     </span>
