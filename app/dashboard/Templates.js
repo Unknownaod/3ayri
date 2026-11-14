@@ -18,8 +18,8 @@ const SAMPLE = {
 };
 const preview = (t) => calm({ ...SAMPLE, ...applyPreset("Haven"), ...t.cfg });
 const LINKED = ["background", "banner", "bgVideo"];
-// Only the look of the page goes into a template: no names, links, text, music or uploaded files.
-const designOf = (me) => Object.fromEntries([...DESIGN_KEYS, ...LINKED].filter((k) => me[k] !== undefined && !(typeof me[k] === "string" && me[k].startsWith("data:"))).map((k) => [k, me[k]]));
+// Only the look of the page goes into a template (including background / banner pictures): no names, links, text, music or avatar.
+const designOf = (me) => Object.fromEntries([...DESIGN_KEYS, ...LINKED].filter((k) => me[k] !== undefined).map((k) => [k, me[k]]));
 
 // Template browser. mode "dash": inside the dashboard (can publish + apply right here). mode "public": landing / /templates page.
 export function TemplatesGallery({ mode = "public", me, user, flash = () => {}, onApply }) {
@@ -79,7 +79,7 @@ export function TemplatesGallery({ mode = "public", me, user, flash = () => {}, 
       {mode === "dash" && (
         <div className="fld tp-pub" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); if (name.trim().length >= 2) publish(); } }}>
           <span>Publish your design as a template</span>
-          <small className="hint">Shares only the look of your page (colors, fonts, card, effects). Your name, links, text and uploaded pictures are never included. Save your page first so your username is set.</small>
+          <small className="hint">Shares the look of your page: colors, fonts, card, effects and your background and banner pictures. Your name, links, text, music and avatar are never included. Save your page first so your username is set.</small>
           <div className="colrow">
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Template name" maxLength={40} aria-label="Template name" required />
             <input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Short description (optional)" maxLength={140} aria-label="Template description" />

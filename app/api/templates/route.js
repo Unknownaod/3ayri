@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import { getSessionId } from "@/lib/session";
 import { redis, validUsername } from "@/lib/db";
 import { rid } from "@/lib/schema";
-import { designOf, MAX_PER_PERSON } from "@/lib/templates";
+import { designOf, imgUrl, MAX_PER_PERSON } from "@/lib/templates";
 import { isStaff } from "@/lib/staff";
 
 export const dynamic = "force-dynamic";
 const bad = (error, status = 400) => NextResponse.json({ error }, { status });
+// Uploaded pictures are not inside the list: the design points at the template's own image URL.
+const withImgs = (t) => ({ ...t.cfg, ...Object.fromEntries((t.imgs || []).map((f) => [f, imgUrl(t.id, f, t.at)])) });
 const str = (v, n) => String(v ?? "").replace(/[\u0000-\u001f]/g, " ").trim().slice(0, n);
 
 // GET /api/templates?q=&sort=popular|new&mine=1  (public; "mine" needs a login)
@@ -23,7 +25,7 @@ export async function GET(req) {
   list.sort((a, b) => (sort === "new" ? b.t.at - a.t.at : b.n - a.n || b.t.at - a.t.at));
   return NextResponse.json({
     templates: list.slice(0, 60).map(({ t, n }) => ({
-      id: t.id, name: t.name, desc: t.desc, at: t.at, cfg: t.cfg, uses: n,
+      id: t.id, name: t.name, desc: t.desc, at: t.at, cfg: withImgs(t), uses: n,
       by: { name: t.by?.name, username: t.by?.username, avatar: t.by?.avatar },
       mine: !!sid && t.by?.id === sid, canDelete: !!sid && (t.by?.id === sid || staff),
     })),
@@ -45,8 +47,12 @@ export async function POST(req) {
   const t = {
     id: rid(8), name, desc: str(b.desc, 140),
     by: { id: sid, name: p.name || p.displayName || p.username, username: p.username, avatar: p.avatar && !String(p.avatar).startsWith("data:") ? p.avatar : "" },
-    at: Date.now(), cfg: designOf(b.cfg || p),
+    at: Date.now(),
   };
+  const d = designOf(b.cfg || p);
+  t.cfg = d.cfg; t.imgs = Object.keys(d.images);
+  if (Object.values(d.images).reduce((n, v) => n + v.length, 0) > 2_200_000) return bad("That background and banner are too big to share together. Use a link for one of them.");
+  for (const [f, v] of Object.entries(d.images)) await redis.set(`templateImg:${t.id}:${f}`, v);
   await redis.set(`template:${t.id}`, t);
   return NextResponse.json({ ok: true, id: t.id });
 }

@@ -4,6 +4,7 @@ import ProfileCard from "../ProfileCard";
 import { Discover } from "./Landing";
 import { TemplatesGallery } from "./Templates";
 import { AppearanceTab } from "./Appearance";
+import { Overview } from "./Overview";
 import { dashStyle } from "@/lib/dashtheme";
 import { SCHEMA, FIELDS, FONTS, cfg, fontsHref } from "@/lib/schema";
 import { Ico } from "@/lib/icons";
@@ -12,9 +13,10 @@ import "../shell.css";
 import "../profiles.css";
 
 const NAV = [
+  ["Account", [["Overview", "home"], ["Stats", "chart"], ["Settings", "sliders"]]],
   ["Content", [["Profile", "user"], ["Discord", "discord"], ["Links", "link"], ["Socials", "share"], ["Music", "music"]]],
   ["Design", [["Templates", "grid"], ["Theme", "palette"], ["Card", "card"], ["Avatar", "image"], ["Background", "globe2"], ["Effects", "sparkles"], ["Layout", "layout"]]],
-  ["Site", [["Discover", "globe2"], ["Page", "globe"], ["Appearance", "palette"], ["Stats", "chart"], ["Account", "sliders"]]],
+  ["Site", [["Discover", "globe2"], ["Page", "globe"], ["Appearance", "palette"]]],
 ];
 const EXTRAS = ["views", "days", "clicks"];
 const clean = (m) => Object.fromEntries(Object.entries(m).filter(([k]) => !EXTRAS.includes(k)));
@@ -147,7 +149,9 @@ function AccountTab({ me, patch, flash, logout }) {
 
 export default function Dashboard() {
   const [me, setMe] = useState(undefined);
-  const [tab, setTab] = useState("Profile");
+  const [tab, setTab] = useState("Overview");
+  const [shut, setShut] = useState({});
+  const search = useRef(null);
   const [q, setQ] = useState("");
   const [msg, setMsg] = useState("");
   const [saving, setSaving] = useState(false);
@@ -187,7 +191,10 @@ export default function Dashboard() {
   }, []);
   const set = useCallback((k, v) => commit({ ...meRef.current, [k]: v }, k), [commit]);
   const patch = useCallback((o) => commit({ ...meRef.current, ...o }, `*${Math.random()}`), [commit]);
-  const applyTemplate = useCallback((cfg, t) => { patch(cfg); flash(`Applied “${t?.name || "template"}”. Look it over, then press Save.`); }, [patch, flash]);
+  const applyTemplate = useCallback((cfg, t) => { // template pictures are served from this site, so make their links absolute before they are saved
+    const abs = Object.fromEntries(Object.entries(cfg).map(([k, v]) => [k, typeof v === "string" && v.startsWith("/api/templates/") ? location.origin + v : v]));
+    patch(abs); flash(`Applied “${t?.name || "template"}”. Look it over, then press Save.`); }, [patch, flash]);
+  const go = (n) => { setTab(n); setQ(""); try { scrollTo({ top: 0 }); } catch {} };
   const undo = () => { const h = hist.current; if (!h.past.length) return; h.future.push(meRef.current); h.key = ""; setMe(h.past.pop()); bump((x) => x + 1); };
   const redo = () => { const h = hist.current; if (!h.future.length) return; h.past.push(meRef.current); h.key = ""; setMe(h.future.pop()); bump((x) => x + 1); };
 
@@ -217,6 +224,7 @@ export default function Dashboard() {
     const key = (e) => {
       const m = e.metaKey || e.ctrlKey;
       if (m && e.key === "s") { e.preventDefault(); save(); }
+      else if (m && e.key === "k") { e.preventDefault(); search.current?.focus(); }
       else if (m && e.key === "z" && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) { e.preventDefault(); e.shiftKey ? redo() : undo(); }
     };
     const warn = (e) => { if (dirty) e.preventDefault(); };
@@ -250,26 +258,36 @@ export default function Dashboard() {
   const title = NAV.flatMap(([, x]) => x).find(([n]) => n === tab);
 
   return (
-    <main className={`dash ${me.dashTheme?.compact ? "compact" : ""}`} style={dashStyle(me.dashTheme, FONTS[me.dashTheme?.font])}>
+    <main className={`dash ${me.dashTheme?.compact ? "compact" : ""} ${tab === "Overview" && !term ? "is-ov" : ""}`} style={dashStyle(me.dashTheme, FONTS[me.dashTheme?.font])}>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Bricolage+Grotesque:wght@600;800&display=swap" />
       <link rel="stylesheet" href={fontsHref(Object.keys(FONTS))} />
       <nav className="dash-nav" aria-label="Dashboard sections">
         <a className="hp-ghost dn-home" href="/"><Ico n="back" size={13} />Return to home page</a>
         <h1 className="dn-logo">Haven</h1>
         <div className="dn-me">{(me.customAvatar || me.avatar) && <img src={me.customAvatar || me.avatar} alt="" />}<div><b>{me.name || me.displayName}</b><small>{me.username ? `/${me.username}` : "Pick a username"}</small></div></div>
-        <label className="dn-search"><Ico n="wand" size={14} /><input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search settings" aria-label="Search settings" /></label>
-        {NAV.map(([g, items]) => (
-          <div className="dn-g" key={g}><small>{g}</small>
-            {items.map(([n, ic]) => <button type="button" key={n} className={tab === n && !term ? "on" : ""} aria-current={tab === n && !term ? "page" : undefined} onClick={() => { setTab(n); setQ(""); }}><Ico n={ic} size={16} />{n}</button>)}
-          </div>
-        ))}
+        <label className="dn-search"><Ico n="wand" size={14} /><input ref={search} type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search…" aria-label="Search settings" /><kbd>Ctrl K</kbd></label>
+        {NAV.map(([g, items]) => {
+          const open = !shut[g] || items.some(([n]) => n === tab && !term);
+          return (
+            <div className="dn-g" key={g}>
+              <button type="button" className="dn-gh" aria-expanded={open} onClick={() => setShut((o) => ({ ...o, [g]: !o[g] }))}>{g}<Ico n="chevron" size={14} /></button>
+              {open && items.map(([n, ic]) => <button type="button" key={n} className={tab === n && !term ? "on" : ""} aria-current={tab === n && !term ? "page" : undefined} onClick={() => go(n)}><Ico n={ic} size={16} />{n}</button>)}
+            </div>
+          );
+        })}
         <span className="sp" />
-        {me.username && <a className="hp-ghost" href={`/${me.username}`} target="_blank" rel="noopener noreferrer">View my page <Ico n="external" size={13} /></a>}
+        {me.username && (
+          <div className="dn-foot">
+            <small>Check out your page</small>
+            <a className="hp-ghost" href={`/${me.username}`} target="_blank" rel="noopener noreferrer"><Ico n="external" size={14} /> My page</a>
+            <button type="button" className="hp-btn gold sm" onClick={() => { try { navigator.clipboard.writeText(`${location.origin}/${me.username}`); flash("Link copied"); } catch { flash(`${location.origin}/${me.username}`); } }}><Ico n="share" size={14} /> Share your profile</button>
+          </div>
+        )}
       </nav>
 
       <form className="dash-main" onSubmit={(e) => { e.preventDefault(); save(); }}>
         <div className="toolbar">
-          <h2>{term ? `Results for “${q}”` : tab}</h2>
+          <h2>{term ? `Results for “${q}”` : tab === "Overview" ? "Account overview" : tab}</h2>
           <span className="tb-sp" />
           <span className="tb-msg" role="status" aria-live="polite">{msg || (dirty ? (auto ? "Saving soon…" : "Unsaved changes") : "")}</span>
           <button type="button" className="ib" aria-label="Undo" title="Undo (Ctrl+Z)" disabled={!hist.current.past.length} onClick={undo}><Ico n="undo" size={16} /></button>
@@ -279,14 +297,15 @@ export default function Dashboard() {
           <button type="submit" className="hp-btn gold sm" disabled={saving || !dirty}>{saving ? "Saving…" : "Save"}</button>
         </div>
 
-        <div className={`panel ${(tab === "Discover" || tab === "Templates") && !term ? "wide" : ""}`}>
+        <div className={`panel ${(tab === "Discover" || tab === "Templates" || tab === "Overview") && !term ? "wide" : ""}`}>
           {term ? (
             hits.length ? hits : <p className="empty">No settings match “{q}”. Some options only appear when a related switch is on.</p>
-          ) : tab === "Discover" ? <Discover embed />
+          ) : tab === "Overview" ? <Overview me={me} go={go} />
+            : tab === "Discover" ? <Discover embed />
             : tab === "Templates" ? <TemplatesGallery mode="dash" me={me} flash={flash} onApply={applyTemplate} />
             : tab === "Appearance" ? <AppearanceTab me={me} set={set} />
             : tab === "Stats" ? <StatsTab me={me} />
-            : tab === "Account" ? <AccountTab me={me} patch={patch} flash={flash} logout={logout} />
+            : tab === "Settings" ? <AccountTab me={me} patch={patch} flash={flash} logout={logout} />
             : (
               <>
                 {tab === "Profile" && (

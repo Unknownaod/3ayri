@@ -315,3 +315,15 @@
 
 /* Staff badge: public/staff.gif. Change height to resize. */
 .pc-staff-img{display:inline-block;height:20px;width:auto;vertical-align:middle;object-fit:contain}
+
+/* Card shape (Card tab > Card shape). Rectangle = fit to content. The others keep a shape but grow if content needs more room. */
+.pc-stage[data-shape] .pc-wrap{container-type:inline-size}
+.pc-stage[data-shape=square] .pc-wrap{width:min(100%,calc(var(--w,460px) * 1.1))}
+.pc-stage[data-shape=wide] .pc-wrap{width:min(100%,calc(var(--w,460px) * 1.7))}
+.pc-stage[data-shape=circle] .pc-wrap{width:min(100%,calc(var(--w,460px) * 1.25))}
+.pc-stage[data-shape=square] .pc,.pc-stage[data-shape=circle] .pc{min-height:100cqw}.pc-stage[data-shape=wide] .pc{min-height:56.25cqw}.pc-stage[data-shape=tall] .pc{min-height:153cqw}
+.pc-stage[data-shape=circle] .pc{border-radius:50%}
+.pc-stage[data-shape=square] .pc,.pc-stage[data-shape=wide] .pc,.pc-stage[data-shape=tall] .pc,.pc-stage[data-shape=circle] .pc{display:flex;flex-direction:column}
+.pc-stage[data-shape=square] .pc-body,.pc-stage[data-shape=wide] .pc-body,.pc-stage[data-shape=tall] .pc-body,.pc-stage[data-shape=circle] .pc-body{flex:1;align-content:center}
+.pc-stage[data-shape=circle] .pc-body{padding-left:calc(var(--pad) + 9%);padding-right:calc(var(--pad) + 9%)}
+.pc-stage[data-shape=square] .pc>*,.pc-stage[data-shape=wide] .pc>*,.pc-stage[data-shape=tall] .pc>*,.pc-stage[data-shape=circle] .pc>*{flex-shrink:0}

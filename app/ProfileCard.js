@@ -245,7 +245,7 @@ export default function ProfileCard({ p, views, preview, livePres, claim, staff 
   };
 
   const ds = {
-    "data-theme": c.theme, "data-cs": c.cardStyle, "data-bd": c.border, "data-bs": c.borderStyle, "data-lay": c.layout, "data-ls": c.linkStyle, "data-ll": c.linkLayout, "data-la": c.linkAlign,
+    "data-theme": c.theme, "data-cs": c.cardStyle, "data-shape": c.cardShape, "data-bd": c.border, "data-bs": c.borderStyle, "data-lay": c.layout, "data-ls": c.linkStyle, "data-ll": c.linkLayout, "data-la": c.linkAlign,
     "data-lh": c.linkHover, "data-ih": c.socialHover, "data-ifill": c.iconFill, "data-is": c.iconStyle, "data-av": c.avatarShape, "data-ab": c.avatarBorder, "data-pa": c.entryAnim,
     "data-es": c.entryStyle, "data-ch": c.cardHover, "data-float": c.cardFloat ? "1" : "0", "data-bf": c.bannerFade ? "1" : "0", "data-bga": c.bgGradient && c.bgAnimate ? "1" : "0",
     "data-bgz": c.bgZoom ? "1" : "0", "data-ready": entered ? "1" : "0", "data-cx": c.cardX, "data-cy": c.vpos,

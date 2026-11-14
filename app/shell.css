@@ -224,3 +224,46 @@ button.dc-link{border:0;background:none;font:inherit;color:inherit;cursor:pointe
 .dt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:.6rem}
 .dt-sw{display:grid;gap:.5rem;padding:.5rem;border:2px solid transparent;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;font-size:.82rem;text-align:left;outline:1px solid #ffffff1f;outline-offset:-1px}
 .dt-sw i{display:flex;align-items:flex-end;gap:5px;height:34px;padding:6px;border-radius:9px}.dt-sw s{display:block;height:6px;border-radius:3px;flex:1}.dt-sw s:first-child{flex:none;width:18px}
+
+/* ---- dashboard v2: floating, softer, accent-tinted (works with every Appearance theme) ---- */
+.dash{--tile:color-mix(in srgb,var(--accent) 8%,var(--panel));--tile-line:color-mix(in srgb,var(--accent) 16%,transparent)}
+.dash-nav button.dn-gh{display:flex;justify-content:space-between;align-items:center;width:100%;padding:.55rem .8rem;border-radius:14px;color:var(--text);font-weight:700;font-size:.95rem;background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.dash-nav button.dn-gh svg{transition:transform .18s}.dash-nav button.dn-gh[aria-expanded=false] svg{transform:rotate(-90deg)}
+.dn-g{margin-top:.5rem}.dn-g>small{display:none}
+.dash-nav button.on{background:color-mix(in srgb,var(--accent) 24%,transparent);color:var(--text);box-shadow:inset 0 0 0 1px var(--tile-line)}
+.dash-nav button:not(.dn-gh):not(.on){padding-left:1.1rem;font-weight:500}
+.dn-search{border-radius:14px;border-color:transparent;background:color-mix(in srgb,var(--text) 6%,transparent)}.dn-search kbd{font-family:inherit;font-size:.66rem;font-weight:600;white-space:nowrap;padding:.15rem .4rem;border-radius:6px;background:color-mix(in srgb,var(--text) 10%,transparent);color:var(--muted)}
+.dn-me{border:0;background:color-mix(in srgb,var(--accent) 10%,transparent);border-radius:16px}
+.dn-foot{display:grid;gap:.5rem;padding:.8rem;border-radius:18px;background:color-mix(in srgb,var(--text) 5%,transparent)}.dn-foot small{color:var(--muted);font-weight:600;padding:0 .1rem}.dn-foot .hp-btn{width:100%;justify-content:center}.dn-foot .hp-ghost{width:100%;border-color:var(--tile-line);background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--text);padding:.55rem}
+.toolbar{border-bottom:0;background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;padding-top:1.3rem;padding-bottom:.7rem}.toolbar h2{font-weight:600;font-size:1.35rem}
+.panel{background:var(--tile);border:0;border-radius:26px;padding:1.6rem;--panel2:color-mix(in srgb,var(--bg) 60%,var(--tile));--line:color-mix(in srgb,var(--text) 11%,transparent)}
+.panel.wide{background:none;padding:.2rem 0}
+.fld input:not([type=range]):not([type=color]):not([type=checkbox]),.fld textarea,.fld select,.hp-prefix{border-radius:12px}
+.seg button{border-radius:12px}.seg button.on{background:color-mix(in srgb,var(--accent) 28%,transparent);color:var(--text);border-color:var(--tile-line);font-weight:700}
+.item{border-radius:16px;border-color:transparent}
+.hp-ghost{border-radius:12px}
+@media(min-width:781px){.dash-nav{top:14px;height:calc(100vh - 28px);margin:14px 0 14px 14px;border:0;border-radius:28px}}
+@media(min-width:1281px){.dash-preview{top:14px;height:calc(100vh - 28px);margin:14px 14px 14px 0;border:0;border-radius:28px;background:var(--panel)}}
+.dash.is-ov{grid-template-columns:260px minmax(0,1fr)}.dash.is-ov .dash-preview{display:none}.dash.is-ov .pvbtn{display:none}
+/* overview */
+.ov{display:grid;gap:1.1rem}
+.ov-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem}
+.ov-tile{display:grid;gap:.35rem;text-align:left;padding:1.15rem 1.25rem;border:1px solid var(--tile-line);border-radius:22px;background:var(--tile);color:var(--text);font:inherit;cursor:pointer;transition:transform .15s,border-color .15s}
+.ov-tile:hover{transform:translateY(-2px);border-color:var(--accent)}
+.ov-tile>span{display:flex;justify-content:space-between;align-items:center;color:var(--muted)}.ov-tile>span b{font-weight:600;color:var(--text)}
+.ov-tile strong{font:700 1.8rem "Bricolage Grotesque",sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ov-tile small{color:var(--muted)}
+.ov-cols{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:1rem;align-items:start}.ov-side{display:grid;gap:1rem}
+.ov-card{display:grid;gap:.9rem;padding:1.35rem 1.4rem;border-radius:24px;background:var(--tile);--panel2:color-mix(in srgb,var(--bg) 55%,var(--tile))}
+.ov-card h3{margin:0;font:600 1.1rem "Bricolage Grotesque",sans-serif}.ov-card p{margin:-.5rem 0 0;color:var(--muted);font-size:.88rem}
+.ov-h{display:flex;justify-content:space-between;align-items:center}
+.ov-bar{display:flex;align-items:center;gap:.8rem}.ov-bar u{flex:1;height:12px;border-radius:99px;background:color-mix(in srgb,var(--text) 10%,transparent);overflow:hidden;display:block}.ov-bar s{display:block;height:100%;border-radius:99px;background:var(--gold);transition:width .4s}.ov-bar small{color:var(--muted);white-space:nowrap}
+.ov-done{display:flex;gap:.7rem;align-items:flex-start;padding:.9rem 1rem;border-radius:16px;background:var(--panel2)}.ov-done svg{color:#43b581;flex:none;margin-top:2px}.ov-done div{display:grid;gap:2px}.ov-done small{color:var(--muted)}
+.ov-todo{display:flex;flex-wrap:wrap;gap:.6rem}
+.ov-todo button,.ov-list button{display:flex;align-items:center;gap:.6rem;padding:.7rem 1rem;border:0;border-radius:14px;background:var(--panel2);color:var(--text);font:inherit;font-size:.9rem;cursor:pointer;text-align:left}
+.ov-todo button:hover,.ov-list button:hover{background:color-mix(in srgb,var(--accent) 16%,var(--panel2))}
+.ov-todo i{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;border:2px solid color-mix(in srgb,var(--text) 30%,transparent);flex:none;color:#fff}.ov-todo .ok i{background:#43b581;border-color:#43b581}
+.ov-list{display:grid;gap:.5rem}.ov-list button svg{color:var(--accent)}
+.ov-card .chart{background:var(--panel2);height:140px}
+@media(max-width:980px){.ov-cols{grid-template-columns:1fr}}
+@media(max-width:1280px){.dash.is-ov{grid-template-columns:240px minmax(0,1fr)}}
+@media(max-width:780px){.dash.is-ov{grid-template-columns:1fr}.dn-foot,.dn-search kbd,.dash-nav button.dn-gh{display:none}.dash-nav button:not(.dn-gh):not(.on){padding-left:.75rem}}
