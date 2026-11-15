@@ -50,7 +50,10 @@ export function Deco({ src, style }) {
   useEffect(() => { const i = ref.current; if (fit == null && i && i.complete && i.naturalWidth) done(i); /* already loaded before this ran */ }, []);  // eslint-disable-line
   if (stage > 1) return null;
   return <img ref={ref} className="pc-deco" src={url} alt="" aria-hidden="true" draggable="false" onLoad={(e) => done(e.currentTarget)} onError={() => setStage((n) => n + 1)}
-    style={{ ...style, "--dfit": fit ?? FIT_DEFAULT, opacity: fit == null ? 0 : 1 }} />;
+    style={{ ...style, "--dfit": fit ?? FIT_DEFAULT, opacity: fit == null ? 0 : 1,
+      // set right here (not only in profiles.css) so an older stylesheet, or a rule like ".pc-davw img{width:100%}", can't shrink it
+      position: "absolute", width: "calc(var(--av) * var(--dfit))", height: "calc(var(--av) * var(--dfit))", maxWidth: "none", borderRadius: 0, objectFit: "contain",
+      left: "calc(var(--av) / 2 - var(--av) * var(--dfit) / 2)", top: "calc(var(--av) / 2 - var(--av) * var(--dfit) / 2)", pointerEvents: "none", zIndex: 3 }} />;
 }
 
 // The person's Discord server tag (a few letters, plus the server's badge icon when it has one). `d` = the saved discord info.
