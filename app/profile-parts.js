@@ -27,8 +27,8 @@ function measureFit(img) {
     }
     let peak = 0; for (let r = 2; r < H; r++) peak = Math.max(peak, mean[r]);
     if (peak < 40) return FIT_DEFAULT;                       // nothing wraps around the picture (a corner sticker, say): leave it at the default
-    let inner = 2; while (inner < H && mean[inner] < peak / 2) inner++;
-    return Math.min(2, Math.max(1, (H / inner) * 1.03));     // 3% so the frame clears the picture
+    let inner = 2; while (inner < H && mean[inner] < peak * 0.5) inner++;
+    return Math.min(2, Math.max(FIT_DEFAULT, (H / inner) * 1.04));   // a little extra so the frame clears the picture, and never smaller than Discord's own size
   } catch { return FIT_DEFAULT; }
 }
 export function Deco({ src, style }) {

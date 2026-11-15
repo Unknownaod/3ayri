@@ -185,7 +185,7 @@ export default function ProfileCard({ p, views, preview, livePres, claim, earned
         {!c.avatarHide && (
           <div className={`pc-avwrap aa-${c.avatarAnim}`}>
             <div className="pc-ring">{avatar ? <img className="pc-avatar" src={avatar} alt="" /> : <span className="pc-avatar pc-initial">{name[0]}</span>}</div>
-            {decoOn && <Deco src={decoUrl(p.discord.deco)} style={{ "--dz": (c.decoSize ?? 100) / 100, "--dx": (c.decoX ?? 0) / 100, "--dy": (c.decoY ?? 0) / 100 }} />}
+            {decoOn && <Deco src={decoUrl(p.discord.deco)} />}
             {pres && <span className="pc-dot" style={{ background: DOT[pres.status] || DOT.offline }} title={LBL[pres.status]} />}
           </div>
         )}
