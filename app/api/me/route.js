@@ -4,7 +4,8 @@ import { redis, validUsername, dayKey } from "@/lib/db";
 import { isStaff } from "@/lib/staff";
 import { earnedHaven } from "@/lib/hbadges";
 import { sanitize, itemsOf, cfg } from "@/lib/schema";
-import { bad, safe, sameOrigin } from "@/lib/api";
+import { offloadImages } from "@/lib/storage";
+import { bad, safe, sameOrigin, logError } from "@/lib/api";
 import { limit, tooMany } from "@/lib/ratelimit";
 
 const COOLDOWN = 7 * 864e5; // how long to wait between username changes
@@ -45,6 +46,9 @@ export const PUT = safe("me.put", async (req) => {
   const profile = await redis.get(`profile:${id}`);
   if (!profile) return bad("unauthenticated", 401);
 
+  let clean = sanitize(b);
+  try { clean = await offloadImages(clean); } catch (e) { await logError("me.images", e); return bad("Couldn't save your pictures right now (image storage is offline). Try again in a minute, or save without the new picture.", 503); }
+
   const username = String(b.username || "").slice(0, 40).toLowerCase();
   if (!validUsername(username)) return bad("Usernames are 3–20 characters: letters, numbers, underscores.");
   const changed = username !== profile.username;
@@ -57,7 +61,7 @@ export const PUT = safe("me.put", async (req) => {
     if (profile.username) await redis.del(`username:${profile.username}`);
   }
   const { views, clicks, days, music, extraBadges, staff, earned, ...rest } = profile;
-  const next = { ...rest, username, ...sanitize(b), createdAt: profile.createdAt ?? Date.now(), updatedAt: Date.now(), ...(changed && profile.username ? { usernameChangedAt: Date.now() } : {}) };
+  const next = { ...rest, username, ...clean, createdAt: profile.createdAt ?? Date.now(), updatedAt: Date.now(), ...(changed && profile.username ? { usernameChangedAt: Date.now() } : {}) };
   await redis.set(`profile:${id}`, next);
   return NextResponse.json({ ...shape(next), ...(await extras(id, next)), staff: await isStaff(id), earned: await earnedHaven(id) });
 });
