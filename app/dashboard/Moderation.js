@@ -128,7 +128,7 @@ export function Moderation({ flash }) {
           )}
 
           <footer className="mx-acts">
-            {u.staff ? <p className="mx-note">Staff accounts can't be hidden or restricted here. Remove their staff role in Discord first.</p> : (
+            {u.staff && !u.founder ? <p className="mx-note">Only founders can hide, restrict or rename staff accounts. Ask a founder, or remove their staff role in Discord first.</p> : (
               <>
                 <input value={why} onChange={(e) => setWhy(e.target.value)} maxLength={120} placeholder="Reason (required for username changes, shown to the owner for hides)" aria-label="Reason" />
                 <a className="hp-ghost sm" href={`/${u.username}`} target="_blank" rel="noreferrer"><Ico n="external" size={13} /> Open page</a>
