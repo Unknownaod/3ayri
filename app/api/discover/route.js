@@ -21,7 +21,7 @@ const pub = (p) => {
   if (typeof o.thumb === "string" && o.thumb.startsWith("data:") && o.thumb.length > BIG) o.thumb = "";
   o.socials = (p.socials || []).map(({ id, type, label }) => ({ id, type, label, url: "#" }));
   o.links = (p.links || []).filter((l) => !l.hidden && l.type !== "embed").map(({ id, type, label, icon, desc, badge, color, featured }) => ({ id, type, label, icon, desc, badge, color, featured, url: "#" }));
-  o.discord = p.discord ? { username: p.discord.username, displayName: p.discord.displayName, avatar: p.discord.avatar, flags: p.discord.flags, nitro: p.discord.nitro } : undefined;
+  o.discord = p.discord ? { username: p.discord.username, displayName: p.discord.displayName, avatar: p.discord.avatar, flags: p.discord.flags, nitro: p.discord.nitro, deco: p.discord.deco, tag: p.discord.tag } : undefined;
   return o;
 };
 

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { PLATFORMS, FONTS, THEMES, cfg, itemsOf, sectionsOf, playlist, embedSrc, ink, fontsHref, iconKind } from "@/lib/schema";
 import { Ico } from "@/lib/icons";
 import { badgesOf } from "@/lib/badges";
+import { decoUrl, tagBadgeUrl } from "@/lib/cosmetics";
 import { Particles, CursorFX } from "./profile-fx";
 import { Icon, Presence, DBadges, StaffBadge, BoosterBadge, Player, useAudio, DOT, LBL, actsOf } from "./profile-parts";
 
@@ -179,11 +180,12 @@ export default function ProfileCard({ p, views, preview, livePres, claim, earned
         {!c.avatarHide && (
           <div className={`pc-avwrap aa-${c.avatarAnim}`}>
             <div className="pc-ring">{avatar ? <img className="pc-avatar" src={avatar} alt="" /> : <span className="pc-avatar pc-initial">{name[0]}</span>}</div>
+            {c.showDeco && p.discord?.deco && <img className="pc-deco" src={decoUrl(p.discord.deco)} alt="" aria-hidden="true" draggable="false" />}
             {pres && <span className="pc-dot" style={{ background: DOT[pres.status] || DOT.offline }} title={LBL[pres.status]} />}
           </div>
         )}
         <div className="pc-idtxt">
-          <div className="pc-nm"><h1 className={`pc-name nm-${c.nameEffect} ${c.nameUpper ? "up" : ""}`} data-text={name}>{name}</h1>{earned.includes("staff") && !hide.includes("staff") && <StaffBadge />}{earned.includes("booster") && !hide.includes("booster") && <BoosterBadge />}{dName && <DBadges d={p.discord} hide={hide} />}</div>
+          <div className="pc-nm"><h1 className={`pc-name nm-${c.nameEffect} ${c.nameUpper ? "up" : ""}`} data-text={name}>{name}</h1>{c.showTag && p.discord?.tag?.t && <span className="pc-gtag" title="Discord server tag">{p.discord.tag.b && <img src={tagBadgeUrl(p.discord.tag.g, p.discord.tag.b)} alt="" aria-hidden="true" draggable="false" />}{p.discord.tag.t}</span>}{earned.includes("staff") && !hide.includes("staff") && <StaffBadge />}{earned.includes("booster") && !hide.includes("booster") && <BoosterBadge />}{dName && <DBadges d={p.discord} hide={hide} />}</div>
           {c.tagline && <p className="pc-tag">{c.tagline}</p>}
         </div>
       </div>

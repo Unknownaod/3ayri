@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionId } from "@/lib/session";
 import { redis } from "@/lib/db";
 import { guildMember } from "@/lib/discord";
+import { cosmeticsOf } from "@/lib/cosmetics";
 import { cfg } from "@/lib/schema";
 import { sameOrigin } from "@/lib/api";
 import { limit, tooMany } from "@/lib/ratelimit";
@@ -54,7 +55,7 @@ export async function POST(req) {
 
   const u = m.member.user, prof = await redis.get(`profile:${id}`);
   const discord = { ...prof?.discord, username: u.username, displayName: u.global_name || u.username, flags: u.public_flags ?? prof?.discord?.flags ?? 0, nitro: !!(prof?.discord?.nitro || u.banner || (u.avatar || "").startsWith("a_")),
-    avatar: u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=256` : prof?.discord?.avatar };
+    avatar: u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=256` : prof?.discord?.avatar, ...cosmeticsOf(u) };
   if (prof) await redis.set(`profile:${id}`, { ...prof, discord });
   return NextResponse.json({
     ok: true, botOnline, fresh, discord, nick: m.member.nick || u.global_name || u.username,

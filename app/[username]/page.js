@@ -34,15 +34,16 @@ export async function generateViewport({ params }) {
   return f?.p && !f.p.hidden ? { themeColor: cfg(f.p).accent } : {};
 }
 
-// If a page has no badge flags stored (older pages, or flags saved as 0), ask Discord once a day and save what it says.
+// If a page has no badge flags stored (older pages, or flags saved as 0), or has never been checked for a decoration / server tag,
+// ask Discord once a day and save what it says.
 async function withBadges({ id, p }) {
-  if (p.discord?.flags) return p;
+  if (p.discord?.flags && "deco" in p.discord) return p;
   const key = `flagsTry:${id}:${dayKey()}`;
   if (await redis.get(key)) return p;
   await redis.set(key, 1);
   try {
     const u = await discordUser(id);
-    if (!u || (!u.flags && !u.nitro)) return p;
+    if (!u) return p;
     const np = { ...p, discord: { ...p.discord, ...u, nitro: u.nitro || p.discord?.nitro } };
     await redis.set(`profile:${id}`, np);
     return np;
