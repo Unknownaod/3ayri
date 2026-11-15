@@ -116,7 +116,7 @@ export default function ProfileCard({ p, views, preview, livePres, claim, earned
   const linkFilled = c.linkStyle === "filled" || c.linkStyle === "gradient";
   // Discord decorations are drawn for a plain round picture, like on Discord: while one is showing the avatar is round and has no
   // border ring, so the decoration is the frame and fits right against the picture.
-  const decoOn = !!(c.showDeco && p.discord?.deco && !c.avatarHide);
+  const decoOn = false;   // the decoration now shows around the small picture in the Discord status card (see Presence), not the big one
   const ringW = decoOn || c.avatarBorder === "none" ? 0 : c.avatarBorderWidth;
   const lrad = c.linkShape === "pill" ? 999 : c.linkShape === "square" ? 4 : Math.round(c.radius * 0.6);
 

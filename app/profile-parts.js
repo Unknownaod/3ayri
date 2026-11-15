@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { PLATFORMS, iconKind, ytId } from "@/lib/schema";
 import { badgesOf, badgeUrl } from "@/lib/badges";
 import { Ico } from "@/lib/icons";
-import { tagBadgeUrl } from "@/lib/cosmetics";
+import { tagBadgeUrl, decoUrl } from "@/lib/cosmetics";
 
 // Discord avatar decoration. Every decoration draws its frame at a different distance from the picture, so this measures the image once
 // (how far from the centre its frame starts) and sizes it so the frame's inner edge sits right on the edge of the picture, making the
@@ -177,7 +177,7 @@ export function Presence({ pres, c, p }) {
     <div className="pc-pres card">
       {(c.presenceAvatar || c.presenceName) && (
         <div className="pc-did">
-          {c.presenceAvatar && av && <span className="pc-davw"><img src={av} alt="" /><i style={{ background: DOT[pres.status] || DOT.offline }} /></span>}
+          {c.presenceAvatar && av && <span className="pc-davw" style={{ "--av": "58px" }}><img src={av} alt="" />{c.showDeco && d.deco && <Deco src={decoUrl(d.deco)} />}<i style={{ background: DOT[pres.status] || DOT.offline }} /></span>}
           {c.presenceName && <div className="pc-dtx"><span className="pc-dline"><b>{dn}</b>{dn && <TagPill d={d} c={c} />}{inCard && <DBadges d={d} hide={p.hideBadges} />}</span>{d.username && <small>@{d.username}</small>}</div>}
         </div>
       )}
