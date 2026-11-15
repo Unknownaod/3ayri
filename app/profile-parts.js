@@ -5,6 +5,39 @@ import { badgesOf, badgeUrl } from "@/lib/badges";
 import { Ico } from "@/lib/icons";
 import { tagBadgeUrl } from "@/lib/cosmetics";
 
+// Discord avatar decoration. Every decoration draws its frame at a different distance from the picture, so this measures the image once
+// (how far from the centre its frame starts) and sizes it so the frame's inner edge sits right on the edge of the picture, making the
+// decoration the border instead of sitting inside the picture. If the image can't be measured it falls back to Discord's usual 1.2x.
+const FIT_DEFAULT = 1.2, FIT = new Map();   // image url -> box size as a multiple of the avatar
+function measureFit(img) {
+  try {
+    const N = 128, cv = document.createElement("canvas"); cv.width = cv.height = N;
+    const cx = cv.getContext("2d", { willReadFrequently: true }); cx.drawImage(img, 0, 0, N, N);
+    const px = cx.getImageData(0, 0, N, N).data, hits = [];
+    for (let a = 0; a < 360; a += 5) {                       // walk outwards from the centre until something solid is hit
+      const dx = Math.cos((a * Math.PI) / 180), dy = Math.sin((a * Math.PI) / 180);
+      for (let r = 2; r < N / 2; r += 0.5) {
+        const x = Math.round(N / 2 + dx * r - 0.5), y = Math.round(N / 2 + dy * r - 0.5);
+        if (px[(y * N + x) * 4 + 3] > 140) { hits.push(r); break; }
+      }
+    }
+    if (hits.length < 36) return FIT_DEFAULT;                // doesn't wrap around the picture (a corner sticker, say): leave it at the default
+    hits.sort((p, q) => p - q);
+    const inner = hits[hits.length >> 1];                    // median = where the frame starts, ignoring bits that poke inwards
+    return Math.min(2, Math.max(1, (N / 2 / inner) * 1.02));  // 2% so the frame clears the picture
+  } catch { return FIT_DEFAULT; }
+}
+export function Deco({ src, style }) {
+  const [fit, setFit] = useState(() => FIT.get(src) ?? null);
+  const [cors, setCors] = useState(true);
+  const ref = useRef(null);
+  const done = (img) => { const f = !cors ? FIT_DEFAULT : (FIT.get(src) ?? measureFit(img)); FIT.set(src, f); setFit(f); };
+  useEffect(() => { const i = ref.current; if (fit == null && i && i.complete && i.naturalWidth) done(i); /* already loaded before this ran */ }, []);  // eslint-disable-line
+  return <img ref={ref} className="pc-deco" src={src} alt="" aria-hidden="true" draggable="false" crossOrigin={cors ? "anonymous" : undefined}
+    onLoad={(e) => done(e.currentTarget)} onError={() => (cors ? setCors(false) : setFit(FIT_DEFAULT))}
+    style={{ ...style, "--dfit": fit ?? FIT_DEFAULT, opacity: fit == null ? 0 : 1 }} />;
+}
+
 // The person's Discord server tag (a few letters, plus the server's badge icon when it has one). `d` = the saved discord info.
 export function TagPill({ d, c }) {
   const t = d?.tag;

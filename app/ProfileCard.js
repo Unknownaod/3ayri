@@ -5,7 +5,7 @@ import { Ico } from "@/lib/icons";
 import { badgesOf } from "@/lib/badges";
 import { decoUrl } from "@/lib/cosmetics";
 import { Particles, CursorFX } from "./profile-fx";
-import { Icon, Presence, DBadges, TagPill, StaffBadge, BoosterBadge, VerifiedBadge, Player, useAudio, DOT, LBL, actsOf } from "./profile-parts";
+import { Icon, Presence, DBadges, Deco, TagPill, StaffBadge, BoosterBadge, VerifiedBadge, Player, useAudio, DOT, LBL, actsOf } from "./profile-parts";
 
 const hexOf = (x) => String(x || "").replace("#", "").slice(0, 6);
 const cssUrl = (u) => `url("${String(u).replace(/["\\\n\r]/g, "")}")`;
@@ -185,7 +185,7 @@ export default function ProfileCard({ p, views, preview, livePres, claim, earned
         {!c.avatarHide && (
           <div className={`pc-avwrap aa-${c.avatarAnim}`}>
             <div className="pc-ring">{avatar ? <img className="pc-avatar" src={avatar} alt="" /> : <span className="pc-avatar pc-initial">{name[0]}</span>}</div>
-            {decoOn && <img className="pc-deco" src={decoUrl(p.discord.deco)} alt="" aria-hidden="true" draggable="false" style={{ "--dz": (c.decoSize ?? 100) / 100, "--dx": (c.decoX ?? 0) / 100, "--dy": (c.decoY ?? 0) / 100 }} />}
+            {decoOn && <Deco src={decoUrl(p.discord.deco)} style={{ "--dz": (c.decoSize ?? 100) / 100, "--dx": (c.decoX ?? 0) / 100, "--dy": (c.decoY ?? 0) / 100 }} />}
             {pres && <span className="pc-dot" style={{ background: DOT[pres.status] || DOT.offline }} title={LBL[pres.status]} />}
           </div>
         )}
