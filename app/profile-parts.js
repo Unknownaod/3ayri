@@ -11,7 +11,7 @@ import { tagBadgeUrl } from "@/lib/cosmetics";
 // How it measures: for each distance from the centre it averages how solid the image is all the way round. A frame shows up as a band
 // where that average is high, even if the frame is thin or faint; stray bits (a bubble, scratches, a sword) only affect a few directions
 // so they barely move it. The frame starts at the first distance reaching half of the strongest band.
-const FIT_DEFAULT = 1.2, FIT = new Map();   // image url -> box size as a multiple of the avatar
+const FIT_DEFAULT = 1.2, FIT_BLIND = 1.4, FIT = new Map();   // FIT_BLIND = when it can't be measured: errs on the big side so the frame stays outside the picture   // image url -> box size as a multiple of the avatar
 function measureFit(img) {
   try {
     const N = 256, H = N / 2, cv = document.createElement("canvas"); cv.width = cv.height = N;
@@ -26,19 +26,27 @@ function measureFit(img) {
       mean[r] = sum / A;
     }
     let peak = 0; for (let r = 2; r < H; r++) peak = Math.max(peak, mean[r]);
-    if (peak < 40) return FIT_DEFAULT;                       // nothing wraps around the picture (a corner sticker, say): leave it at the default
+    if (peak < 40) return null;                              // this frame has nothing wrapping around the picture (a faint animation frame, a corner sticker)
     let inner = 2; while (inner < H && mean[inner] < peak * 0.5) inner++;
     return Math.min(2, Math.max(FIT_DEFAULT, (H / inner) * 1.04));   // a little extra so the frame clears the picture, and never smaller than Discord's own size
-  } catch { return FIT_DEFAULT; }
+  } catch { return null; }
+}
+// Animated decorations (ids starting a_) change from frame to frame, and a canvas only sees the frame showing right now, so look at a
+// handful of frames over about a second and use the middle value. Frames that show no frame at all are skipped.
+async function measureMany(img) {
+  const got = [], N = 10;
+  for (let i = 0; i < N; i++) { const f = measureFit(img); if (f != null) got.push(f); if (i < N - 1) await new Promise((r) => setTimeout(r, 110)); if (!img.isConnected) break; }
+  if (!got.length) return FIT_BLIND;
+  got.sort((a, b) => a - b); return got[Math.floor(got.length / 2)];
 }
 export function Deco({ src, style }) {
   const [fit, setFit] = useState(() => FIT.get(src) ?? null);
   const [cors, setCors] = useState(true);
   const ref = useRef(null);
-  const done = (img) => { const f = !cors ? FIT_DEFAULT : (FIT.get(src) ?? measureFit(img)); FIT.set(src, f); setFit(f); };
+  const done = async (img) => { const f = !cors ? FIT_BLIND : (FIT.get(src) ?? await measureMany(img)); FIT.set(src, f); setFit(f); };
   useEffect(() => { const i = ref.current; if (fit == null && i && i.complete && i.naturalWidth) done(i); /* already loaded before this ran */ }, []);  // eslint-disable-line
   return <img ref={ref} className="pc-deco" src={src} alt="" aria-hidden="true" draggable="false" crossOrigin={cors ? "anonymous" : undefined}
-    onLoad={(e) => done(e.currentTarget)} onError={() => (cors ? setCors(false) : setFit(FIT_DEFAULT))}
+    onLoad={(e) => done(e.currentTarget)} onError={() => (cors ? setCors(false) : setFit(FIT_BLIND))}
     style={{ ...style, "--dfit": fit ?? FIT_DEFAULT, opacity: fit == null ? 0 : 1 }} />;
 }
 
