@@ -114,7 +114,10 @@ export default function ProfileCard({ p, views, preview, livePres, claim, earned
   const socHex = c.iconColor === "brand" ? undefined : hexOf(socColor);
   const lc = c.linkColor || accent, lon = c.linkTextColor || ink(lc);
   const linkFilled = c.linkStyle === "filled" || c.linkStyle === "gradient";
-  const ringW = c.avatarBorder === "none" ? 0 : c.avatarBorderWidth;
+  // Discord decorations are drawn for a plain round picture, like on Discord: while one is showing the avatar is round and has no
+  // border ring, so the decoration is the frame and fits right against the picture.
+  const decoOn = !!(c.showDeco && p.discord?.deco && !c.avatarHide);
+  const ringW = decoOn || c.avatarBorder === "none" ? 0 : c.avatarBorderWidth;
   const lrad = c.linkShape === "pill" ? 999 : c.linkShape === "square" ? 4 : Math.round(c.radius * 0.6);
 
   const bgFilter = `blur(${c.bgBlur}px) brightness(${c.bgBrightness}%) saturate(${c.bgSaturate}%)`;
@@ -172,8 +175,6 @@ export default function ProfileCard({ p, views, preview, livePres, claim, earned
   const firstShown = sections.find((s) => s.on && has[s.k])?.k;
   // Badges don't depend on live status: if the status card isn't on the page, "card" falls back to showing them by the name.
   const cardShown = !!pres && c.presenceStyle !== "dot";
-  // Discord decorations are drawn for round pictures, so the avatar is shown round whenever a decoration is on (a hexagon would poke out of the ring).
-  const decoOn = !!(c.showDeco && p.discord?.deco && !c.avatarHide);
   // The server tag sits next to the Discord name in the status card; if that card isn't showing the name, it goes by the profile name instead.
   const tagInCard = cardShown && !!c.presenceName && !!(p.discord?.displayName || p.displayName) && !(c.presenceHideOffline && pres.status === "offline");
   const dName = badgesOf(p.discord, p.hideBadges).length > 0 && (c.badgePlacement === "name" || c.badgePlacement === "both" || (c.badgePlacement === "card" && !cardShown));
@@ -253,7 +254,7 @@ export default function ProfileCard({ p, views, preview, livePres, claim, earned
 
   const ds = {
     "data-theme": c.theme, "data-cs": c.cardStyle, "data-shape": c.cardShape, "data-bd": c.border, "data-bs": c.borderStyle, "data-lay": c.layout, "data-ls": c.linkStyle, "data-ll": c.linkLayout, "data-la": c.linkAlign,
-    "data-lh": c.linkHover, "data-ih": c.socialHover, "data-ifill": c.iconFill, "data-is": c.iconStyle, "data-av": decoOn ? "circle" : c.avatarShape, "data-ab": c.avatarBorder, "data-pa": c.entryAnim,
+    "data-lh": c.linkHover, "data-ih": c.socialHover, "data-ifill": c.iconFill, "data-is": c.iconStyle, "data-av": decoOn ? "circle" : c.avatarShape, "data-ab": decoOn ? "none" : c.avatarBorder, "data-pa": c.entryAnim,
     "data-es": c.entryStyle, "data-ch": c.cardHover, "data-float": c.cardFloat ? "1" : "0", "data-bf": c.bannerFade ? "1" : "0", "data-bga": c.bgGradient && c.bgAnimate ? "1" : "0",
     "data-bgz": c.bgZoom ? "1" : "0", "data-ready": entered ? "1" : "0", "data-cx": c.cardX, "data-cy": c.vpos,
   };
