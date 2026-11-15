@@ -88,7 +88,8 @@ export const POST = safe("mod.post", async (req) => {
     const f = await lookup(b.username || "");
     if (!f) return bad("No page with that username.", 404);
     if (f.id === me) return bad("You can't do that to your own page.");
-    if (action !== "unhide" && action !== "unban" && (await isStaff(f.id))) return bad("That person is staff. Remove their staff role first.");
+    if (action !== "unhide" && action !== "unban" && (await isFounder(f.id))) return bad("Founders can't be hidden or restricted here.");
+    if (action !== "unhide" && action !== "unban" && (await isStaff(f.id)) && !(await isFounder(me))) return bad("Only a founder can do this to a staff member.");
     if (action === "hide") await redis.set(`profile:${f.id}`, { ...f.p, hidden: true, hiddenReason: str(b.reason, 120) });
     if (action === "unhide") await redis.set(`profile:${f.id}`, { ...f.p, hidden: false, hiddenReason: "" });
     if (action === "ban") { await redis.set(`ban:${f.id}`, { at: Date.now(), by: me, reason: str(b.reason, 120) }); await redis.set(`profile:${f.id}`, { ...f.p, hidden: true, hiddenReason: str(b.reason, 120) || "Account restricted" }); }
@@ -123,7 +124,7 @@ export const POST = safe("mod.post", async (req) => {
     if (!f || !f.p.username) return bad("No page with that username.", 404);
     if (f.id === me) return bad("Change your own username from the editor.");
     if (await isFounder(f.id)) return bad("Founders can't be renamed here.");
-    if (action === "reset-username" && (await isStaff(f.id))) return bad("That person is staff. Remove their staff role first.");
+    if (action === "reset-username" && (await isStaff(f.id)) && !(await isFounder(me))) return bad("Only a founder can reset a staff member's username.");
     const reset = action === "reset-username", old = f.p.username;
     let to = "";
     if (reset) {
