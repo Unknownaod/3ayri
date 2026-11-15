@@ -57,11 +57,13 @@ export const PUT = safe("me.put", async (req) => {
     return bad(`You can change your username again on ${when}.`, 429);
   }
   if (changed) {
+    const hold = await redis.get(`uhold:${username}`);   // names freed by a staff rename are held for 30 days
+    if (hold && hold.id !== id) return bad("That username is reserved for now. Try another.", 409);
     if (!(await redis.set(`username:${username}`, id, { nx: true }))) return bad("That username is taken.", 409);
     if (profile.username) await redis.del(`username:${profile.username}`);
   }
-  const { views, clicks, days, music, extraBadges, staff, earned, ...rest } = profile;
-  const next = { ...rest, username, ...clean, createdAt: profile.createdAt ?? Date.now(), updatedAt: Date.now(), ...(changed && profile.username ? { usernameChangedAt: Date.now() } : {}) };
+  const { views, clicks, days, music, extraBadges, staff, earned, usernameReset, ...rest } = profile;
+  const next = { ...rest, ...(!changed && usernameReset ? { usernameReset } : {}), username, ...clean, createdAt: profile.createdAt ?? Date.now(), updatedAt: Date.now(), ...(changed && profile.username ? { usernameChangedAt: Date.now() } : {}) };
   await redis.set(`profile:${id}`, next);
   return NextResponse.json({ ...shape(next), ...(await extras(id, next)), staff: await isStaff(id), earned: await earnedHaven(id) });
 });

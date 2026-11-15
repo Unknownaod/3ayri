@@ -44,6 +44,7 @@ export function Moderation({ flash }) {
       else { flash(ok); await load(); if (then) await then(); }
     } finally { setBusy(false); }
   }
+  const [toName, setToName] = useState("");
   const sure = (msg) => typeof window === "undefined" || window.confirm(msg);
 
   if (err) return <p className="empty">{err}</p>;
@@ -129,7 +130,7 @@ export function Moderation({ flash }) {
           <footer className="mx-acts">
             {u.staff ? <p className="mx-note">Staff accounts can't be hidden or restricted here. Remove their staff role in Discord first.</p> : (
               <>
-                {!u.hidden && !u.banned && <input value={why} onChange={(e) => setWhy(e.target.value)} maxLength={120} placeholder="Reason (optional, shown to the owner)" aria-label="Reason" />}
+                <input value={why} onChange={(e) => setWhy(e.target.value)} maxLength={120} placeholder="Reason (required for username changes, shown to the owner for hides)" aria-label="Reason" />
                 <a className="hp-ghost sm" href={`/${u.username}`} target="_blank" rel="noreferrer"><Ico n="external" size={13} /> Open page</a>
                 {u.banned
                   ? <button type="button" className="hp-btn sm" disabled={busy} onClick={() => act({ action: "unban", username: u.username }, "Account unrestricted", () => lookup(u.username))}>Lift restriction</button>
@@ -139,6 +140,15 @@ export function Moderation({ flash }) {
                       : <button type="button" className="hp-ghost sm" disabled={busy} onClick={() => act({ action: "hide", username: u.username, reason: why }, "Page hidden", () => lookup(u.username))}>Hide page</button>}
                     <button type="button" className="hp-ghost sm bad" disabled={busy} onClick={() => sure(`Restrict @${u.username}? Their page is hidden and they can't save changes.`) && act({ action: "ban", username: u.username, reason: why }, "Account restricted", () => lookup(u.username))}>Restrict</button>
                   </>}
+                <div className="mx-ren">
+                  <button type="button" className="hp-ghost sm" disabled={busy || !why.trim()} title={why.trim() ? "" : "Add a reason first"} onClick={() => sure(`Reset @${u.username} to a generated username? Their old name is held for 30 days and they can pick a new one right away.`) && act({ action: "reset-username", username: u.username, reason: why }, "Username reset", () => lookup(u.username))}>Reset username</button>
+                  {u.founder && (
+                    <span className="mx-find">
+                      <input value={toName} onChange={(e) => setToName(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))} maxLength={20} placeholder="New username (founders)" aria-label="New username" />
+                      <button type="button" className="hp-btn sm" disabled={busy || !why.trim() || toName.length < 3} onClick={() => sure(`Change @${u.username} to @${toName}? Old links stop working and @${u.username} is held for 30 days.`) && act({ action: "set-username", username: u.username, to: toName, reason: why }, "Username changed", () => { const n = toName; setToName(""); return lookup(n); })}>Set username</button>
+                    </span>
+                  )}
+                </div>
               </>
             )}
           </footer>

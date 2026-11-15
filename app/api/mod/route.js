@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSessionId } from "@/lib/session";
-import { redis } from "@/lib/db";
-import { isStaff } from "@/lib/staff";
+import { redis, validUsername } from "@/lib/db";
+import { isStaff, isFounder } from "@/lib/staff";
+import { limit, tooMany } from "@/lib/ratelimit";
 import { cfg } from "@/lib/schema";
 import { bad, safe, sameOrigin } from "@/lib/api";
 
@@ -52,7 +53,7 @@ export const GET = safe("mod.get", async (req) => {
   const me = await staffId();
   if (!me) return bad("Staff only.", 403);
   const u = new URL(req.url).searchParams.get("user");
-  if (u) return NextResponse.json(await dossier(u));
+  if (u) return NextResponse.json({ ...(await dossier(u)), founder: await isFounder(me) });
   const reports = (await redis.list("report:", 2000)).map(([, r]) => r).filter((r) => r?.status === "open");
   const groups = new Map();
   for (const r of reports) {
@@ -108,6 +109,42 @@ export const POST = safe("mod.post", async (req) => {
     if (!["profile", "template"].includes(type) || !target) return bad("Bad report key.");
     await closeReports(type, target, "dismissed"); await note(`${type} ${target}`);
     return NextResponse.json({ ok: true });
+  }
+
+  // Reset (any staff): the account gets a generated name like user_48213 and the owner picks a new one. Staff never choose the name.
+  // Set (founders only): a specific username. Both need a reason, are logged, and hold the old name for 30 days.
+  if (action === "reset-username" || action === "set-username") {
+    const rl = await limit(`modren:${me}`, 20, 3600);
+    if (!rl.ok) return bad(tooMany(rl), 429);
+    const reason = str(b.reason, 120);
+    if (!reason) return bad("Add a reason first. It's saved in the moderation log.");
+    if (action === "set-username" && !(await isFounder(me))) return bad("Only founders can choose a username.", 403);
+    const f = await lookup(b.username || "");
+    if (!f || !f.p.username) return bad("No page with that username.", 404);
+    if (f.id === me) return bad("Change your own username from the editor.");
+    if (await isFounder(f.id)) return bad("Founders can't be renamed here.");
+    if (action === "reset-username" && (await isStaff(f.id))) return bad("That person is staff. Remove their staff role first.");
+    const reset = action === "reset-username", old = f.p.username;
+    let to = "";
+    if (reset) {
+      for (let i = 0; i < 6 && !to; i++) { const t = `user_${Math.floor(10000 + Math.random() * 90000)}`; if (await redis.set(`username:${t}`, f.id, { nx: true })) to = t; }
+      if (!to) return bad("Couldn't find a free generated name. Try again.");
+    } else {
+      to = str(b.to, 40).toLowerCase();
+      if (!validUsername(to)) return bad("Usernames are 3–20 characters: letters, numbers, underscores.");
+      if (to === old) return bad("That's already their username.");
+      const hold = await redis.get(`uhold:${to}`);
+      if (hold && hold.id !== f.id) return bad("That name is being held for 30 days after a staff rename. Pick another.", 409);
+      if (!(await redis.set(`username:${to}`, f.id, { nx: true }))) return bad("That username is taken.", 409);
+    }
+    try {
+      await redis.set(`profile:${f.id}`, { ...f.p, username: to, usernameChangedAt: reset ? 0 : f.p.usernameChangedAt, usernameReset: { at: Date.now(), reset, from: old } });
+    } catch (e) { await redis.del(`username:${to}`); throw e; }
+    await redis.del(`username:${old}`);
+    await redis.setex(`uhold:${old}`, { id: reset ? "-" : f.id, at: Date.now() }, 30 * 86400);   // a reset name can't be reclaimed, even by its old owner
+    await closeReports("profile", old, "actioned");
+    await note(`@${old} → @${to} · ${reason}`);
+    return NextResponse.json({ ok: true, username: to });
   }
   return bad("Unknown action.");
 });

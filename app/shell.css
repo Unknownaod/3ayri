@@ -395,3 +395,5 @@ html:has(.dash)::-webkit-scrollbar-thumb{background:var(--dash-sb,#ffffff30);bor
 .bp-i:not(.on):not(.lock){opacity:.6}
 .bp-i.lock{cursor:not-allowed;opacity:.5}.bp-i.lock .bp-ic img{filter:grayscale(1)}
 .bp-i:focus-visible{outline:2px solid var(--ac,#e0a243);outline-offset:2px}
+.mx-ren{display:flex;flex-wrap:wrap;gap:8px;align-items:center;width:100%;padding-top:10px;margin-top:4px;border-top:1px solid var(--line,#ffffff14)}
+.mx-ren .mx-find{display:flex;gap:8px;flex:1 1 260px}.mx-ren .mx-find input{flex:1;min-width:0}
