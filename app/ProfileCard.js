@@ -3,9 +3,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { PLATFORMS, FONTS, THEMES, cfg, itemsOf, sectionsOf, playlist, embedSrc, ink, fontsHref, iconKind } from "@/lib/schema";
 import { Ico } from "@/lib/icons";
 import { badgesOf } from "@/lib/badges";
-import { decoUrl, tagBadgeUrl } from "@/lib/cosmetics";
+import { decoUrl } from "@/lib/cosmetics";
 import { Particles, CursorFX } from "./profile-fx";
-import { Icon, Presence, DBadges, StaffBadge, BoosterBadge, Player, useAudio, DOT, LBL, actsOf } from "./profile-parts";
+import { Icon, Presence, DBadges, TagPill, StaffBadge, BoosterBadge, Player, useAudio, DOT, LBL, actsOf } from "./profile-parts";
 
 const hexOf = (x) => String(x || "").replace("#", "").slice(0, 6);
 const cssUrl = (u) => `url("${String(u).replace(/["\\\n\r]/g, "")}")`;
@@ -172,6 +172,8 @@ export default function ProfileCard({ p, views, preview, livePres, claim, earned
   const firstShown = sections.find((s) => s.on && has[s.k])?.k;
   // Badges don't depend on live status: if the status card isn't on the page, "card" falls back to showing them by the name.
   const cardShown = !!pres && c.presenceStyle !== "dot";
+  // The server tag sits next to the Discord name in the status card; if that card isn't showing the name, it goes by the profile name instead.
+  const tagInCard = cardShown && !!c.presenceName && !!(p.discord?.displayName || p.displayName) && !(c.presenceHideOffline && pres.status === "offline");
   const dName = badgesOf(p.discord, p.hideBadges).length > 0 && (c.badgePlacement === "name" || c.badgePlacement === "both" || (c.badgePlacement === "card" && !cardShown));
 
   const body = {
@@ -185,7 +187,7 @@ export default function ProfileCard({ p, views, preview, livePres, claim, earned
           </div>
         )}
         <div className="pc-idtxt">
-          <div className="pc-nm"><h1 className={`pc-name nm-${c.nameEffect} ${c.nameUpper ? "up" : ""}`} data-text={name}>{name}</h1>{c.showTag && p.discord?.tag?.t && <span className="pc-gtag" title="Discord server tag">{p.discord.tag.b && <img src={tagBadgeUrl(p.discord.tag.g, p.discord.tag.b)} alt="" aria-hidden="true" draggable="false" />}{p.discord.tag.t}</span>}{earned.includes("staff") && !hide.includes("staff") && <StaffBadge />}{earned.includes("booster") && !hide.includes("booster") && <BoosterBadge />}{dName && <DBadges d={p.discord} hide={hide} />}</div>
+          <div className="pc-nm"><h1 className={`pc-name nm-${c.nameEffect} ${c.nameUpper ? "up" : ""}`} data-text={name}>{name}</h1>{!tagInCard && <TagPill d={p.discord} c={c} />}{earned.includes("staff") && !hide.includes("staff") && <StaffBadge />}{earned.includes("booster") && !hide.includes("booster") && <BoosterBadge />}{dName && <DBadges d={p.discord} hide={hide} />}</div>
           {c.tagline && <p className="pc-tag">{c.tagline}</p>}
         </div>
       </div>

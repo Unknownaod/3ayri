@@ -3,6 +3,14 @@ import { useEffect, useRef, useState } from "react";
 import { PLATFORMS, iconKind, ytId } from "@/lib/schema";
 import { badgesOf, badgeUrl } from "@/lib/badges";
 import { Ico } from "@/lib/icons";
+import { tagBadgeUrl } from "@/lib/cosmetics";
+
+// The person's Discord server tag (a few letters, plus the server's badge icon when it has one). `d` = the saved discord info.
+export function TagPill({ d, c }) {
+  const t = d?.tag;
+  if (!c?.showTag || !t?.t) return null;
+  return <span className="pc-gtag" title="Discord server tag">{t.b && <img src={tagBadgeUrl(t.g, t.b)} alt="" aria-hidden="true" draggable="false" />}{t.t}</span>;
+}
 
 // ───────────── icons ─────────────
 // name = platform slug ("github"), built-in ("globe") or "si:<any simpleicons slug>". hex = colour (no #); omit for the brand's own.
@@ -110,7 +118,7 @@ export function Presence({ pres, c, p }) {
   if (c.presenceStyle === "compact") {
     const a = acts[0];
     return (
-      <p className="pc-pres compact">{dot}{c.presenceName && dn ? `${dn} · ` : ""}
+      <p className="pc-pres compact">{dot}{c.presenceName && dn ? <>{dn}<TagPill d={d} c={c} /> · </> : ""}
         {a ? `${KIND[a.kind]?.replace(" Spotify", "")} ${a.title}` : custom || LBL[pres.status]}{inCard && <DBadges d={d} hide={p.hideBadges} />}
       </p>
     );
@@ -120,7 +128,7 @@ export function Presence({ pres, c, p }) {
       {(c.presenceAvatar || c.presenceName) && (
         <div className="pc-did">
           {c.presenceAvatar && av && <span className="pc-davw"><img src={av} alt="" /><i style={{ background: DOT[pres.status] || DOT.offline }} /></span>}
-          {c.presenceName && <div><b>{dn}</b>{d.username && <small>@{d.username}</small>}{inCard && <DBadges d={d} hide={p.hideBadges} />}</div>}
+          {c.presenceName && <div className="pc-dtx"><span className="pc-dline"><b>{dn}</b>{dn && <TagPill d={d} c={c} />}{inCard && <DBadges d={d} hide={p.hideBadges} />}</span>{d.username && <small>@{d.username}</small>}</div>}
         </div>
       )}
       <div className="pc-pres-top">{dot}{LBL[pres.status] || "Offline"}
