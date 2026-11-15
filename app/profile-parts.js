@@ -40,13 +40,16 @@ async function measureMany(img) {
   got.sort((a, b) => a - b); return got[Math.floor(got.length / 2)];
 }
 export function Deco({ src, style }) {
+  // stage 0: our own copy (can be measured)  ->  stage 1: Discord's server directly (can't be measured, drawn at the safe size)  ->  stage 2: give up quietly
+  const [stage, setStage] = useState(0);
   const [fit, setFit] = useState(() => FIT.get(src) ?? null);
-  const [cors, setCors] = useState(true);
   const ref = useRef(null);
-  const done = async (img) => { const f = !cors ? FIT_BLIND : (FIT.get(src) ?? await measureMany(img)); FIT.set(src, f); setFit(f); };
+  const id = String(src).split("/").pop();
+  const url = stage === 0 ? src : `https://cdn.discordapp.com/avatar-decoration-presets/${id}.png`;
+  const done = async (img) => { const f = stage ? FIT_BLIND : (FIT.get(src) ?? await measureMany(img)); if (!stage) FIT.set(src, f); setFit(f); };
   useEffect(() => { const i = ref.current; if (fit == null && i && i.complete && i.naturalWidth) done(i); /* already loaded before this ran */ }, []);  // eslint-disable-line
-  return <img ref={ref} className="pc-deco" src={src} alt="" aria-hidden="true" draggable="false" crossOrigin={cors ? "anonymous" : undefined}
-    onLoad={(e) => done(e.currentTarget)} onError={() => (cors ? setCors(false) : setFit(FIT_BLIND))}
+  if (stage > 1) return null;
+  return <img ref={ref} className="pc-deco" src={url} alt="" aria-hidden="true" draggable="false" onLoad={(e) => done(e.currentTarget)} onError={() => setStage((n) => n + 1)}
     style={{ ...style, "--dfit": fit ?? FIT_DEFAULT, opacity: fit == null ? 0 : 1 }} />;
 }
 
