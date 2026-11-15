@@ -8,23 +8,27 @@ import { tagBadgeUrl } from "@/lib/cosmetics";
 // Discord avatar decoration. Every decoration draws its frame at a different distance from the picture, so this measures the image once
 // (how far from the centre its frame starts) and sizes it so the frame's inner edge sits right on the edge of the picture, making the
 // decoration the border instead of sitting inside the picture. If the image can't be measured it falls back to Discord's usual 1.2x.
+// How it measures: for each distance from the centre it averages how solid the image is all the way round. A frame shows up as a band
+// where that average is high, even if the frame is thin or faint; stray bits (a bubble, scratches, a sword) only affect a few directions
+// so they barely move it. The frame starts at the first distance reaching half of the strongest band.
 const FIT_DEFAULT = 1.2, FIT = new Map();   // image url -> box size as a multiple of the avatar
 function measureFit(img) {
   try {
-    const N = 128, cv = document.createElement("canvas"); cv.width = cv.height = N;
+    const N = 256, H = N / 2, cv = document.createElement("canvas"); cv.width = cv.height = N;
     const cx = cv.getContext("2d", { willReadFrequently: true }); cx.drawImage(img, 0, 0, N, N);
-    const px = cx.getImageData(0, 0, N, N).data, hits = [];
-    for (let a = 0; a < 360; a += 5) {                       // walk outwards from the centre until something solid is hit
-      const dx = Math.cos((a * Math.PI) / 180), dy = Math.sin((a * Math.PI) / 180);
-      for (let r = 2; r < N / 2; r += 0.5) {
-        const x = Math.round(N / 2 + dx * r - 0.5), y = Math.round(N / 2 + dy * r - 0.5);
-        if (px[(y * N + x) * 4 + 3] > 140) { hits.push(r); break; }
+    const px = cx.getImageData(0, 0, N, N).data, A = 180, mean = new Float32Array(H);
+    for (let r = 2; r < H; r++) {
+      let sum = 0;
+      for (let k = 0; k < A; k++) {
+        const t = (k / A) * Math.PI * 2, x = Math.min(N - 1, Math.max(0, Math.round(H + Math.cos(t) * r - 0.5))), y = Math.min(N - 1, Math.max(0, Math.round(H + Math.sin(t) * r - 0.5)));
+        sum += px[(y * N + x) * 4 + 3];
       }
+      mean[r] = sum / A;
     }
-    if (hits.length < 36) return FIT_DEFAULT;                // doesn't wrap around the picture (a corner sticker, say): leave it at the default
-    hits.sort((p, q) => p - q);
-    const inner = hits[hits.length >> 1];                    // median = where the frame starts, ignoring bits that poke inwards
-    return Math.min(2, Math.max(1, (N / 2 / inner) * 1.02));  // 2% so the frame clears the picture
+    let peak = 0; for (let r = 2; r < H; r++) peak = Math.max(peak, mean[r]);
+    if (peak < 40) return FIT_DEFAULT;                       // nothing wraps around the picture (a corner sticker, say): leave it at the default
+    let inner = 2; while (inner < H && mean[inner] < peak / 2) inner++;
+    return Math.min(2, Math.max(1, (H / inner) * 1.03));     // 3% so the frame clears the picture
   } catch { return FIT_DEFAULT; }
 }
 export function Deco({ src, style }) {
