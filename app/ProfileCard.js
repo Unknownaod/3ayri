@@ -5,7 +5,7 @@ import { Ico } from "@/lib/icons";
 import { badgesOf } from "@/lib/badges";
 import { decoUrl } from "@/lib/cosmetics";
 import { Particles, CursorFX } from "./profile-fx";
-import { Icon, Presence, DBadges, TagPill, StaffBadge, BoosterBadge, Player, useAudio, DOT, LBL, actsOf } from "./profile-parts";
+import { Icon, Presence, DBadges, TagPill, StaffBadge, BoosterBadge, VerifiedBadge, Player, useAudio, DOT, LBL, actsOf } from "./profile-parts";
 
 const hexOf = (x) => String(x || "").replace("#", "").slice(0, 6);
 const cssUrl = (u) => `url("${String(u).replace(/["\\\n\r]/g, "")}")`;
@@ -187,7 +187,7 @@ export default function ProfileCard({ p, views, preview, livePres, claim, earned
           </div>
         )}
         <div className="pc-idtxt">
-          <div className="pc-nm"><h1 className={`pc-name nm-${c.nameEffect} ${c.nameUpper ? "up" : ""}`} data-text={name}>{name}</h1>{!tagInCard && <TagPill d={p.discord} c={c} />}{earned.includes("staff") && !hide.includes("staff") && <StaffBadge />}{earned.includes("booster") && !hide.includes("booster") && <BoosterBadge />}{dName && <DBadges d={p.discord} hide={hide} />}</div>
+          <div className="pc-nm"><h1 className={`pc-name nm-${c.nameEffect} ${c.nameUpper ? "up" : ""}`} data-text={name}>{name}</h1>{earned.includes("verified") && !hide.includes("verified") && <VerifiedBadge />}{!tagInCard && <TagPill d={p.discord} c={c} />}{earned.includes("staff") && !hide.includes("staff") && <StaffBadge />}{earned.includes("booster") && !hide.includes("booster") && <BoosterBadge />}{dName && <DBadges d={p.discord} hide={hide} />}</div>
           {c.tagline && <p className="pc-tag">{c.tagline}</p>}
         </div>
       </div>

@@ -127,6 +127,16 @@ export function Moderation({ flash }) {
             </div>
           )}
 
+          {(u.verified || u.canVerify) && (
+            <div className="mx-ver">
+              <span className="mx-vlab"><img src="/verified.png" alt="" width={20} height={20} />{u.verified ? "Verified" : "Not verified"}</span>
+              {u.canVerify && (u.verified
+                ? <button type="button" className="hp-ghost sm" disabled={busy} onClick={() => sure(`Remove the Verified badge from @${u.username}?`) && act({ action: "unverify", username: u.username }, "Verified badge removed", () => lookup(u.username))}>Remove Verified badge</button>
+                : <button type="button" className="hp-btn sm" disabled={busy} onClick={() => sure(`Give @${u.username} the Verified badge?`) && act({ action: "verify", username: u.username }, "Verified badge given", () => lookup(u.username))}>Give Verified badge</button>)}
+            </div>
+          )}
+          {!u.verified && !u.canVerify && u.verifiedBy === "founder" && <p className="mx-note">Only founders can give the Verified badge.</p>}
+
           <footer className="mx-acts">
             {u.staff && !u.founder ? <p className="mx-note">Only founders can hide, restrict or rename staff accounts. Ask a founder, or remove their staff role in Discord first.</p> : (
               <>

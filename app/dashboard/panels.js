@@ -51,7 +51,7 @@ function Mv({ i, n, go }) {
 export function BadgePicker({ me, set }) {
   const hide = me.hideBadges || [], earned = me.earned || [];
   const flip = (id) => set("hideBadges", hide.includes(id) ? hide.filter((x) => x !== id) : [...hide, id]);
-  const haven = Object.entries(HAVEN_BADGES).map(([id, b]) => ({ id, label: b.label, how: b.how, own: earned.includes(id), icon: <img src={b.img} alt="" width={26} height={26} /> })).filter((b) => b.own || b.id !== "staff");
+  const haven = Object.entries(HAVEN_BADGES).map(([id, b]) => ({ id, label: b.label, how: b.how, own: earned.includes(id), icon: <img src={b.img} alt="" width={26} height={26} /> })).filter((b) => b.own || (b.id !== "staff" && b.id !== "verified"));
   const disc = badgesOf(me.discord).map(([t, e, col, id, hash]) => ({ id, label: t, own: true, icon: <Badge t={t} e={e} col={col} id={id} hash={hash} /> }));
   const all = [...haven, ...disc];
   return (

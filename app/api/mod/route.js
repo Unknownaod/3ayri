@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionId } from "@/lib/session";
 import { redis, validUsername } from "@/lib/db";
 import { isStaff, isFounder } from "@/lib/staff";
+import { canVerify, verifiedBy, isVerified, vkey } from "@/lib/verified";
 import { limit, tooMany } from "@/lib/ratelimit";
 import { cfg } from "@/lib/schema";
 import { bad, safe, sameOrigin } from "@/lib/api";
@@ -22,9 +23,9 @@ async function dossier(who) {
   const f = await lookup(who);
   if (!f) return { missing: String(who).slice(0, 40) };
   const { id, p } = f, c = cfg(p);
-  const [views, ban, staff, tpls, reps] = await Promise.all([
+  const [views, ban, staff, tpls, reps, verified] = await Promise.all([
     redis.get(`views:${id}`), redis.get(`ban:${id}`), isStaff(id),
-    redis.list("template:", 1000), redis.list("report:", 2000),
+    redis.list("template:", 1000), redis.list("report:", 2000), isVerified(id),
   ]);
   const mine = reps.map(([, r]) => r).filter((r) => r?.type === "profile" && r.target === p.username).sort((a, b) => b.at - a.at);
   const remote = (x) => (x && !String(x).startsWith("data:") ? x : "");
@@ -42,7 +43,7 @@ async function dossier(who) {
     discover: p.discover !== false, noindex: !!c.noindex,
     hidden: !!p.hidden, hiddenReason: p.hiddenReason || "",
     banned: !!ban, ban: ban ? { at: ban.at, by: ban.by, reason: ban.reason || "" } : null,
-    staff: !!staff,
+    staff: !!staff, verified: !!verified,
     templates: tpls.map(([, t]) => t).filter((t) => t?.by?.id === id).map((t) => ({ id: t.id, name: t.name, at: t.at })),
     reports: { open: mine.filter((r) => r.status === "open").length, total: mine.length, recent: mine.slice(0, 6).map((r) => ({ reason: r.reason, details: r.details, status: r.status, at: r.at, by: r.by })) },
   };
@@ -53,7 +54,7 @@ export const GET = safe("mod.get", async (req) => {
   const me = await staffId();
   if (!me) return bad("Staff only.", 403);
   const u = new URL(req.url).searchParams.get("user");
-  if (u) return NextResponse.json({ ...(await dossier(u)), founder: await isFounder(me) });
+  if (u) return NextResponse.json({ ...(await dossier(u)), founder: await isFounder(me), canVerify: await canVerify(me), verifiedBy: verifiedBy() });
   const reports = (await redis.list("report:", 2000)).map(([, r]) => r).filter((r) => r?.status === "open");
   const groups = new Map();
   for (const r of reports) {
@@ -73,7 +74,7 @@ export const GET = safe("mod.get", async (req) => {
   return NextResponse.json({ reports: list, errors, log, stats: { open: reports.length, targets: list.length, restricted, errors: errors.length } });
 });
 
-// POST { action: hide | unhide | ban | unban | delete-template | dismiss, username?, id?, key?, reason? }
+// POST { action: hide | unhide | ban | unban | delete-template | dismiss | verify | unverify, username?, id?, key?, reason? }
 export const POST = safe("mod.post", async (req) => {
   if (!sameOrigin(req)) return bad("Blocked: this request came from another site.", 403);
   const me = await staffId();
@@ -109,6 +110,20 @@ export const POST = safe("mod.post", async (req) => {
     const [type, target] = String(b.key || "").split(":");
     if (!["profile", "template"].includes(type) || !target) return bad("Bad report key.");
     await closeReports(type, target, "dismissed"); await note(`${type} ${target}`);
+    return NextResponse.json({ ok: true });
+  }
+
+  // Verified badge: only who VERIFIED_BY allows (founders by default, or any staff). It's stored as verified:<id>, so owners can't touch it.
+  if (action === "verify" || action === "unverify") {
+    const rl = await limit(`modver:${me}`, 60, 3600);
+    if (!rl.ok) return bad(tooMany(rl), 429);
+    if (!(await canVerify(me))) return bad(verifiedBy() === "staff" ? "Only staff can change the Verified badge." : "Only a founder can change the Verified badge.", 403);
+    const f = await lookup(b.username || "");
+    if (!f || !f.p.username) return bad("No page with that username.", 404);
+    if (f.id === me && !(await isFounder(me))) return bad("Ask a founder to change your own Verified badge.");
+    if (action === "verify") await redis.set(vkey(f.id), { at: Date.now(), by: me });
+    else await redis.del(vkey(f.id));
+    await note(`@${f.p.username}`);
     return NextResponse.json({ ok: true });
   }
 

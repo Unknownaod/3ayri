@@ -395,5 +395,7 @@ html:has(.dash)::-webkit-scrollbar-thumb{background:var(--dash-sb,#ffffff30);bor
 .bp-i:not(.on):not(.lock){opacity:.6}
 .bp-i.lock{cursor:not-allowed;opacity:.5}.bp-i.lock .bp-ic img{filter:grayscale(1)}
 .bp-i:focus-visible{outline:2px solid var(--ac,#e0a243);outline-offset:2px}
+.mx-ver{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 0 2px;margin-top:2px;border-top:1px solid var(--ln)}
+.mx-vlab{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px}.mx-vlab img{display:block;object-fit:contain}
 .mx-ren{display:flex;flex-wrap:wrap;gap:8px;align-items:center;width:100%;padding-top:10px;margin-top:4px;border-top:1px solid var(--line,#ffffff14)}
 .mx-ren .mx-find{display:flex;gap:8px;flex:1 1 260px}.mx-ren .mx-find input{flex:1;min-width:0}

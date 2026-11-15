@@ -347,6 +347,7 @@
 .tp-rep{position:absolute;top:8px;left:8px;z-index:3;opacity:0}
 .dc-card:hover .tp-rep,.dc-card:focus-within .tp-rep{opacity:1}
 .pc-boost{height:22px;width:22px;margin-left:2px;filter:drop-shadow(0 1px 3px #0007)}
+.pc-verified{height:22px;width:22px;flex:none}
 /* Discord avatar decoration: drawn 20% larger than the picture itself (not counting the ring border), centred on it, never blocking clicks */
 .pc-deco{position:absolute;left:calc(var(--av) * -.1 + var(--avb) * 1.2);top:calc(var(--av) * -.1 + var(--avb) * 1.2);width:calc(var(--av) * 1.2 - var(--avb) * 2.4);height:calc(var(--av) * 1.2 - var(--avb) * 2.4);object-fit:contain;pointer-events:none;user-select:none;z-index:3}
 /* Discord server tag, next to the name */

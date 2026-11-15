@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { redis } from "@/lib/db";
 import { isStaff } from "@/lib/staff";
+import { verifiedSet } from "@/lib/verified";
 import { safe, bad, ipOf } from "@/lib/api";
 import { limit, tooMany } from "@/lib/ratelimit";
 
@@ -49,8 +50,9 @@ export const GET = safe("discover", async (req) => {
   const slice = list.slice(page * PAGE, page * PAGE + PAGE);
   // Staff badges are looked up for the people on this page (cached for 10 minutes, so this is cheap after the first view).
   const staff = await Promise.all(slice.map((x) => isStaff(x.id).catch(() => false)));
+  const verified = await verifiedSet(slice.map((x) => x.id)).catch(() => new Set());
   return NextResponse.json(
-    { total: list.length, more: (page + 1) * PAGE < list.length, profiles: slice.map(({ p, v }, i) => ({ ...pub(p), views: v, staff: staff[i] })) },
+    { total: list.length, more: (page + 1) * PAGE < list.length, profiles: slice.map(({ id, p, v }, i) => ({ ...pub(p), views: v, staff: staff[i], verified: verified.has(id) })) },
     { headers: { "Cache-Control": "no-store" } },
   );
 });

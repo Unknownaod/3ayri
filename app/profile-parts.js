@@ -97,6 +97,11 @@ export function StaffBadge() {
   return <img className="pc-staff-img" src="/staff.gif" alt="Haven Staff" title="Haven Staff" height="20" />;
 }
 
+// Given by the team from the Moderation panel. It's a prop, never saved profile data. The image is public/verified.png.
+export function VerifiedBadge() {
+  return <img className="pc-staff-img pc-verified" src="/verified.png" alt="Verified" title="Verified" height="22" width="22" />;
+}
+
 export function BoosterBadge() {
   return <img className="pc-staff-img pc-boost" src="/booster.png" alt="Server Booster" title="Server Booster" height="22" width="22" />;
 }
