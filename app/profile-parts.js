@@ -28,7 +28,7 @@ function measureFit(img) {
     let peak = 0; for (let r = 2; r < H; r++) peak = Math.max(peak, mean[r]);
     if (peak < 40) return null;                              // this frame has nothing wrapping around the picture (a faint animation frame, a corner sticker)
     let inner = 2; while (inner < H && mean[inner] < peak * 0.5) inner++;
-    return Math.min(2, Math.max(FIT_DEFAULT, (H / inner) * 1.04));   // a little extra so the frame clears the picture, and never smaller than Discord's own size
+    return Math.min(2, Math.max(FIT_DEFAULT, (H / inner) * 1.01));   // a little extra so the frame clears the picture, and never smaller than Discord's own size
   } catch { return null; }
 }
 // Animated decorations (ids starting a_) change from frame to frame, and a canvas only sees the frame showing right now, so look at a

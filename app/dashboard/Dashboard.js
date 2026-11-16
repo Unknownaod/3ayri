@@ -75,7 +75,7 @@ function Field({ k, f, me, c, set }) {
       if (!file.type.startsWith("image/")) return setErr("Choose an image file (PNG, JPG, GIF or WebP).");
       try {
         const out = await compress(file, f.max > 1e6 ? 1920 : f.max > 5e5 ? 1280 : 512, f.max);
-        if (out.length > f.max) return setErr(`That file is too big (limit about ${Math.round(f.max / 1000)} KB). Use a smaller one, or paste a link instead.`);
+        if (out.length > f.max) return setErr(`That file is too big (limit about ${(f.max * 0.75 / 1e6).toFixed(1)} MB). Use a smaller one, or paste a link instead.`);
         set(k, out);
       } catch { setErr("Couldn't read that image."); }
     };

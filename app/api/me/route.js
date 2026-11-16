@@ -40,7 +40,7 @@ export const PUT = safe("me.put", async (req) => {
   if (!rl.ok) return bad(tooMany(rl), 429);
   if (await redis.get(`ban:${id}`)) return bad("Your account has been restricted by staff, so changes can't be saved.", 403);
   const text = await req.text();
-  if (text.length > 4_000_000) return bad("That's too much data to save at once. Try a smaller image.", 413);
+  if (text.length > 4_300_000) return bad("That's too much to save at once (about 4 MB in total across your pictures). Remove or shrink one of your images, or use a link for it.", 413);   // Vercel itself refuses requests over ~4.5 MB
   let b;
   try { b = JSON.parse(text); } catch { return bad("Couldn't read that request."); }
   const profile = await redis.get(`profile:${id}`);

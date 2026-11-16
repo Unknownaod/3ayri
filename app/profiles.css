@@ -123,9 +123,9 @@
 .pc-pres.compact{display:inline-flex;align-items:center;gap:.55rem;margin:0;padding:.55rem 1.1rem;font-size:1rem;border-radius:999px;border:1px solid var(--line);background:color-mix(in srgb,var(--text) 6%,transparent);max-width:100%}
 .sec-status{text-align:center}
 [data-lay=left] .sec-status{text-align:left}[data-lay=right] .sec-status{text-align:right}
-.pc-did{display:flex;align-items:center;gap:.9rem}
+.pc-did{display:flex;align-items:center;gap:1.05rem}
 .pc-did b{display:block;font-size:1.15rem;line-height:1.25}.pc-did small{display:block;font-size:.9rem;color:var(--muted)}
-.pc-dtx{display:grid;gap:.15rem;min-width:0}
+.pc-dtx{display:grid;gap:.15rem;min-width:0;position:relative;z-index:5}
 .pc-dline{display:flex;align-items:center;flex-wrap:wrap;gap:.45rem}.pc-dline b{display:inline}
 .pc-did .pc-gtag{font-size:.85rem}.pc-did .pc-dbadges{gap:5px}.pc-did .pc-dbadges img{width:25px;height:25px}
 .pc-davw{position:relative;width:58px;height:58px;flex:none}
