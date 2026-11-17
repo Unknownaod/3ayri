@@ -6,7 +6,7 @@ export const revalidate = 3600;
 
 // Public pages only: has a username, not hidden, not turned off in Discover, not set to noindex.
 export default async function sitemap() {
-  const fixed = ["", "/templates", "/terms", "/privacy"].map((p) => ({ url: `${SITE}${p}` }));
+  const fixed = ["", "/templates", "/status", "/terms", "/privacy"].map((p) => ({ url: `${SITE}${p}` }));
   try {
     const rows = await redis.listProfiles(5000);
     const pages = rows

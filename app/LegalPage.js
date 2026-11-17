@@ -10,7 +10,7 @@ export default function LegalPage({ title, updated, children }) {
         <h1>{title}</h1>
         <p className="legal-up">Last updated {updated}</p>
         {children}
-        <p className="legal-up"><a href="/">Back to home</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></p>
+        <p className="legal-up"><a href="/">Back to home</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/status">Status</a></p>
       </article>
     </main>
   );

@@ -9,7 +9,7 @@ import { Moderation } from "./Moderation";
 import { dashStyle, dashColors } from "@/lib/dashtheme";
 import { SCHEMA, FIELDS, FONTS, cfg, fontsHref } from "@/lib/schema";
 import { Ico } from "@/lib/icons";
-import { BadgesEditor, BadgePicker, LinksEditor, SocialsEditor, TracksEditor, SectionsEditor, PresetsBlock, FontPicker, DiscordBlock, compress } from "./panels";
+import { BadgesEditor, BadgePicker, LinksEditor, SocialsEditor, TracksEditor, SectionsEditor, PresetsBlock, FontPicker, DiscordBlock, compress, directUpload } from "./panels";
 import "../shell.css";
 import "../profiles.css";
 
@@ -74,6 +74,11 @@ function Field({ k, f, me, c, set }) {
       if (!file) return;
       if (!file.type.startsWith("image/")) return setErr("Choose an image file (PNG, JPG, GIF or WebP).");
       try {
+        if (file.type === "image/gif" && file.size > 150_000) {   // big GIFs go straight to the image server, around Vercel's request limit
+          if (file.size > 10 * 1048576) return setErr("That GIF is too big (limit 10 MB). Use a smaller one, or paste a link instead.");
+          setErr("Uploading…");
+          try { const link = await directUpload(file); setErr(""); if (link) return set(k, link); } catch (e) { return setErr(e.message); }
+        }
         const out = await compress(file, f.max > 1e6 ? 1920 : f.max > 5e5 ? 1280 : 512, f.max);
         if (out.length > f.max) return setErr(`That file is too big (limit about ${(f.max * 0.75 / 1e6).toFixed(1)} MB). Use a smaller one, or paste a link instead.`);
         set(k, out);

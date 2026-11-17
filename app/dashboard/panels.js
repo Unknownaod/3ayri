@@ -6,6 +6,21 @@ import { Ico } from "@/lib/icons";
 import { Presence, DBadges, Badge } from "../profile-parts";
 
 // ───────────── shared helpers ─────────────
+// Sends a picture straight to the image server (no 4.5 MB Vercel limit). Returns its link, or null when no image server is set up.
+export async function directUpload(file) {
+  const t = await fetch("/api/upload-token", { method: "POST" });
+  const j = await t.json().catch(() => ({}));
+  if (!t.ok) throw new Error(j.error || "Couldn't start the upload.");
+  if (!j.on) return null;
+  let r;
+  try { r = await fetch(j.url, { method: "POST", headers: { Authorization: `Bearer ${j.token}`, "Content-Type": file.type }, body: file }); }
+  catch { throw new Error("The image server didn't answer. Try again in a minute."); }
+  if (r.status === 413) throw new Error("That file is too big (limit 10 MB).");
+  if (r.status === 415) throw new Error("Choose a PNG, JPG, GIF or WebP image.");
+  if (!r.ok) throw new Error("The upload didn't go through. Try again in a minute.");
+  return `${j.base}/${(await r.json()).name}`;
+}
+
 export const compress = (file, maxPx, maxChars) => new Promise((resolve, reject) => {
   const read = () => { const r = new FileReader(); r.onload = () => resolve(r.result); r.onerror = reject; r.readAsDataURL(file); };
   if (file.type === "image/gif") return read();
